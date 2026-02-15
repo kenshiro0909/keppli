@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luxe Clarity - Double Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600&family=Inter:wght@400;700&family=Montserrat:wght@700;800&display=swap');
+        
+        :root {
+            --color-midnight: #060a13;
+            --color-card: #0d1424;
+            --color-gold: #d4af37;    /* Classic Noble Gold */
+            --color-rose-gold: #e5b3a3;
+            --color-text: #ffffff;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-midnight);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(212, 175, 55, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(229, 179, 163, 0.05) 0%, transparent 40%);
+            color: var(--color-text);
+            min-height: 100vh;
+        }
+
+        .noble-title {
+            font-family: 'Cinzel', serif;
+            letter-spacing: 0.1em;
+        }
+
+        .num-font {
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* High Visibility Card */
+        .luxury-card {
+            background: var(--color-card);
+            border: 1px solid rgba(212, 175, 55, 0.3);
+            box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.6);
+            position: relative;
+        }
+
+        /* High Contrast Display */
+        .display-unit {
+            background: #000000;
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            box-shadow: inset 0 0 15px rgba(212, 175, 55, 0.2);
+            position: relative;
+        }
+
+        .display-glow {
+            color: #f3cf7a; /* Brighter Champagne Gold */
+            text-shadow: 0 0 12px rgba(243, 207, 122, 0.4);
+        }
+
+        /* Defined Buttons for better interaction */
+        .btn-luxe {
+            @apply flex items-center justify-center transition-all duration-200 rounded-xl h-16 w-full text-xl font-bold border-b-4;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+
+        .btn-number {
+            @apply bg-slate-800 text-white border-slate-900 hover:bg-slate-700 active:translate-y-1 active:border-b-0;
+        }
+
+        .btn-operator {
+            @apply bg-slate-900 text-[#d4af37] border-black hover:bg-black active:translate-y-1 active:border-b-0;
+        }
+
+        .btn-equal {
+            @apply bg-gradient-to-br from-[#d4af37] to-[#b8860b] text-black border-[#8b6508] hover:brightness-110 active:translate-y-1 active:border-b-0;
+            font-weight: 900;
+        }
+
+        .btn-reset {
+            @apply bg-rose-950/30 text-rose-400 border-rose-900/50 hover:bg-rose-900/50 hover:text-white text-xs tracking-widest font-bold;
+        }
+
+        @media (max-width: 1024px) {
+            .grid-main { grid-template-columns: 1fr; max-width: 500px; }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-12 flex flex-col items-center">
+
+    <header class="w-full max-w-5xl mb-16 text-center">
+        <div class="flex items-center justify-center gap-4 mb-3">
+            <div class="h-[1px] w-16 bg-[#d4af37]"></div>
+            <span class="text-[#d4af37] text-[10px] tracking-[0.6em] font-bold uppercase">Private Boutique Edition</span>
+            <div class="h-[1px] w-16 bg-[#d4af37]"></div>
+        </div>
+        <h1 class="noble-title text-4xl md:text-5xl font-bold text-white mb-2">
+            LUXE <span class="text-[#d4af37]">CLARITY</span>
+        </h1>
+        <p class="text-white/40 text-[10px] tracking-[0.3em] font-medium uppercase">High-Visibility Dual Calculator</p>
+    </header>
+
+    <main class="w-full max-w-6xl grid grid-cols-2 gap-10 grid-main">
+        
+        <!-- Calculator Alpha -->
+        <div class="luxury-card rounded-[2.5rem] p-8 flex flex-col">
+            <div class="flex items-center justify-between mb-6 px-2">
+                <span class="noble-title text-[#d4af37] text-sm uppercase tracking-tighter">Terminal A</span>
+                <div class="flex gap-1.5">
+                    <div class="w-2 h-2 rounded-full bg-[#d4af37]"></div>
+                    <div class="w-2 h-2 rounded-full bg-[#d4af37]/20"></div>
+                </div>
+            </div>
+            
+            <div class="display-unit rounded-2xl p-6 h-36 flex flex-col justify-end items-end mb-8">
+                <div id="formula-1" class="text-[#d4af37]/40 text-xs tracking-widest font-bold mb-1 h-5 uppercase overflow-hidden w-full text-right"></div>
+                <div id="display-1" class="num-font text-5xl font-bold display-glow truncate w-full text-right">0</div>
+            </div>
+            
+            <div class="grid grid-cols-4 gap-4">
+                <button onclick="clearCalc(1)" class="btn-luxe btn-reset col-span-2">ALL CLEAR</button>
+                <button onclick="inputCalc(1, '/')" class="btn-luxe btn-operator">÷</button>
+                <button onclick="inputCalc(1, '*')" class="btn-luxe btn-operator">×</button>
+                
+                <button onclick="inputCalc(1, '7')" class="btn-luxe btn-number">7</button>
+                <button onclick="inputCalc(1, '8')" class="btn-luxe btn-number">8</button>
+                <button onclick="inputCalc(1, '9')" class="btn-luxe btn-number">9</button>
+                <button onclick="inputCalc(1, '-')" class="btn-luxe btn-operator">−</button>
+                
+                <button onclick="inputCalc(1, '4')" class="btn-luxe btn-number">4</button>
+                <button onclick="inputCalc(1, '5')" class="btn-luxe btn-number">5</button>
+                <button onclick="inputCalc(1, '6')" class="btn-luxe btn-number">6</button>
+                <button onclick="inputCalc(1, '+')" class="btn-luxe btn-operator">+</button>
+                
+                <button onclick="inputCalc(1, '1')" class="btn-luxe btn-number">1</button>
+                <button onclick="inputCalc(1, '2')" class="btn-luxe btn-number">2</button>
+                <button onclick="inputCalc(1, '3')" class="btn-luxe btn-number">3</button>
+                <button onclick="calculate(1)" class="btn-luxe btn-equal row-span-2 h-full text-4xl">=</button>
+                
+                <button onclick="inputCalc(1, '0')" class="btn-luxe btn-number col-span-2">0</button>
+                <button onclick="inputCalc(1, '.')" class="btn-luxe btn-number">.</button>
+            </div>
+        </div>
+
+        <!-- Calculator Beta -->
+        <div class="luxury-card rounded-[2.5rem] p-8 flex flex-col">
+            <div class="flex items-center justify-between mb-6 px-2">
+                <span class="noble-title text-[#d4af37] text-sm uppercase tracking-tighter">Terminal B</span>
+                <div class="flex gap-1.5">
+                    <div class="w-2 h-2 rounded-full bg-[#d4af37]"></div>
+                    <div class="w-2 h-2 rounded-full bg-[#d4af37]/20"></div>
+                </div>
+            </div>
+            
+            <div class="display-unit rounded-2xl p-6 h-36 flex flex-col justify-end items-end mb-8">
+                <div id="formula-2" class="text-[#d4af37]/40 text-xs tracking-widest font-bold mb-1 h-5 uppercase overflow-hidden w-full text-right"></div>
+                <div id="display-2" class="num-font text-5xl font-bold display-glow truncate w-full text-right">0</div>
+            </div>
+            
+            <div class="grid grid-cols-4 gap-4">
+                <button onclick="clearCalc(2)" class="btn-luxe btn-reset col-span-2">ALL CLEAR</button>
+                <button onclick="inputCalc(2, '/')" class="btn-luxe btn-operator">÷</button>
+                <button onclick="inputCalc(2, '*')" class="btn-luxe btn-operator">×</button>
+                
+                <button onclick="inputCalc(2, '7')" class="btn-luxe btn-number">7</button>
+                <button onclick="inputCalc(2, '8')" class="btn-luxe btn-number">8</button>
+                <button onclick="inputCalc(2, '9')" class="btn-luxe btn-number">9</button>
+                <button onclick="inputCalc(2, '-')" class="btn-luxe btn-operator">−</button>
+                
+                <button onclick="inputCalc(2, '4')" class="btn-luxe btn-number">4</button>
+                <button onclick="inputCalc(2, '5')" class="btn-luxe btn-number">5</button>
+                <button onclick="inputCalc(2, '6')" class="btn-luxe btn-number">6</button>
+                <button onclick="inputCalc(2, '+')" class="btn-luxe btn-operator">+</button>
+                
+                <button onclick="inputCalc(2, '1')" class="btn-luxe btn-number">1</button>
+                <button onclick="inputCalc(2, '2')" class="btn-luxe btn-number">2</button>
+                <button onclick="inputCalc(2, '3')" class="btn-luxe btn-number">3</button>
+                <button onclick="calculate(2)" class="btn-luxe btn-equal row-span-2 h-full text-4xl">=</button>
+                
+                <button onclick="inputCalc(2, '0')" class="btn-luxe btn-number col-span-2">0</button>
+                <button onclick="inputCalc(2, '.')" class="btn-luxe btn-number">.</button>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="mt-20 mb-12 flex flex-col items-center gap-4">
+        <div class="w-16 h-[1px] bg-[#d4af37]/30"></div>
+        <p class="text-[10px] tracking-[0.4em] text-white/30 font-bold uppercase">Prestige Computing Lab</p>
+    </footer>
+
+    <script>
+        const states = {
+            1: { current: '', formula: '', lastResult: null },
+            2: { current: '', formula: '', lastResult: null }
+        };
+
+        function updateDisplay(id) {
+            const disp = document.getElementById(`display-${id}`);
+            const formulaDisp = document.getElementById(`formula-${id}`);
+            
+            let visual = states[id].current
+                .replace(/\//g, '÷')
+                .replace(/\*/g, '×');
+            
+            disp.textContent = visual || '0';
+            formulaDisp.textContent = states[id].formula;
+
+            // Responsive font resizing for large numbers
+            if (disp.textContent.length > 10) {
+                disp.style.fontSize = '2.2rem';
+            } else if (disp.textContent.length > 7) {
+                disp.style.fontSize = '3rem';
+            } else {
+                disp.style.fontSize = '3.75rem';
+            }
+        }
+
+        function inputCalc(id, char) {
+            const ops = ['+', '-', '*', '/'];
+            const lastChar = states[id].current.slice(-1);
+
+            if (states[id].lastResult !== null && !ops.includes(char)) {
+                states[id].current = char === '.' ? '0.' : char;
+                states[id].lastResult = null;
+                states[id].formula = '';
+            } 
+            else if (states[id].lastResult !== null && ops.includes(char)) {
+                states[id].current = states[id].lastResult + char;
+                states[id].lastResult = null;
+                states[id].formula = '';
+            }
+            else {
+                if (states[id].current === '0' && char !== '.') {
+                    states[id].current = char;
+                } else {
+                    if (char === '.') {
+                        const parts = states[id].current.split(/[\+\-\*\/]/);
+                        if (parts[parts.length - 1].includes('.')) return;
+                    }
+                    if (ops.includes(char) && ops.includes(lastChar)) {
+                        states[id].current = states[id].current.slice(0, -1) + char;
+                    } else if (states[id].current === '' && ops.includes(char) && char !== '-') {
+                        return;
+                    } else {
+                        states[id].current += char;
+                    }
+                }
+            }
+            updateDisplay(id);
+        }
+
+        function clearCalc(id) {
+            states[id] = { current: '', formula: '', lastResult: null };
+            updateDisplay(id);
+        }
+
+        function calculate(id) {
+            try {
+                if (!states[id].current) return;
+                
+                states[id].formula = states[id].current
+                    .replace(/\//g, '÷')
+                    .replace(/\*/g, '×') + ' =';
+
+                const result = new Function('return ' + states[id].current)();
+                if (!isFinite(result)) throw new Error();
+                
+                let formattedResult = Number(result.toPrecision(12)).toString();
+                // Avoid scientific notation if possible
+                if (formattedResult.includes('e')) {
+                    formattedResult = result.toFixed(8).replace(/\.?0+$/, "");
+                }
+
+                states[id].current = formattedResult;
+                states[id].lastResult = formattedResult;
+                updateDisplay(id);
+            } catch (e) {
+                const disp = document.getElementById(`display-${id}`);
+                disp.textContent = "INVALID";
+                disp.style.color = "#ff4d4d";
+                states[id].current = '';
+                states[id].lastResult = null;
+                setTimeout(() => {
+                    disp.style.color = "#f3cf7a";
+                    updateDisplay(id);
+                }, 1000);
+            }
+        }
+
+        // Global Key Support for Alpha
+        document.addEventListener('keydown', (e) => {
+            const key = e.key;
+            if (/[0-9.]/.test(key)) inputCalc(1, key);
+            if (key === '+') inputCalc(1, '+');
+            if (key === '-') inputCalc(1, '-');
+            if (key === '*') inputCalc(1, '*');
+            if (key === '/') inputCalc(1, '/');
+            if (key === 'Enter') { e.preventDefault(); calculate(1); }
+            if (key === 'Escape') clearCalc(1);
+            if (key === 'Backspace') {
+                states[1].current = states[1].current.slice(0, -1);
+                updateDisplay(1);
+            }
+        });
+    </script>
+</body>
+</html>
