@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "Google Docs 画像保存",
+  "version": "1.0.0",
+  "description": "Googleドキュメントの画像を右クリックからオリジナル画質で保存",
+  "permissions": [
+    "activeTab"
+  ],
+  "host_permissions": [
+    "https://docs.google.com/*",
+    "https://*.googleusercontent.com/*",
+    "https://*.google.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": ["https://docs.google.com/document/*"],
+      "js": ["content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ]
+}
