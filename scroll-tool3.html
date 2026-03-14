@@ -2,565 +2,1290 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>スクロール資料ジェネレーター Pro Max v3</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>スクロール資料ジェネレーター Pro Max</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
-:root{--ac:#7c3aed;--acL:#f5f3ff;--acG:linear-gradient(135deg,#7c3aed,#a78bfa);--main:#0f172a;--bg:#f0f0f5;--sh:0 1px 3px rgba(0,0,0,.04),0 8px 32px rgba(0,0,0,.06)}
+:root{
+  --ac:#7c3aed;--acL:#f5f3ff;--acG:linear-gradient(135deg,#7c3aed,#a78bfa);
+  --main:#0f172a;--sub:#475569;--bg:#f0f0f5;--card:#ffffff;
+  --kpBd:#7c3aed;--kpBg:#f5f3ff;--qtBg:#f8fafc;
+  --gS:#7c3aed;--gE:#a78bfa;
+  --body:#334155;--R:20px;
+  --sh:0 1px 3px rgba(0,0,0,.04),0 8px 32px rgba(0,0,0,.06);
+  --marker:#fff59d;
+}
 *{margin:0;padding:0;box-sizing:border-box}
-body{font-family:'Noto Sans JP','Inter',sans-serif;background:#e8e8ed;color:#333;line-height:1.7;font-size:13px;overflow:hidden;height:100vh}
-::selection{background:var(--acL);color:var(--ac)}
-::-webkit-scrollbar{width:5px}::-webkit-scrollbar-thumb{background:#d0d0d0;border-radius:3px}
-
-.hd{background:var(--acG);color:#fff;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;z-index:10;box-shadow:0 2px 16px rgba(124,58,237,.2)}
-.hd h1{font-size:14px;font-weight:900;display:flex;align-items:center;gap:6px}
-.hd-right{display:flex;gap:6px;align-items:center}
-.hd .save-dot{width:8px;height:8px;border-radius:50%;background:#4ade80;margin-left:6px;title:auto-saved}
-
-.wrap{display:flex;height:calc(100vh - 44px)}
-.pL{width:420px;min-width:420px;background:#fff;display:flex;flex-direction:column;border-right:1px solid #e5e5e5}
-.pR{flex:1;overflow-y:auto;background:var(--bg);padding:20px}
-
-.pL-tabs{display:flex;border-bottom:1px solid #eee;flex-shrink:0}
-.pL-tab{flex:1;padding:9px 4px;text-align:center;font-size:10px;font-weight:700;cursor:pointer;color:#aaa;border-bottom:2px solid transparent;transition:.15s}
-.pL-tab.on{color:var(--ac);border-color:var(--ac);background:var(--acL)}
-.pL-body{flex:1;overflow-y:auto;padding:0}
-
-.cat-nav{display:flex;flex-wrap:wrap;gap:3px;padding:8px;border-bottom:1px solid #f0f0f0;background:#fafafa}
-.cat-btn{padding:3px 9px;border-radius:14px;font-size:9px;font-weight:700;border:1.5px solid #e5e5e5;cursor:pointer;background:#fff;color:#777;transition:.15s;white-space:nowrap}
-.cat-btn:hover{border-color:var(--ac);color:var(--ac)}.cat-btn.on{background:var(--ac);color:#fff;border-color:var(--ac)}
-
-.tpl-list{padding:6px}
-.tpl-item{border:1.5px solid #eee;border-radius:9px;margin-bottom:5px;overflow:hidden;background:#fff;transition:.15s}
-.tpl-item:hover{border-color:#ddd}
-.tpl-head{display:flex;justify-content:space-between;align-items:center;padding:7px 10px}
-.tpl-info{display:flex;align-items:center;gap:6px}
-.tpl-info h4{font-size:11px;font-weight:700}.tpl-info span{font-size:9px;color:#aaa}
-.tpl-actions{display:flex;gap:3px}
-.tpl-btn{padding:3px 10px;border:none;border-radius:5px;font-size:9px;font-weight:700;cursor:pointer;transition:.15s}
-.tpl-pv-btn{background:#f0f0f0;color:#888}.tpl-add-btn{background:var(--acG);color:#fff}
-.tpl-add-btn:hover{box-shadow:0 2px 8px rgba(124,58,237,.25)}
-.tpl-pv{padding:6px;border-top:1px solid #f0f0f0;background:#fafafa;max-height:0;overflow:hidden;transition:max-height .3s}
-.tpl-item.open .tpl-pv{max-height:600px}
-
-.ed-wrap{padding:10px}
-.ed-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-
-.sec-card{background:#fafafa;border:1.5px solid #e8e8e8;border-radius:9px;margin-bottom:5px;overflow:hidden}
-.sec-card-hd{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;cursor:pointer;user-select:none}
-.sec-card-hd h3{font-size:11px;font-weight:700;color:var(--ac);display:flex;align-items:center;gap:4px}
-.sec-card-hd .num{background:var(--ac);color:#fff;width:16px;height:16px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:8px;font-weight:900;flex-shrink:0}
-.sec-card-hd .arr{color:#ccc;font-size:8px;transition:.15s}
-.sec-card.shut .sec-card-bd{display:none}.sec-card.shut .arr{transform:rotate(-90deg)}
-.sec-card-bd{padding:0 10px 10px}
-
-label{display:block;font-size:9px;font-weight:600;color:#999;margin:6px 0 2px;letter-spacing:.3px}
-input[type=text],input[type=url],input[type=number],input[type=color],textarea,select{width:100%;padding:5px 8px;border:1.5px solid #e2e2e2;border-radius:6px;font-family:inherit;font-size:11px;line-height:1.5;background:#fff;transition:.15s}
-input:focus,textarea:focus,select:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 2px rgba(124,58,237,.06)}
-textarea{resize:vertical;min-height:34px}
-input[type=color]{width:36px;height:28px;padding:2px;cursor:pointer;border-radius:6px}
-.rw{display:flex;gap:5px}.rw>*{flex:1}
-.rw3{display:flex;gap:4px}.rw3>*{flex:1}
-
-.al-bar{display:inline-flex;gap:1px;background:#f0f0f0;border-radius:5px;padding:1px}
-.al-btn{padding:2px 7px;font-size:9px;border:none;background:transparent;border-radius:4px;cursor:pointer;color:#bbb;font-weight:600;transition:.1s}
-.al-btn.on{background:#fff;color:var(--ac);box-shadow:0 1px 2px rgba(0,0,0,.05)}
-
-.eli{background:#fff;border:1.5px solid #eee;border-radius:6px;padding:6px 8px;margin-bottom:3px;position:relative}
-.eli:hover{border-color:#ddd}
-.eli.dragging{opacity:.35;border:2px dashed var(--ac)}
-.eli.drag-over{border-color:var(--ac);box-shadow:0 0 0 2px var(--acL)}
-.eli-grip{cursor:grab;color:#ccc;font-size:10px;margin-right:4px;user-select:none;display:inline-block}
-.eli-grip:active{cursor:grabbing}
-.eli-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
-.eli-top-left{display:flex;align-items:center;gap:3px}
-.eli-label-edit{font-size:9px;font-weight:700;color:var(--ac);background:none;border:none;border-bottom:1px dashed transparent;padding:0 1px;font-family:inherit;min-width:30px;max-width:140px}
-.eli-label-edit:hover{border-color:#ccc}.eli-label-edit:focus{outline:none;border-color:var(--ac);background:var(--acL)}
-.eli-btns{display:flex;gap:2px;align-items:center}
-.eli-x{background:none;border:none;color:#ddd;cursor:pointer;font-size:11px;padding:0}.eli-x:hover{color:#ef4444}
-
-.add-bar{display:flex;gap:2px;flex-wrap:wrap;margin-top:5px}
-.add-b{padding:2px 6px;font-size:8px;border-radius:4px;background:var(--acL);color:var(--ac);font-weight:600;border:none;cursor:pointer;transition:.15s}
-.add-b:hover{background:var(--ac);color:#fff}
-
-/* icon image */
-.icon-wrap{display:flex;gap:4px;align-items:center}
-.icon-wrap input[type=text]{flex:1}
-.icon-img-btn{flex-shrink:0;padding:4px 8px;border:1.5px solid #e2e2e2;border-radius:6px;font-size:9px;cursor:pointer;background:#fff;color:#888;position:relative}
-.icon-img-btn input{position:absolute;inset:0;opacity:0;cursor:pointer}
-.icon-img-btn:hover{border-color:var(--ac);color:var(--ac)}
-.icon-preview{width:24px;height:24px;border-radius:4px;object-fit:cover;vertical-align:middle}
-
-.img-drop{border:2px dashed #ddd;border-radius:6px;padding:8px;text-align:center;cursor:pointer;font-size:9px;color:#bbb;position:relative}
-.img-drop:hover{border-color:var(--ac);color:var(--ac)}
-.img-drop input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
-.img-thumb{max-width:100%;max-height:40px;border-radius:4px;margin-top:3px;object-fit:cover}
-.img-url-row{display:flex;gap:3px;margin-top:3px}
-.img-url-row input{flex:1;font-size:9px;padding:4px 6px}
-
-.help-box{background:#f8f8ff;border:1px solid #e8e8f8;border-radius:6px;padding:8px;margin-top:4px;font-size:9px;line-height:1.6;color:#666;display:none}
-.help-box a{color:var(--ac)}
-
-button{font-family:inherit;cursor:pointer;transition:.15s}
-.btn-main{padding:5px 12px;border:none;border-radius:6px;font-size:10px;font-weight:700;color:#fff;background:var(--acG)}
-.btn-ghost{padding:4px 10px;border:1.5px solid #e2e2e2;border-radius:6px;font-size:10px;font-weight:600;color:#666;background:#fff}
-.btn-ghost:hover{border-color:var(--ac);color:var(--ac)}
-.btn-xs{padding:2px 6px;font-size:9px;border:none;border-radius:4px;background:#f0f0f0;color:#888;font-weight:600}
-.btn-del{padding:2px 7px;font-size:9px;border:1px solid #fcc;border-radius:4px;background:#fff;color:#ef4444;font-weight:600}
-.btn-del:hover{background:#ef4444;color:#fff}
-.btn-export{padding:6px 16px;border:none;border-radius:7px;font-size:11px;font-weight:700;color:#fff;background:rgba(255,255,255,.2)}
-.btn-export:hover{background:rgba(255,255,255,.3)}
-
-.pv-area{max-width:700px;margin:0 auto}
-.empty-pv{text-align:center;color:#bbb;padding:50px 16px;font-size:11px}
-
-/* Color picker row */
-.color-row{display:flex;gap:6px;align-items:center;margin:4px 0}
-.color-row label{margin:0;min-width:70px}
-.color-row input[type=color]{width:30px;height:24px;flex-shrink:0}
-.color-row input[type=text]{flex:1;font-size:10px;padding:3px 6px}
-
-/* Setting sections */
-.set-section{margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid #f0f0f0}
-.set-section h4{font-size:11px;font-weight:700;color:var(--main);margin-bottom:8px}
-
-.mo-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;justify-content:center;align-items:center;backdrop-filter:blur(3px)}
-.mo-bg.show{display:flex}
-.mo-box{background:#fff;border-radius:14px;padding:20px;width:92%;max-width:600px;max-height:80vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.2)}
-.mo-box h2{font-size:15px;margin-bottom:8px}.mo-box textarea{height:200px;font-family:'SF Mono',Consolas,monospace;font-size:10px;background:#f8f8f8}
-
-.toast{position:fixed;bottom:20px;right:20px;background:#1e1e2e;color:#fff;padding:8px 16px;border-radius:8px;font-size:11px;font-weight:600;z-index:200;opacity:0;transform:translateY(10px);transition:.3s}
-.toast.show{opacity:1;transform:translateY(0)}
-
-@media(max-width:900px){.wrap{flex-direction:column;height:auto;overflow:auto}.pL{width:100%;min-width:unset;max-height:50vh}.pR{max-height:none}}
+body{font-family:'Inter','Noto Sans JP',sans-serif;background:var(--bg);color:var(--main);min-height:100vh;display:flex;flex-direction:column}
+/* ── Header ── */
+.hd{background:#fff;border-bottom:1px solid #e2e8f0;padding:12px 24px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100}
+.hd h1{font-size:16px;font-weight:700;background:var(--acG);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hd .sep{flex:1}
+.hd .save-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;margin-right:4px}
+.hd .save-label{font-size:11px;color:#64748b}
+.hd .themes{display:flex;gap:6px;margin-left:12px}
+.hd .td{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:.2s}
+.hd .td:hover,.hd .td.on{border-color:var(--main);transform:scale(1.15)}
+.btn{padding:8px 18px;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;font-family:inherit}
+.btn-p{background:var(--acG);color:#fff;box-shadow:0 2px 8px rgba(124,58,237,.25)}
+.btn-p:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(124,58,237,.35)}
+.btn-s{background:#f1f5f9;color:var(--main)}
+.btn-s:hover{background:#e2e8f0}
+.btn-d{background:#fef2f2;color:#dc2626}
+.btn-d:hover{background:#fecaca}
+/* ── Layout ── */
+.wrap{display:flex;flex:1;overflow:hidden}
+.pL{width:420px;min-width:420px;border-right:1px solid #e2e8f0;background:#fff;display:flex;flex-direction:column;overflow:hidden}
+.pR{flex:1;overflow-y:auto;padding:40px;background:var(--bg)}
+/* ── Tabs ── */
+.tabs{display:flex;border-bottom:1px solid #e2e8f0}
+.tab{flex:1;padding:12px 0;text-align:center;font-size:13px;font-weight:600;color:#94a3b8;cursor:pointer;border-bottom:2px solid transparent;transition:.2s}
+.tab:hover{color:var(--main)}
+.tab.on{color:var(--ac);border-bottom-color:var(--ac)}
+.tabC{flex:1;overflow-y:auto;padding:16px}
+/* ── Gallery ── */
+.catBtn{display:inline-block;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;margin:0 4px 8px 0;border:1px solid #e2e8f0;background:#fff;color:#64748b;transition:.15s}
+.catBtn:hover,.catBtn.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.tplGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+.tplCard{background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:14px;cursor:pointer;transition:.15s;position:relative}
+.tplCard:hover{border-color:var(--ac);box-shadow:0 4px 16px rgba(124,58,237,.1)}
+.tplCard h4{font-size:13px;margin-bottom:4px}
+.tplCard p{font-size:11px;color:#94a3b8}
+.tplCard .tplAdd{position:absolute;top:8px;right:8px;background:var(--acG);color:#fff;border:none;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:600;cursor:pointer;opacity:0;transition:.15s}
+.tplCard:hover .tplAdd{opacity:1}
+/* ── Editor Sections ── */
+.secBlock{background:#f8fafc;border:1px solid #e2e8f0;border-radius:14px;margin-bottom:12px;overflow:hidden}
+.secHead{display:flex;align-items:center;padding:12px 14px;gap:8px;cursor:pointer}
+.secHead .grip{cursor:grab;color:#94a3b8;font-size:14px;user-select:none}
+.secHead .sn{font-size:13px;font-weight:700;flex:1}
+.secHead .arrow{font-size:12px;color:#94a3b8;transition:.2s}
+.secHead .arrow.open{transform:rotate(180deg)}
+.secBody{padding:0 14px 14px}
+.secBody.hide{display:none}
+.fld{margin-bottom:10px}
+.fld label{display:block;font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px}
+.fld input,.fld textarea,.fld select{width:100%;padding:8px 12px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px;font-family:inherit;transition:.15s}
+.fld input:focus,.fld textarea:focus{border-color:var(--ac);outline:none;box-shadow:0 0 0 3px rgba(124,58,237,.1)}
+.fld textarea{resize:vertical;min-height:60px}
+.alignBar{display:flex;gap:4px;margin-bottom:10px}
+.alignBar button{flex:1;padding:6px;border:1px solid #e2e8f0;border-radius:8px;font-size:11px;background:#fff;cursor:pointer;transition:.15s;font-weight:600}
+.alignBar button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+/* ── Element Editor ── */
+.elBlock{background:#fff;border:1px solid #e2e8f0;border-radius:10px;margin-bottom:8px;padding:10px 12px;position:relative}
+.elBlock.dragging{opacity:.4}
+.elBlock .elGrip{cursor:grab;color:#cbd5e1;margin-right:6px;user-select:none}
+.elBlock .elHead{display:flex;align-items:center;font-size:12px;font-weight:600;margin-bottom:6px}
+.elBlock .elLabel{background:#f1f5f9;border:1px solid transparent;border-radius:4px;padding:1px 6px;font-size:11px;font-weight:600;color:var(--ac);cursor:text}
+.elBlock .elLabel:focus{border-color:var(--ac);outline:none}
+.elBlock .elRm{margin-left:auto;background:none;border:none;color:#cbd5e1;cursor:pointer;font-size:14px}
+.elBlock .elRm:hover{color:#ef4444}
+.elAlignBar{display:flex;gap:3px;margin:6px 0}
+.elAlignBar button{padding:3px 8px;border:1px solid #e2e8f0;border-radius:6px;font-size:10px;background:#fff;cursor:pointer;transition:.15s}
+.elAlignBar button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.addElBar{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.addElBar button{padding:4px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:11px;background:#fff;cursor:pointer;transition:.15s}
+.addElBar button:hover{border-color:var(--ac);color:var(--ac)}
+/* ── Marker highlight ── */
+.marker-bar{display:flex;gap:4px;align-items:center;margin-top:4px}
+.marker-bar .mClr{width:20px;height:20px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:.15s}
+.marker-bar .mClr:hover,.marker-bar .mClr.on{border-color:var(--main);transform:scale(1.2)}
+.marker-bar .mOff{padding:2px 8px;border:1px solid #e2e8f0;border-radius:6px;font-size:10px;cursor:pointer;background:#fff}
+/* ── Color settings ── */
+.colorGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.colorItem{display:flex;align-items:center;gap:8px}
+.colorItem label{font-size:11px;font-weight:600;color:#64748b;min-width:70px}
+.colorItem input[type=color]{width:36px;height:28px;border:1px solid #e2e8f0;border-radius:6px;padding:0;cursor:pointer}
+.colorItem input[type=text]{width:80px;padding:4px 8px;border:1px solid #e2e8f0;border-radius:6px;font-size:11px;font-family:monospace}
+.presetGrid{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0}
+.presetBtn{padding:6px 14px;border:1px solid #e2e8f0;border-radius:10px;font-size:12px;font-weight:600;cursor:pointer;background:#fff;transition:.15s}
+.presetBtn:hover{border-color:var(--ac);color:var(--ac)}
+.colorPv{margin-top:16px;border-radius:12px;overflow:hidden;border:1px solid #e2e8f0}
+.colorPvCard{padding:24px;border-radius:12px;margin:16px}
+/* ── Settings ── */
+.settRow{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.settRow label{font-size:12px;font-weight:600;color:#64748b;min-width:80px}
+.settRow input[type=number]{width:100px;padding:6px 10px;border:1px solid #e2e8f0;border-radius:8px;font-size:13px}
+/* ── Preview Cards ── */
+.pvCard{background:var(--card);border-radius:var(--R);box-shadow:var(--sh);overflow:hidden;position:relative}
+.pvCard .acLine{height:4px;background:var(--acG)}
+.pvCard .inner{padding:32px 36px}
+.pvCard .lbl{display:inline-block;padding:4px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.06em;margin-bottom:12px}
+.pvCard h2{font-size:22px;font-weight:900;line-height:1.4;margin-bottom:16px;letter-spacing:-.02em}
+.pvCard .bodyTxt{font-size:15px;line-height:1.9;color:var(--body)}
+.pvCard .bodyTxt mark{background:var(--marker);padding:2px 4px;border-radius:3px}
+.pvCard .kp{border-left:4px solid var(--kpBd);background:var(--kpBg);padding:16px 20px;border-radius:0 12px 12px 0;margin:16px 0}
+.pvCard .kp .kpLabel{font-size:11px;font-weight:700;color:var(--ac);margin-bottom:4px}
+.pvCard .qt{background:var(--qtBg);border-radius:12px;padding:20px 24px;margin:16px 0;position:relative}
+.pvCard .qt::before{content:'"';position:absolute;top:8px;left:12px;font-size:40px;color:var(--ac);opacity:.2}
+.pvCard .numBlock{text-align:center;margin:16px 0}
+.pvCard .numBlock .num{font-size:56px;font-weight:900;background:var(--acG);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.pvCard .numBlock .numLabel{font-size:13px;color:#64748b;margin-top:4px}
+.pvCard .warn{background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:16px 20px;margin:16px 0}
+.pvCard .warn .warnLabel{font-size:12px;font-weight:700;color:#dc2626;margin-bottom:4px}
+.pvCard .cl-item{display:flex;align-items:flex-start;gap:8px;margin:8px 0;font-size:14px}
+.pvCard .cl-item .ck{width:20px;height:20px;border-radius:50%;background:var(--acG);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:2px}
+.pvCard .ba{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+.pvCard .ba>div{padding:16px;border-radius:12px}
+.pvCard .ba .bf{background:#fef2f2}
+.pvCard .ba .af{background:#f0fdf4}
+.pvCard .ba .baLabel{font-size:11px;font-weight:700;margin-bottom:6px}
+.pvCard .bubble{display:flex;gap:12px;margin:12px 0;align-items:flex-start}
+.pvCard .bubble .bIcon{width:36px;height:36px;border-radius:50%;background:var(--acL);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.pvCard .bubble .bBody{background:#f1f5f9;border-radius:0 14px 14px 14px;padding:12px 16px;font-size:14px;line-height:1.7;flex:1}
+.pvCard .tl-item{display:flex;gap:14px;margin:12px 0;position:relative}
+.pvCard .tl-item .tl-dot{width:12px;height:12px;border-radius:50%;background:var(--ac);flex-shrink:0;margin-top:4px;position:relative;z-index:1}
+.pvCard .tl-item .tl-line{position:absolute;left:5px;top:16px;width:2px;height:calc(100% + 12px);background:#e2e8f0}
+.pvCard .tl-item:last-child .tl-line{display:none}
+.pvCard .pts3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:16px 0}
+.pvCard .pts3>div{text-align:center;padding:16px;background:#f8fafc;border-radius:12px}
+.pvCard .pts3 .ptIcon{font-size:28px;margin-bottom:8px}
+.pvCard .pts3 .ptTtl{font-size:13px;font-weight:700}
+.pvCard .ctaWrap{margin:20px 0}
+.pvCard .ctaBtn{display:inline-block;padding:16px 40px;border-radius:60px;font-size:15px;font-weight:700;color:#fff;background:var(--acG);text-decoration:none;box-shadow:0 4px 20px rgba(124,58,237,.25);transition:.2s;cursor:pointer}
+.pvCard .ctaBtn:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(124,58,237,.35)}
+.pvCard .dd{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+.pvCard .dd>div{padding:16px;border-radius:12px}
+.pvCard .dd .do{background:#f0fdf4;border:1px solid #bbf7d0}
+.pvCard .dd .dont{background:#fef2f2;border:1px solid #fecaca}
+.pvCard .dd .ddLabel{font-size:12px;font-weight:700;margin-bottom:6px}
+.pvCard .qa-item{margin:12px 0}
+.pvCard .qa-item .qa-q{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+.pvCard .qa-item .qa-badge{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;flex-shrink:0}
+.pvCard .qa-item .qa-badge.q{background:var(--acG);color:#fff}
+.pvCard .qa-item .qa-badge.a{background:#f0fdf4;color:#22c55e}
+.pvCard .qa-item .qa-txt{font-size:14px;line-height:1.7;padding-top:4px}
+.pvCard .merit{display:flex;align-items:flex-start;gap:10px;margin:10px 0}
+.pvCard .merit .mIcon{font-size:20px;flex-shrink:0}
+.pvCard .price-tbl{border:2px solid var(--ac);border-radius:14px;overflow:hidden;margin:16px 0}
+.pvCard .price-tbl .pHead{background:var(--acG);color:#fff;padding:14px;text-align:center;font-weight:700}
+.pvCard .price-tbl .pBody{padding:16px}
+.pvCard .price-tbl .pRow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:14px}
+.pvCard .price-tbl .pRow:last-child{border:none}
+.pvCard .profile{display:flex;gap:20px;align-items:center;margin:16px 0}
+.pvCard .profile img{width:80px;height:80px;border-radius:50%;object-fit:cover}
+.pvCard .profile .prInfo{flex:1}
+.pvCard .profile .prName{font-size:16px;font-weight:700}
+.pvCard .profile .prBio{font-size:13px;color:#64748b;margin-top:4px;line-height:1.6}
+.pvCard .stars{font-size:24px;margin:8px 0;letter-spacing:2px}
+.pvCard .progress{margin:12px 0}
+.pvCard .progress .prgLabel{font-size:12px;font-weight:600;margin-bottom:4px}
+.pvCard .progress .prgBar{height:12px;background:#e2e8f0;border-radius:6px;overflow:hidden}
+.pvCard .progress .prgFill{height:100%;background:var(--acG);border-radius:6px;transition:.5s}
+.pvCard .ribbon{position:absolute;top:20px;right:-35px;background:var(--acG);color:#fff;padding:6px 40px;font-size:11px;font-weight:700;transform:rotate(45deg)}
+.pvCard .divider{height:1px;background:#e2e8f0;margin:20px 0}
+.pvCard .spacer{height:24px}
+.pvCard .toc{margin:16px 0}
+.pvCard .toc a{display:block;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:14px;color:var(--ac);text-decoration:none}
+.pvCard .acc-item{border:1px solid #e2e8f0;border-radius:10px;margin:8px 0;overflow:hidden}
+.pvCard .acc-item summary{padding:12px 16px;font-weight:600;font-size:14px;cursor:pointer}
+.pvCard .acc-item .accBody{padding:0 16px 12px;font-size:14px;line-height:1.7}
+.pvCard .img-block{margin:16px 0;text-align:center}
+.pvCard .img-block img{max-width:100%;border-radius:12px}
+.pvCard .img-block.circle img{width:120px;height:120px;border-radius:50%;object-fit:cover}
+/* ── Modal ── */
+.modal-bg{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:center;justify-content:center}
+.modal-bg.show{display:flex}
+.modal{background:#fff;border-radius:20px;padding:28px;max-width:700px;width:95%;max-height:85vh;overflow-y:auto}
+.modal h3{font-size:18px;margin-bottom:16px}
+.modal textarea{width:100%;height:260px;font-size:12px;font-family:monospace;border:1px solid #e2e8f0;border-radius:10px;padding:12px}
+.modal .mBtns{display:flex;gap:8px;margin-top:12px}
+/* ── Drop Zone ── */
+.drop-hint{border:2px dashed var(--ac);border-radius:10px;padding:12px;text-align:center;font-size:12px;color:var(--ac);background:var(--acL);margin-top:4px;transition:.2s}
+.secBlock.drag-over{border-color:var(--ac);background:var(--acL)}
+/* ── Responsive ── */
+@media(max-width:900px){
+  .wrap{flex-direction:column}
+  .pL{width:100%;min-width:0;max-height:50vh}
+  .pR{padding:20px}
+}
 </style>
 </head>
 <body>
 
 <div class="hd">
-  <h1>✦ スクロール資料 Pro <span class="save-dot" id="saveDot" title="自動保存済み"></span></h1>
-  <div class="hd-right">
-    <button class="btn-export" onclick="doExport()">💾 エクスポート</button>
-  </div>
+  <h1>📄 スクロール資料ジェネレーター Pro Max</h1>
+  <div class="sep"></div>
+  <div class="save-dot" id="saveDot"></div>
+  <span class="save-label" id="saveLabel">自動保存ON</span>
+  <button class="btn btn-p" onclick="doExport()">📦 エクスポート</button>
 </div>
 
 <div class="wrap">
-<div class="pL">
-  <div class="pL-tabs">
-    <div class="pL-tab on" onclick="swTab(0)">📦テンプレ</div>
-    <div class="pL-tab" onclick="swTab(1)">✏️エディタ</div>
-    <div class="pL-tab" onclick="swTab(2)">🎨カラー</div>
-    <div class="pL-tab" onclick="swTab(3)">⚙️設定</div>
+  <div class="pL">
+    <div class="tabs">
+      <div class="tab on" onclick="swTab(0)">📚 テンプレート</div>
+      <div class="tab" onclick="swTab(1)">✏️ エディタ</div>
+      <div class="tab" onclick="swTab(2)">🎨 カラー</div>
+      <div class="tab" onclick="swTab(3)">⚙️ 設定</div>
+    </div>
+    <div class="tabC" id="tabC"></div>
   </div>
-  <div class="pL-body" id="tabC"></div>
-</div>
-<div class="pR" id="pvScroll"><div class="pv-area" id="pvArea"><div class="empty-pv">← テンプレートからカードを追加してください</div></div></div>
+  <div class="pR" id="pvScroll"></div>
 </div>
 
-<div class="mo-bg" id="moBg" onclick="if(event.target===this)this.classList.remove('show')">
-  <div class="mo-box">
-    <h2>HTMLエクスポート</h2>
-    <textarea id="expArea" readonly></textarea>
-    <div style="display:flex;gap:6px;margin-top:8px">
-      <button class="btn-main" onclick="navigator.clipboard.writeText(document.getElementById('expArea').value);toast('コピーしました')">コピー</button>
-      <button class="btn-main" style="background:#059669" onclick="dlFile()">ダウンロード</button>
-      <button class="btn-ghost" onclick="document.getElementById('moBg').classList.remove('show')">閉じる</button>
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="modal">
+    <h3>📦 HTMLエクスポート</h3>
+    <textarea id="exportArea" readonly></textarea>
+    <div class="mBtns">
+      <button class="btn btn-p" onclick="navigator.clipboard.writeText(document.getElementById('exportArea').value);this.textContent='✅ コピー済み!'">📋 コピー</button>
+      <button class="btn btn-s" onclick="dlFile()">💾 ダウンロード</button>
+      <button class="btn btn-s" onclick="document.getElementById('modalBg').classList.remove('show')">閉じる</button>
     </div>
   </div>
 </div>
 
-<div class="toast" id="toastEl"></div>
-
 <script>
-/* ==========================================
-   TOAST
-========================================== */
-function toast(msg){const el=document.getElementById('toastEl');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2000);}
+/* ═══════════════════════════════════════════════
+   DATA & STATE
+   ═══════════════════════════════════════════════ */
+const SAVE_KEY = 'scrollDocPro_v4';
 
-/* ==========================================
-   THEME / COLOR SYSTEM
-========================================== */
-let colors={
-  accent:'#7c3aed',accentLight:'#f5f3ff',
-  mainText:'#0f172a',bodyText:'#444444',
-  cardBg:'#ffffff',pageBg:'#f5f3ff',
-  kpBorder:'#7c3aed',kpBg:'#f5f3ff',
-  quoteBg:'#f5f3ff',
-  gradFrom:'#7c3aed',gradTo:'#a78bfa',
+// Color definitions
+const DEFAULT_COLORS = {
+  ac:'#7c3aed', acL:'#f5f3ff', gS:'#7c3aed', gE:'#a78bfa',
+  main:'#0f172a', body:'#334155', sub:'#64748b',
+  card:'#ffffff', bg:'#f0f0f5',
+  kpBd:'#7c3aed', kpBg:'#f5f3ff', qtBg:'#f8fafc',
+  marker:'#fff59d'
 };
 
-const PRESETS=[
-  {nm:'ビジネス',accent:'#2563eb',accentLight:'#eff6ff',mainText:'#0f172a',bodyText:'#444',cardBg:'#fff',pageBg:'#f1f5f9',kpBorder:'#2563eb',kpBg:'#f0f5ff',quoteBg:'#eff6ff',gradFrom:'#2563eb',gradTo:'#3b82f6'},
-  {nm:'恋愛',accent:'#ec4899',accentLight:'#fdf2f8',mainText:'#4a0e2b',bodyText:'#444',cardBg:'#fff',pageBg:'#fdf5f9',kpBorder:'#ec4899',kpBg:'#fdf2f8',quoteBg:'#fdf2f8',gradFrom:'#ec4899',gradTo:'#f472b6'},
-  {nm:'占い',accent:'#7c3aed',accentLight:'#f5f3ff',mainText:'#1e1049',bodyText:'#444',cardBg:'#fff',pageBg:'#f5f3ff',kpBorder:'#7c3aed',kpBg:'#f5f3ff',quoteBg:'#f5f3ff',gradFrom:'#7c3aed',gradTo:'#8b5cf6'},
-  {nm:'自己啓発',accent:'#ea580c',accentLight:'#fff7ed',mainText:'#431407',bodyText:'#444',cardBg:'#fff',pageBg:'#fef6ee',kpBorder:'#ea580c',kpBg:'#fff7ed',quoteBg:'#fff7ed',gradFrom:'#ea580c',gradTo:'#f97316'},
-  {nm:'健康',accent:'#059669',accentLight:'#f0fdf4',mainText:'#052e16',bodyText:'#444',cardBg:'#fff',pageBg:'#f0fdf4',kpBorder:'#059669',kpBg:'#f0fdf4',quoteBg:'#f0fdf4',gradFrom:'#059669',gradTo:'#10b981'},
-  {nm:'教育',accent:'#d97706',accentLight:'#fffbeb',mainText:'#451a03',bodyText:'#444',cardBg:'#fff',pageBg:'#fffbeb',kpBorder:'#d97706',kpBg:'#fffbeb',quoteBg:'#fffbeb',gradFrom:'#d97706',gradTo:'#f59e0b'},
-  {nm:'モノトーン',accent:'#374151',accentLight:'#f9fafb',mainText:'#111827',bodyText:'#444',cardBg:'#fff',pageBg:'#f3f4f6',kpBorder:'#6b7280',kpBg:'#f9fafb',quoteBg:'#f9fafb',gradFrom:'#374151',gradTo:'#6b7280'},
-  {nm:'ダーク',accent:'#a78bfa',accentLight:'#1e1b4b',mainText:'#e2e8f0',bodyText:'#cbd5e1',cardBg:'#1e1e2e',pageBg:'#0f0f1a',kpBorder:'#a78bfa',kpBg:'#1e1b4b',quoteBg:'#1e1b4b',gradFrom:'#7c3aed',gradTo:'#a78bfa'},
+const COLOR_LABELS = {
+  ac:'アクセント', acL:'アクセント薄', gS:'グラデ開始', gE:'グラデ終了',
+  main:'見出し文字', body:'本文文字', sub:'補足文字',
+  card:'カード背景', bg:'ページ背景',
+  kpBd:'KPボーダー', kpBg:'KP背景', qtBg:'引用背景',
+  marker:'マーカー色'
+};
+
+const PRESETS = [
+  {nm:'ビジネス',ac:'#2563eb',acL:'#eff6ff',gS:'#2563eb',gE:'#3b82f6',main:'#0f172a',body:'#334155',sub:'#64748b',card:'#fff',bg:'#f0f4f8',kpBd:'#2563eb',kpBg:'#eff6ff',qtBg:'#f8fafc',marker:'#bfdbfe'},
+  {nm:'恋愛',ac:'#e84393',acL:'#fdf2f8',gS:'#e84393',gE:'#fd79a8',main:'#4a1942',body:'#6b4560',sub:'#a87ca0',card:'#fff',bg:'#fef6fa',kpBd:'#e84393',kpBg:'#fdf2f8',qtBg:'#fef6fa',marker:'#fbcfe8'},
+  {nm:'占い',ac:'#8b5cf6',acL:'#f5f3ff',gS:'#6d28d9',gE:'#a78bfa',main:'#1e1b4b',body:'#3b3570',sub:'#7c72a8',card:'#fff',bg:'#f3f0ff',kpBd:'#7c3aed',kpBg:'#f5f3ff',qtBg:'#f3f0ff',marker:'#ddd6fe'},
+  {nm:'自己啓発',ac:'#f59e0b',acL:'#fffbeb',gS:'#f59e0b',gE:'#fbbf24',main:'#451a03',body:'#78350f',sub:'#a16207',card:'#fff',bg:'#fefce8',kpBd:'#f59e0b',kpBg:'#fffbeb',qtBg:'#fefce8',marker:'#fde68a'},
+  {nm:'健康',ac:'#10b981',acL:'#ecfdf5',gS:'#059669',gE:'#34d399',main:'#064e3b',body:'#065f46',sub:'#6ee7b7',card:'#fff',bg:'#f0fdf4',kpBd:'#10b981',kpBg:'#ecfdf5',qtBg:'#f0fdf4',marker:'#a7f3d0'},
+  {nm:'教育',ac:'#0ea5e9',acL:'#f0f9ff',gS:'#0284c7',gE:'#38bdf8',main:'#0c4a6e',body:'#075985',sub:'#7dd3fc',card:'#fff',bg:'#f0f9ff',kpBd:'#0ea5e9',kpBg:'#f0f9ff',qtBg:'#f0f9ff',marker:'#bae6fd'},
+  {nm:'モノトーン',ac:'#475569',acL:'#f8fafc',gS:'#334155',gE:'#64748b',main:'#0f172a',body:'#334155',sub:'#94a3b8',card:'#fff',bg:'#f1f5f9',kpBd:'#64748b',kpBg:'#f8fafc',qtBg:'#f8fafc',marker:'#e2e8f0'},
+  {nm:'ダーク',ac:'#a78bfa',acL:'#1e1b4b',gS:'#7c3aed',gE:'#a78bfa',main:'#f8fafc',body:'#cbd5e1',sub:'#94a3b8',card:'#1e293b',bg:'#0f172a',kpBd:'#a78bfa',kpBg:'#1e1b4b',qtBg:'#1e293b',marker:'#4c1d95'}
 ];
 
-function grad(){return`linear-gradient(135deg,${colors.gradFrom},${colors.gradTo})`;}
+// Marker colors
+const MARKER_COLORS = ['#fff59d','#a5f3fc','#fbcfe8','#bbf7d0','#fed7aa','#ddd6fe','#fecaca','transparent'];
 
-/* ==========================================
-   TEMPLATES (52 types)
-========================================== */
-const CATS=[
-  {id:'intro',nm:'🚪導入'},{id:'problem',nm:'😰問題提起'},{id:'solution',nm:'💡解決策'},
-  {id:'proof',nm:'📊証拠'},{id:'offer',nm:'🎁提案'},{id:'faq',nm:'❓FAQ'},
-  {id:'cta',nm:'🚀CTA'},{id:'bridge',nm:'🔗繋ぎ'},{id:'closing',nm:'🎬締め'},
-];
-let curCat='intro';
-
-const T=[
-{id:1,cat:'intro',nm:'表紙',icon:'📘',align:'center',els:[{key:'title',value:'SNS集客\n完全攻略ガイド',align:'center'},{key:'subtitle',value:'ゼロから月30万を安定させる方法',align:'center'},{key:'small',value:'著者名 / 2026年版',align:'center'}]},
-{id:2,cat:'intro',nm:'目次',icon:'📋',heading:'目次',align:'left',els:[{key:'toc',value:'はじめに\nSTEP1：集客の基本\nSTEP2：信頼の構築\nSTEP3：収益化\nまとめ'}]},
-{id:3,cat:'intro',nm:'自己紹介',icon:'👤',align:'center',els:[{key:'image_circle',value:'',align:'center'},{key:'profile_name',value:'山田 花子',align:'center'},{key:'profile_title',value:'恋愛カウンセラー',align:'center'},{key:'body',value:'10年間で3,000人以上の恋愛相談に乗ってきました。',align:'center'}]},
-{id:4,cat:'intro',nm:'導入メッセージ',icon:'👋',heading:'はじめに',align:'left',els:[{key:'body',value:'この資料を手に取ってくださりありがとうございます。\nこれからお伝えする内容は『本質』です。'}]},
-{id:5,cat:'intro',nm:'注意書き',icon:'📌',heading:'お読みになる前に',align:'left',els:[{key:'warning',value:'この資料はSNS集客に興味がある方を対象としています。\n※効果を保証するものではありません。'}]},
-{id:6,cat:'problem',nm:'悩み列挙',icon:'😔',heading:'こんな悩みありませんか？',align:'left',els:[{key:'checklist_negative',value:'毎日投稿しても反応がない\nフォロワーが増えない\n売上が安定しない'}]},
-{id:7,cat:'problem',nm:'共感ストーリー',icon:'📖',heading:'実は私も同じでした',align:'left',els:[{key:'body',value:'3年前の私は毎日5時間費やしても月売上3万円でした。'},{key:'quote',value:'なんで結果が出ないんだろう…'}]},
-{id:8,cat:'problem',nm:'NG行動',icon:'🔍',heading:'9割がやるNG',align:'left',els:[{key:'do_dont',labelDo:'正解',labelDont:'NG',valueDo:'ターゲットを絞る\n読者に寄り添う',valueDont:'とにかく毎日投稿\nいきなり売り込む'}]},
-{id:9,cat:'problem',nm:'恐怖喚起',icon:'⚡',heading:'このまま何もしなければ…',align:'center',els:[{key:'warning',value:'1年後も同じ悩みを抱えたまま時間だけが過ぎていきます。'}]},
-{id:10,cat:'problem',nm:'読者の声',icon:'💭',align:'left',els:[{key:'bubble_q',value:'私には無理だと思う…'},{key:'bubble_a',value:'大丈夫。正しい順番を知るだけで結果は変わります。'}]},
-{id:11,cat:'solution',nm:'結論ファースト',icon:'🎯',label:'結論',heading:'答えはシンプル',align:'center',els:[{key:'number',value:'たった3つ',align:'center'},{key:'body',value:'この3つを正しい順番でやるだけです。',align:'center'}]},
-{id:12,cat:'solution',nm:'ステップ解説',icon:'🎯',label:'STEP 1',heading:'Threadsで集客する',align:'left',els:[{key:'body',value:'『これ私のことだ！』と思ってもらう投稿で興味を引く。'},{key:'keypoint',value:'Threadsの役割は繁華街の看板と同じ。売り込まない。'}]},
-{id:13,cat:'solution',nm:'ポイント整理',icon:'💡',heading:'成功の3つの鍵',align:'left',els:[{key:'points3',value:'継続|毎日1投稿を3ヶ月\n分析|反応の良い投稿を研究\n改善|データで磨く'}]},
-{id:14,cat:'solution',nm:'フロー図',icon:'🗺️',heading:'全体の流れ',align:'center',els:[{key:'flow',value:'Threads発信\nLINE誘導\n信頼構築\n個別相談\n成約'}]},
-{id:15,cat:'solution',nm:'比較表',icon:'⚖️',heading:'プラン比較',align:'center',els:[{key:'table',value:'|項目|ライト|プレミアム\n|相談|月1|無制限\n|価格|9,800円|29,800円'}]},
-{id:16,cat:'solution',nm:'ビフォーアフター',icon:'🔄',heading:'受講前と後',align:'center',els:[{key:'compare',labelBefore:'BEFORE',labelAfter:'AFTER',valueBefore:'不安で眠れない\n自信がない',valueAfter:'心が穏やか\n強みがわかった'}]},
-{id:17,cat:'solution',nm:'タイムライン',icon:'📅',heading:'1日のスケジュール',align:'left',els:[{key:'timeline',value:'7:00|朝の投稿\n12:00|コメント返し\n19:00|夜の投稿\n22:00|振り返り'}]},
-{id:18,cat:'solution',nm:'ケーススタディ',icon:'📋',label:'CASE',heading:'Aさんの場合',align:'left',els:[{key:'body',value:'30代会社員。副業で占いを始め半年間売上ゼロ。'},{key:'compare',labelBefore:'Before',labelAfter:'After',valueBefore:'フォロワー200\n月売上0円',valueAfter:'フォロワー3,000\n月売上30万円'}]},
-{id:19,cat:'solution',nm:'計算ロジック',icon:'🧮',heading:'なぜ3ヶ月で結果が出るか',align:'left',els:[{key:'number',value:'90投稿×1%=毎日1名',align:'center'},{key:'body',value:'3ヶ月で90名がLINE登録。10%が有料相談で月9件。'}]},
-{id:20,cat:'solution',nm:'チェックリスト',icon:'✅',heading:'準備チェック',align:'left',els:[{key:'checklist',value:'アカウント作成\nプロフィール設定\nアイコン用意\n最初の投稿を下書き'}]},
-{id:21,cat:'solution',nm:'テンプレート',icon:'📝',label:'テンプレ',heading:'投稿テンプレ',align:'left',els:[{key:'colored_body',value:'【タイトル】○○で悩んでいませんか？\n実は△△するだけで解決できます。'},{key:'small',value:'※○○を置き換えて使ってください'}]},
-{id:22,cat:'solution',nm:'Do/Don\'t',icon:'⭕',heading:'成功と失敗の分かれ道',align:'center',els:[{key:'do_dont',labelDo:'やるべき',labelDont:'やめるべき',valueDo:'ターゲット明確\n毎日発信\nデータ分析',valueDont:'万人受け狙い\n気まぐれ投稿\n感覚で判断'}]},
-{id:23,cat:'proof',nm:'実績数字',icon:'📊',label:'実績',align:'center',els:[{key:'number',value:'3,000名+',align:'center'},{key:'body',value:'累計ご相談者数。',align:'center'},{key:'stars',value:'4.9',align:'center'}]},
-{id:24,cat:'proof',nm:'お客様の声',icon:'💬',label:'Voice',align:'left',els:[{key:'quote',value:'2ヶ月で人生が変わりました。'},{key:'body',value:'── Bさん（30代女性）'},{key:'stars',value:'5'}]},
-{id:25,cat:'proof',nm:'BA実績',icon:'📈',label:'実績',align:'center',els:[{key:'compare',labelBefore:'Before',labelAfter:'After',valueBefore:'月収5万\nフォロワー300',valueAfter:'月収50万\nフォロワー12,000'}]},
-{id:26,cat:'proof',nm:'メディア掲載',icon:'📺',label:'メディア',align:'center',els:[{key:'image',value:''},{key:'body',value:'○○新聞 / △△マガジン等に掲載',align:'center'}]},
-{id:27,cat:'proof',nm:'資格',icon:'🏅',heading:'保有資格',align:'center',els:[{key:'checklist',value:'国家資格○○\n認定カウンセラー\n○○協会認定'}]},
-{id:28,cat:'proof',nm:'アンケート',icon:'📊',heading:'受講者アンケート',align:'center',els:[{key:'progress',value:'満足度|98'},{key:'progress',value:'おすすめ度|95'},{key:'small',value:'※2025年度 n=150',align:'center'}]},
-{id:29,cat:'proof',nm:'推薦',icon:'👑',label:'推薦',align:'left',els:[{key:'image_circle',value:''},{key:'quote',value:'最も実践的で再現性の高い方法です。'},{key:'body',value:'── ○○大学教授'}]},
-{id:30,cat:'proof',nm:'SNSスクショ',icon:'📱',label:'実際の反応',align:'center',els:[{key:'image',value:''},{key:'small',value:'※許可を得て掲載',align:'center'}]},
-{id:31,cat:'offer',nm:'サービス紹介',icon:'✨',heading:'○○プログラム',align:'left',els:[{key:'body',value:'3ヶ月間の完全個別サポート。'},{key:'merit_list',value:'📞|週1コンサル|専用戦略会議\n📚|全教材|100本以上\n💬|LINE無制限|24h以内返信'}]},
-{id:32,cat:'offer',nm:'料金表',icon:'💰',heading:'料金プラン',align:'center',els:[{key:'table',value:'|項目|ライト|プレミアム\n|期間|1ヶ月|3ヶ月\n|価格|9,800円|29,800円'}]},
-{id:33,cat:'offer',nm:'特典一覧',icon:'🎁',label:'特典',heading:'限定特典',align:'left',els:[{key:'ribbon',value:'期間限定'},{key:'merit_list',value:'🎯|個別戦略シート|専用ロードマップ\n📝|テンプレ50選|すぐ使える\n🎥|限定セミナー|非公開講義'}]},
-{id:34,cat:'offer',nm:'限定・緊急',icon:'⏰',align:'center',els:[{key:'colored_body',value:'⚡ 先着20名限定 ⚡',align:'center'},{key:'number',value:'残り 7名',align:'center'}]},
-{id:35,cat:'offer',nm:'返金保証',icon:'🛡️',label:'保証',heading:'30日間全額返金保証',align:'center',els:[{key:'body',value:'ご満足いただけなければ全額返金。リスクゼロです。',align:'center'}]},
-{id:36,cat:'offer',nm:'価格アンカリング',icon:'💎',heading:'特別価格',align:'center',els:[{key:'price',valueOld:'500,000円',valueNew:'198,000円'},{key:'small',value:'※分割：月々16,500円×12回',align:'center'}]},
-{id:37,cat:'faq',nm:'Q&A',icon:'❓',heading:'よくある質問',align:'left',els:[{key:'qa',value:[{q:'初心者でも大丈夫？',a:'はい。基礎からサポートします。'},{q:'どのくらいで結果が出る？',a:'3ヶ月で多くの方が変化を実感。'},{q:'返金は？',a:'30日間全額返金保証付き。'}]}]},
-{id:38,cat:'faq',nm:'反論処理',icon:'🤔',align:'left',els:[{key:'bubble_q',value:'時間がないんです…'},{key:'bubble_a',value:'1日30分でOK。通勤中にスマホで書く方も多いです。'}]},
-{id:39,cat:'faq',nm:'対象者',icon:'👤',heading:'こんな方に',align:'center',els:[{key:'do_dont',labelDo:'おすすめ',labelDont:'不向き',valueDo:'本気で変わりたい\n素直に行動できる',valueDont:'楽して稼ぎたい\nすぐ結果を求める'}]},
-{id:40,cat:'cta',nm:'CTA',icon:'🚀',heading:'今すぐ始めましょう',align:'center',els:[{key:'body',value:'あなたはもう準備ができています。',align:'center'},{key:'cta',value:'LINEで無料相談する',link:'https://'}]},
-{id:41,cat:'cta',nm:'申込手順',icon:'📋',heading:'申込の流れ',align:'center',els:[{key:'flow',value:'LINE追加\n「相談希望」送信\n日程調整\n無料相談\nスタート'}]},
-{id:42,cat:'cta',nm:'QRコード',icon:'📱',heading:'LINE追加',align:'center',els:[{key:'image',value:''},{key:'cta',value:'友達追加する',link:'https://'}]},
-{id:43,cat:'bridge',nm:'セクション区切り',icon:'📌',label:'CHAPTER 2',align:'center',els:[{key:'title',value:'実践編',align:'center'},{key:'subtitle',value:'具体的な方法をステップで解説',align:'center'}]},
-{id:44,cat:'bridge',nm:'次への導線',icon:'→',align:'center',els:[{key:'transition',value:'次はいよいよ実践編です。'}]},
-{id:45,cat:'bridge',nm:'中間まとめ',icon:'📝',label:'まとめ',align:'left',els:[{key:'summary',value:'Threadsは看板\nLINEで信頼構築\n3ヶ月は継続'}]},
-{id:46,cat:'bridge',nm:'ブレイク',icon:'☕',align:'center',els:[{key:'transition',value:'ちょっとひと休み。振り返ってみてください。'}]},
-{id:47,cat:'bridge',nm:'名言',icon:'✨',align:'center',els:[{key:'quote',value:'千里の道も一歩から。'}]},
-{id:48,cat:'closing',nm:'全体まとめ',icon:'📝',heading:'まとめ',align:'left',els:[{key:'summary',value:'STEP1：認知獲得\nSTEP2：信頼構築\nSTEP3：成約\n鍵は正しい順番で続けること'}]},
-{id:49,cat:'closing',nm:'最後のメッセージ',icon:'💌',heading:'最後に',align:'left',els:[{key:'body',value:'ここまで読んでくださりありがとうございます。\nあなたの一歩を応援しています。'},{key:'profile_name',value:'山田 花子'}]},
-{id:50,cat:'closing',nm:'追伸',icon:'✉️',label:'P.S.',align:'left',els:[{key:'body',value:'最後まで読んでくださった方だけに特別なご案内があります。'}]},
-{id:51,cat:'closing',nm:'奥付',icon:'©',align:'center',els:[{key:'small',value:'© 2026 山田花子\nexample@mail.com',align:'center'}]},
-{id:52,cat:'closing',nm:'参考文献',icon:'📚',heading:'参考文献',align:'left',els:[{key:'body',value:'・○○白書 2025年版\n・「△△の法則」著：□□太郎'}]},
+// Template categories
+const CATS = [
+  {id:'intro',nm:'🚪 導入'},
+  {id:'problem',nm:'😰 問題提起'},
+  {id:'solution',nm:'💡 解決策'},
+  {id:'evidence',nm:'📊 証拠・信頼'},
+  {id:'offer',nm:'💰 提案'},
+  {id:'faq',nm:'❓ FAQ'},
+  {id:'cta',nm:'🎯 行動喚起'},
+  {id:'sep',nm:'➖ 区切り'},
+  {id:'close',nm:'🏁 締め'}
 ];
 
-const ELK=[
-  {key:'title',lb:'大タイトル'},{key:'subtitle',lb:'サブタイトル'},{key:'body',lb:'本文'},
-  {key:'small',lb:'注釈'},{key:'heading_sub',lb:'中見出し'},{key:'keypoint',lb:'KEY POINT'},
-  {key:'quote',lb:'引用'},{key:'number',lb:'数字強調'},{key:'image',lb:'画像'},
-  {key:'image_circle',lb:'丸画像'},{key:'warning',lb:'警告'},{key:'checklist',lb:'チェックリスト'},
-  {key:'checklist_negative',lb:'悩みリスト'},{key:'compare',lb:'ビフォーアフター'},
-  {key:'bubble_q',lb:'吹き出し(Q)'},{key:'bubble_a',lb:'吹き出し(A)'},
-  {key:'timeline',lb:'タイムライン'},{key:'points3',lb:'ポイント整理'},
-  {key:'colored_body',lb:'色付きボックス'},{key:'transition',lb:'導線'},
-  {key:'profile_name',lb:'名前'},{key:'profile_title',lb:'肩書き'},
-  {key:'qa',lb:'Q&A'},{key:'merit_list',lb:'メリット一覧'},
-  {key:'cta',lb:'CTAボタン'},{key:'flow',lb:'フロー図'},
-  {key:'summary',lb:'まとめ'},{key:'table',lb:'表'},
-  {key:'do_dont',lb:'Do/Don\'t'},{key:'stars',lb:'星評価'},
-  {key:'price',lb:'価格表示'},{key:'progress',lb:'プログレスバー'},
-  {key:'ribbon',lb:'リボン'},{key:'toc',lb:'目次'},
-  {key:'accordion',lb:'アコーディオン'},{key:'divider',lb:'区切り線'},
+// Templates (52 kinds)
+const T = [
+  // 導入
+  {id:1,cat:'intro',nm:'表紙',desc:'タイトルとサブタイトル',icon:'📘',els:[{t:'body',v:'サブタイトルをここに入力',mk:''},{t:'spacer'}]},
+  {id:2,cat:'intro',nm:'目次',desc:'コンテンツ一覧',icon:'📋',els:[{t:'toc',items:['セクション1','セクション2','セクション3']}]},
+  {id:3,cat:'intro',nm:'自己紹介',desc:'プロフィールカード',icon:'👤',els:[{t:'profile',img:'',name:'名前',bio:'自己紹介文'}]},
+  {id:4,cat:'intro',nm:'導入メッセージ',desc:'読者への語りかけ',icon:'💬',els:[{t:'body',v:'あなたにお伝えしたいことがあります。',mk:''}]},
+  {id:5,cat:'intro',nm:'注意書き',desc:'前提・免責事項',icon:'⚠️',els:[{t:'warn',label:'ご注意',v:'この資料は情報提供を目的としています。'}]},
+  // 問題提起
+  {id:6,cat:'problem',nm:'悩み列挙',desc:'読者の悩みをリスト化',icon:'😥',els:[{t:'checklist',label:'こんなお悩みありませんか？',items:['悩み1','悩み2','悩み3']}]},
+  {id:7,cat:'problem',nm:'共感ストーリー',desc:'ストーリーで共感',icon:'📖',els:[{t:'body',v:'実は私も同じ悩みを抱えていました…',mk:''},{t:'quote',v:'あの時の私は、本当に苦しかった。',label:'引用'}]},
+  {id:8,cat:'problem',nm:'現状の問題点',desc:'問題を明確化',icon:'🚨',els:[{t:'warn',label:'現状の問題',v:'多くの人がこの間違いを犯しています。'},{t:'body',v:'問題の詳細をここに記載します。',mk:''}]},
+  {id:9,cat:'problem',nm:'恐怖喚起',desc:'危機感を伝える',icon:'😱',els:[{t:'number',num:'80',label:'％の人が失敗',unit:'%'},{t:'body',v:'このまま放置するとどうなるか…',mk:''}]},
+  {id:10,cat:'problem',nm:'読者の声',desc:'SNSやDMの声を紹介',icon:'💭',els:[{t:'bubble',icon:'😰',v:'どうすればいいか分かりません…',name:'読者A'},{t:'bubble',icon:'😢',v:'何度やっても上手くいかない…',name:'読者B'}]},
+  // 解決策
+  {id:11,cat:'solution',nm:'結論ファースト',desc:'最初に結論を提示',icon:'🎯',els:[{t:'keypoint',label:'結論',v:'最も大切なのは○○です。'},{t:'body',v:'その理由を詳しく説明します。',mk:''}]},
+  {id:12,cat:'solution',nm:'ステップ解説',desc:'手順を順番に説明',icon:'📝',els:[{t:'timeline',items:[{t:'ステップ1',v:'まず○○を行います'},{t:'ステップ2',v:'次に○○を実行'},{t:'ステップ3',v:'最後に○○で完成'}]}]},
+  {id:13,cat:'solution',nm:'ポイント整理',desc:'重要ポイントをまとめ',icon:'✨',els:[{t:'pts3',items:[{icon:'🎯',title:'ポイント1',v:'説明'},{icon:'💡',title:'ポイント2',v:'説明'},{icon:'🔑',title:'ポイント3',v:'説明'}]}]},
+  {id:14,cat:'solution',nm:'図解・フロー',desc:'流れを図で示す',icon:'🔄',els:[{t:'flow',items:['入力','処理','出力']}]},
+  {id:15,cat:'solution',nm:'比較表',desc:'2つ以上を比較',icon:'⚖️',els:[{t:'table',headers:['項目','プランA','プランB'],rows:[['価格','¥1,000','¥2,000'],['機能','基本','全機能'],['サポート','メール','24h対応']]}]},
+  {id:16,cat:'solution',nm:'ビフォーアフター',desc:'変化を視覚的に',icon:'🔀',els:[{t:'ba',labelB:'BEFORE',labelA:'AFTER',before:'変更前の状態',after:'変更後の改善された状態'}]},
+  {id:17,cat:'solution',nm:'タイムライン',desc:'時系列で説明',icon:'⏳',els:[{t:'timeline',items:[{t:'2024年1月',v:'プロジェクト開始'},{t:'2024年6月',v:'βリリース'},{t:'2025年1月',v:'正式リリース'}]}]},
+  {id:18,cat:'solution',nm:'ケーススタディ',desc:'具体的な事例',icon:'📑',els:[{t:'body',v:'Aさんの場合…',mk:''},{t:'ba',labelB:'導入前',labelA:'導入後',before:'月商50万円',after:'月商200万円'},{t:'quote',v:'本当に人生が変わりました！',label:'Aさんの声'}]},
+  {id:19,cat:'solution',nm:'計算ロジック',desc:'数字で根拠を示す',icon:'🧮',els:[{t:'number',num:'3',label:'倍の効率アップ',unit:'倍'},{t:'body',v:'具体的な計算根拠をここに。',mk:''}]},
+  {id:20,cat:'solution',nm:'チェックリスト',desc:'確認項目一覧',icon:'✅',els:[{t:'checklist',label:'チェックリスト',items:['項目1を確認','項目2を確認','項目3を確認']}]},
+  {id:21,cat:'solution',nm:'テンプレート・例文',desc:'そのまま使える型',icon:'📝',els:[{t:'quote',v:'お世話になっております。〇〇の件でご連絡いたしました。',label:'例文テンプレート'},{t:'body',v:'上記をカスタマイズしてご利用ください。',mk:''}]},
+  {id:22,cat:'solution',nm:'Do / Don\'t',desc:'やること・やらないこと',icon:'⭕',els:[{t:'do_dont',labelD:'Do（やること）',labelDn:'Don\'t（やらないこと）',doList:['正しい方法1','正しい方法2'],dontList:['やりがちなNG1','やりがちなNG2']}]},
+  // 証拠・信頼
+  {id:23,cat:'evidence',nm:'実績・数字',desc:'数値で信頼感',icon:'📈',els:[{t:'number',num:'10,000',label:'人以上が受講',unit:'人'},{t:'number',num:'98',label:'の満足度',unit:'%'}]},
+  {id:24,cat:'evidence',nm:'お客様の声',desc:'レビュー・感想',icon:'🗣️',els:[{t:'stars',v:5},{t:'quote',v:'素晴らしいサービスでした！',label:'東京都 30代女性'},{t:'stars',v:4},{t:'quote',v:'とても勉強になりました。',label:'大阪府 40代男性'}]},
+  {id:25,cat:'evidence',nm:'ビフォーアフター実績',desc:'実際の変化事例',icon:'📊',els:[{t:'ba',labelB:'受講前',labelA:'受講3ヶ月後',before:'月収20万円・自信なし',after:'月収80万円・自信を持って活動'},{t:'body',v:'※個人の感想であり成果を保証するものではありません。',mk:''}]},
+  {id:26,cat:'evidence',nm:'メディア掲載',desc:'掲載実績の紹介',icon:'📰',els:[{t:'body',v:'以下のメディアに掲載されました：',mk:''},{t:'checklist',label:'掲載メディア',items:['メディア1','メディア2','メディア3']}]},
+  {id:27,cat:'evidence',nm:'資格・認定',desc:'専門性の証明',icon:'🏅',els:[{t:'checklist',label:'保有資格',items:['○○認定コーチ','△△マスター資格','□□プロフェッショナル']}]},
+  {id:28,cat:'evidence',nm:'データ・グラフ',desc:'グラフ画像で説明',icon:'📊',els:[{t:'image',v:'',cap:'グラフ・データ画像をここに'},{t:'body',v:'上記データが示すように…',mk:''}]},
+  {id:29,cat:'evidence',nm:'権威者推薦',desc:'専門家のお墨付き',icon:'👨‍⚕️',els:[{t:'profile',img:'',name:'専門家名',bio:'○○大学教授'},{t:'quote',v:'この方法は非常に理にかなっています。',label:'推薦コメント'}]},
+  {id:30,cat:'evidence',nm:'SNSスクリーンショット',desc:'SNSの反応を紹介',icon:'📱',els:[{t:'image',v:'',cap:'SNSスクリーンショット'},{t:'body',v:'多くの方から反響をいただきました。',mk:''}]},
+  // 提案
+  {id:31,cat:'offer',nm:'サービス紹介',desc:'サービスの概要',icon:'🎁',els:[{t:'body',v:'サービスの詳細説明をここに。',mk:''},{t:'pts3',items:[{icon:'✅',title:'特徴1',v:'説明'},{icon:'✅',title:'特徴2',v:'説明'},{icon:'✅',title:'特徴3',v:'説明'}]}]},
+  {id:32,cat:'offer',nm:'料金表・プラン比較',desc:'プラン一覧',icon:'💳',els:[{t:'price',label:'おすすめプラン',items:[{k:'基本料金',v:'¥9,800/月'},{k:'サポート',v:'メール対応'},{k:'コンテンツ',v:'全動画見放題'}]}]},
+  {id:33,cat:'offer',nm:'特典・メリット一覧',desc:'メリットを列挙',icon:'🎀',els:[{t:'merit',items:[{icon:'🎁',v:'特典1：○○プレゼント'},{icon:'📚',v:'特典2：限定教材'},{icon:'🤝',v:'特典3：個別コンサル'}]}]},
+  {id:34,cat:'offer',nm:'限定感・緊急性',desc:'今すぐ行動を促す',icon:'⏰',els:[{t:'warn',label:'期間限定',v:'この価格でご提供できるのは今月末まで！'},{t:'number',num:'残り12',label:'名様限定',unit:'名'}]},
+  {id:35,cat:'offer',nm:'保証・リスクリバーサル',desc:'安心感を提供',icon:'🛡️',els:[{t:'keypoint',label:'安心保証',v:'30日間全額返金保証付き。リスクゼロでお試しいただけます。'}]},
+  {id:36,cat:'offer',nm:'価格アンカリング',desc:'価格の妥当性を示す',icon:'💎',els:[{t:'body',v:'通常価格：',mk:''},{t:'number',num:'¥49,800',label:'→ 特別価格',unit:''},{t:'number',num:'¥19,800',label:'今だけの特別価格',unit:''},{t:'body',v:'差額30,000円分がお得！',mk:''}]},
+  // FAQ
+  {id:37,cat:'faq',nm:'Q&A',desc:'よくある質問と回答',icon:'❓',els:[{t:'qa',items:[{q:'質問1をここに',a:'回答1をここに'},{q:'質問2をここに',a:'回答2をここに'}]}]},
+  {id:38,cat:'faq',nm:'反論処理',desc:'不安・反論への対応',icon:'🤔',els:[{t:'qa',items:[{q:'本当に効果はありますか？',a:'はい、○○の理由で効果が実証されています。'},{q:'初心者でも大丈夫？',a:'もちろんです。基礎から丁寧にサポートします。'}]}]},
+  {id:39,cat:'faq',nm:'対象者・非対象者',desc:'向き不向きの明示',icon:'👥',els:[{t:'do_dont',labelD:'こんな方におすすめ',labelDn:'こんな方には向きません',doList:['本気で変わりたい方','行動力のある方'],dontList:['楽して稼ぎたい方','すぐ諦める方']}]},
+  // 行動喚起
+  {id:40,cat:'cta',nm:'CTAボタン',desc:'行動を促すボタン',icon:'🔘',els:[{t:'body',v:'今すぐ始めましょう！',mk:''},{t:'cta',v:'無料で始める',url:'https://example.com'}]},
+  {id:41,cat:'cta',nm:'申し込み手順',desc:'手順を簡潔に',icon:'📋',els:[{t:'timeline',items:[{t:'STEP 1',v:'ボタンをクリック'},{t:'STEP 2',v:'必要事項を入力'},{t:'STEP 3',v:'完了！すぐにご利用いただけます'}]},{t:'cta',v:'お申し込みはこちら',url:'https://example.com'}]},
+  {id:42,cat:'cta',nm:'QRコード',desc:'QRで誘導',icon:'📲',els:[{t:'image',v:'',cap:'QRコードをここに'},{t:'body',v:'スマホでスキャンしてアクセス！',mk:''}]},
+  // 区切り
+  {id:43,cat:'sep',nm:'区切り線',desc:'セクション間の区切り',icon:'➖',els:[{t:'divider'}]},
+  {id:44,cat:'sep',nm:'次への導線',desc:'次セクションへの誘導',icon:'👉',els:[{t:'body',v:'ここまで理解できましたか？\n次はいよいよ核心に迫ります。',mk:''}]},
+  {id:45,cat:'sep',nm:'中間まとめ',desc:'ここまでの要約',icon:'📌',els:[{t:'keypoint',label:'ここまでのまとめ',v:'ポイント1、ポイント2、ポイント3の3つを説明しました。'}]},
+  {id:46,cat:'sep',nm:'ブレイク・余白',desc:'一呼吸おく余白',icon:'💭',els:[{t:'spacer'},{t:'body',v:'☕ ちょっと一休み',mk:''},{t:'spacer'}]},
+  {id:47,cat:'sep',nm:'名言・格言',desc:'モチベーションUP',icon:'✨',els:[{t:'quote',v:'千里の道も一歩から。',label:'老子'}]},
+  // 締め
+  {id:48,cat:'close',nm:'全体まとめ',desc:'要点の総括',icon:'📋',els:[{t:'keypoint',label:'まとめ',v:'本日お伝えした内容を振り返ります。'},{t:'checklist',label:'重要ポイント',items:['ポイント1','ポイント2','ポイント3']}]},
+  {id:49,cat:'close',nm:'最後のメッセージ',desc:'読者への感謝・激励',icon:'💌',els:[{t:'body',v:'最後までお読みいただきありがとうございます。\nあなたの挑戦を心から応援しています。',mk:''}]},
+  {id:50,cat:'close',nm:'追伸（P.S.）',desc:'追伸で最後の一押し',icon:'✉️',els:[{t:'body',v:'P.S. 実は今回だけの特別なご案内があります…',mk:''}]},
+  {id:51,cat:'close',nm:'奥付・クレジット',desc:'著者情報・免責',icon:'📄',els:[{t:'profile',img:'',name:'著者名',bio:'連絡先・SNS情報'},{t:'body',v:'© 2025 All Rights Reserved.',mk:''}]},
+  {id:52,cat:'close',nm:'参考文献・出典',desc:'参考資料一覧',icon:'📚',els:[{t:'checklist',label:'参考文献',items:['出典1: ○○（2024）','出典2: △△（2023）']}]}
 ];
 
-/* ==========================================
-   STATE
-========================================== */
-let secs=[];let uid=0;let aTab=0;
-const G={maxW:700,gap:40,radius:20};
-let dragSid=null,dragEi=null;
+// Element kinds with labels
+const ELK = {
+  body:{nm:'📝 本文'},subtitle:{nm:'📌 小見出し'},image:{nm:'🖼️ 画像'},image_circle:{nm:'⭕ 丸画像'},
+  keypoint:{nm:'💡 キーポイント'},quote:{nm:'💬 引用'},number:{nm:'🔢 数字強調'},
+  warn:{nm:'⚠️ 警告・注意'},checklist:{nm:'✅ チェックリスト'},
+  ba:{nm:'🔀 ビフォーアフター'},bubble:{nm:'💭 吹き出し'},
+  timeline:{nm:'⏳ タイムライン'},pts3:{nm:'📊 3ポイント'},
+  cta:{nm:'🎯 CTAボタン'},do_dont:{nm:'⭕ Do/Don\'t'},
+  qa:{nm:'❓ Q&A'},merit:{nm:'🎀 メリット一覧'},
+  price:{nm:'💰 料金表'},profile:{nm:'👤 プロフィール'},
+  stars:{nm:'⭐ 星レーティング'},progress:{nm:'📊 プログレスバー'},
+  ribbon:{nm:'🎗️ リボン'},toc:{nm:'📋 目次'},
+  accordion:{nm:'📂 アコーディオン'},table:{nm:'📊 テーブル'},
+  flow:{nm:'🔄 フロー'},divider:{nm:'─ 区切り線'},spacer:{nm:'⬜ 余白'}
+};
 
-/* ==========================================
-   AUTO SAVE (localStorage)
-========================================== */
-const SAVE_KEY='scrollDocPro_v3';
+// State
+let secs = [];
+let uid = 0;
+let aTab = 0;
+let aCat = 'intro';
+let colors = {...DEFAULT_COLORS};
+const G = {maxW:700, gap:40, radius:20};
+
+/* ═══════════════════════════════════════════════
+   AUTO SAVE / LOAD
+   ═══════════════════════════════════════════════ */
 function autoSave(){
   try{
-    localStorage.setItem(SAVE_KEY,JSON.stringify({colors,sections:secs,settings:G,uid}));
-    document.getElementById('saveDot').style.background='#4ade80';
+    localStorage.setItem(SAVE_KEY, JSON.stringify({secs,uid,colors,G}));
+    const d = document.getElementById('saveDot');
+    if(d){d.style.background='#22c55e';setTimeout(()=>d.style.background='#22c55e',500)}
   }catch(e){}
 }
 function autoLoad(){
   try{
-    const d=JSON.parse(localStorage.getItem(SAVE_KEY));
-    if(!d)return;
-    if(d.colors)Object.assign(colors,d.colors);
-    if(d.sections){secs=d.sections;uid=d.uid||Math.max(0,...secs.map(s=>s.id))+1;}
-    if(d.settings)Object.assign(G,d.settings);
+    const raw = localStorage.getItem(SAVE_KEY);
+    if(!raw) return;
+    const d = JSON.parse(raw);
+    if(d.secs) secs = d.secs;
+    if(d.uid) uid = d.uid;
+    if(d.colors) colors = {...DEFAULT_COLORS,...d.colors};
+    if(d.G){Object.assign(G,d.G)}
   }catch(e){}
 }
-autoLoad();
+setInterval(autoSave, 2000);
 
-// auto-save every 2 seconds
-setInterval(autoSave,2000);
-
-/* ==========================================
-   TABS
-========================================== */
-function swTab(n){aTab=n;document.querySelectorAll('.pL-tab').forEach((t,i)=>t.classList.toggle('on',i===n));renderTab();}
-function renderTab(){const c=document.getElementById('tabC');[renderGallery,renderEditor,renderColors,renderSettings][aTab](c);}
-
-/* ==========================================
-   GALLERY
-========================================== */
-function renderGallery(c){
-  const cats=CATS.map(cat=>`<div class="cat-btn ${curCat===cat.id?'on':''}" onclick="curCat='${cat.id}';renderTab()">${cat.nm}</div>`).join('');
-  const list=T.filter(t=>t.cat===curCat).map(t=>`
-    <div class="tpl-item" id="tpl${t.id}">
-      <div class="tpl-head"><div class="tpl-info"><span style="font-size:14px">${t.icon||'📄'}</span><h4>${t.nm}</h4></div>
-        <div class="tpl-actions"><button class="tpl-btn tpl-pv-btn" onclick="event.stopPropagation();document.getElementById('tpl${t.id}').classList.toggle('open')">▼</button>
-        <button class="tpl-btn tpl-add-btn" onclick="event.stopPropagation();useTpl(${t.id})">＋</button></div>
-      </div><div class="tpl-pv"><div id="gp${t.id}" style="pointer-events:none"></div></div>
-    </div>`).join('');
-  c.innerHTML=`<div class="cat-nav">${cats}</div><div class="tpl-list">${list}</div>`;
-  T.filter(t=>t.cat===curCat).forEach(t=>{const e=document.getElementById('gp'+t.id);if(e)e.innerHTML=renderCard(t,true);});
+/* ═══════════════════════════════════════════════
+   UTILITY
+   ═══════════════════════════════════════════════ */
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function nl2br(s){return esc(s).replace(/\n/g,'<br>')}
+function applyMarker(text, markerColor){
+  if(!text) return '';
+  // 『…』 pattern for marker highlighting
+  return nl2br(text).replace(/『([^』]+)』/g, (m, p1) => {
+    const mc = markerColor || colors.marker;
+    if(mc === 'transparent') return `<strong>${p1}</strong>`;
+    return `<mark style="background:${mc};padding:2px 6px;border-radius:3px">${p1}</mark>`;
+  });
 }
-function useTpl(id){const t=T.find(x=>x.id===id);secs.push({id:uid++,icon:t.icon||'',iconImg:'',label:t.label||'',heading:t.heading||'',align:t.align||'left',els:JSON.parse(JSON.stringify(t.els))});swTab(1);renderPv();}
+function deepClone(o){return JSON.parse(JSON.stringify(o))}
+function nid(){return ++uid}
 
-/* ==========================================
-   EDITOR
-========================================== */
-function renderEditor(c){
-  let h=`<div class="ed-wrap"><div class="ed-top"><button class="btn-ghost" onclick="swTab(0)">← テンプレ</button><span style="font-size:9px;color:#aaa">${secs.length}セクション</span></div>`;
-  if(!secs.length)h+='<div class="empty-pv" style="padding:16px">テンプレタブからカード追加</div>';
-  else h+=secs.map((s,si)=>{
-    const title=s.label||s.heading||`セクション${si+1}`;
-    const iconDisp=s.iconImg?`<img src="${s.iconImg}" style="width:16px;height:16px;border-radius:3px;object-fit:cover;vertical-align:middle">`:(s.icon||'📄');
-    const elsH=s.els.map((el,ei)=>renderElEd(s.id,el,ei)).join('');
-    const addBtns=ELK.map(k=>`<button class="add-b" onclick="addEl(${s.id},'${k.key}')">+${k.lb}</button>`).join('');
-    return`<div class="sec-card" id="sec-${s.id}">
-      <div class="sec-card-hd" onclick="togS(${s.id})"><h3><span class="num">${si+1}</span>${iconDisp} ${esc(title)}</h3><span class="arr">▶</span></div>
-      <div class="sec-card-bd">
-        <label>アイコン（絵文字 or 画像）</label>
-        <div class="icon-wrap">
-          <input type=text value="${esc(s.icon)}" oninput="uf(${s.id},'icon',this.value)" placeholder="🎯 絵文字">
-          <div class="icon-img-btn">${s.iconImg?`<img src="${s.iconImg}" class="icon-preview">`:'📷'}<input type=file accept="image/*" onchange="hIconImg(${s.id},this)"></div>
-          ${s.iconImg?`<button class="btn-xs" onclick="uf(${s.id},'iconImg','');renderTab()">✕</button>`:''}
-        </div>
-        <div class="rw"><div><label>ラベル</label><input type=text value="${esc(s.label)}" oninput="uf(${s.id},'label',this.value)" placeholder="STEP 1"></div>
-        <div><label>見出し</label><input type=text value="${esc(s.heading)}" oninput="uf(${s.id},'heading',this.value)"></div></div>
-        <label>配置</label><div class="al-bar">${['left','center','right'].map(a=>`<div class="al-btn ${s.align===a?'on':''}" onclick="uf(${s.id},'align','${a}');renderTab()">${a==='left'?'←左':a==='center'?'中央':'右→'}</div>`).join('')}</div>
-        <label style="margin-top:6px">構成要素 <span style="color:#ccc">ドラッグで並替</span></label>
-        ${elsH}
-        <div class="add-bar">${addBtns}</div>
-        <div style="display:flex;justify-content:space-between;margin-top:6px">
-          <div><button class="btn-xs" onclick="mvS(${s.id},-1)">↑</button> <button class="btn-xs" onclick="mvS(${s.id},1)">↓</button> <button class="btn-xs" onclick="dupS(${s.id})">複製</button></div>
-          <button class="btn-del" onclick="rmS(${s.id})">削除</button>
-        </div>
-      </div></div>`;
-  }).join('');
-  h+='</div>';c.innerHTML=h;
+// Apply colors to CSS variables
+function applyColors(){
+  const r = document.documentElement.style;
+  r.setProperty('--ac', colors.ac);
+  r.setProperty('--acL', colors.acL);
+  r.setProperty('--gS', colors.gS);
+  r.setProperty('--gE', colors.gE);
+  r.setProperty('--acG', `linear-gradient(135deg,${colors.gS},${colors.gE})`);
+  r.setProperty('--main', colors.main);
+  r.setProperty('--body', colors.body);
+  r.setProperty('--sub', colors.sub);
+  r.setProperty('--card', colors.card);
+  r.setProperty('--bg', colors.bg);
+  r.setProperty('--kpBd', colors.kpBd);
+  r.setProperty('--kpBg', colors.kpBg);
+  r.setProperty('--qtBg', colors.qtBg);
+  r.setProperty('--marker', colors.marker);
 }
 
-function renderElEd(sid,el,ei){
-  const defLb=ELK.find(k=>k.key===el.key)?.lb||el.key;
-  const dLb=el.label||defLb;
-  const grip=`<span class="eli-grip" draggable="true" ondragstart="dS(event,${sid},${ei})" ondragend="dE(event)">⠿</span>`;
-  const labIn=`<input class="eli-label-edit" value="${esc(dLb)}" oninput="uel(${sid},${ei},'label',this.value)" style="width:${Math.max(30,dLb.length*9)}px">`;
-  const alHtml=`<div class="al-bar" style="margin-left:4px">${['left','center','right','inherit'].map(a=>`<div class="al-btn ${(el.align||'inherit')===a?'on':''}" onclick="uel(${sid},${ei},'align','${a}');renderTab();renderPv()" style="padding:1px 5px;font-size:8px">${a==='left'?'←':a==='center'?'◆':a==='right'?'→':'∞'}</div>`).join('')}</div>`;
-  const top=`<div class="eli-top"><div class="eli-top-left">${grip}${labIn}</div><div class="eli-btns">${alHtml}<button class="eli-x" onclick="rmEl(${sid},${ei})">×</button></div></div>`;
-  const da=`ondragover="dO(event,${sid},${ei})" ondragleave="dL(event)" ondrop="dD(event,${sid},${ei})"`;
+/* ═══════════════════════════════════════════════
+   IMAGE HANDLING
+   ═══════════════════════════════════════════════ */
+function handleImg(file, cb){
+  const MAX = 500*1024;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    if(file.size <= MAX){cb(e.target.result);return}
+    // Compress
+    const img = new Image();
+    img.onload = function(){
+      const c = document.createElement('canvas');
+      let w = img.width, h = img.height;
+      if(w > 1200){h = h*(1200/w);w=1200}
+      c.width=w;c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      cb(c.toDataURL('image/jpeg',0.7));
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
 
-  if(el.key==='divider')return`<div class="eli" ${da}>${top}</div>`;
-  if(el.key==='image'||el.key==='image_circle')return`<div class="eli" ${da}>${top}<div class="img-drop">📷 画像追加<input type=file accept="image/*" onchange="hImg(${sid},${ei},this)"></div><div class="img-url-row"><input type=url value="${esc(el.value||'')}" oninput="uel(${sid},${ei},'value',this.value)" placeholder="画像URL"><button class="btn-xs" onclick="togHelp(this)">？</button></div>${el.value?`<img class="img-thumb" src="${el.value}">`:''}
-  <div class="help-box"><b>推奨：</b><a href="https://imgur.com" target=_blank>Imgur</a> / <a href="https://imgbb.com" target=_blank>ImgBB</a> にアップしてURL貼付。直接追加は500KB以下推奨。</div></div>`;
-  if(el.key==='compare'||el.key==='do_dont'){
-    const isDD=el.key==='do_dont';const lb1=isDD?(el.labelDo||'Do'):(el.labelBefore||'BEFORE');const lb2=isDD?(el.labelDont||"Don't"):(el.labelAfter||'AFTER');
-    return`<div class="eli" ${da}>${top}<div class="rw"><div><label><input class="eli-label-edit" value="${esc(lb1)}" oninput="uel(${sid},${ei},'${isDD?'labelDo':'labelBefore'}',this.value)" style="width:50px"></label><textarea rows=2 oninput="uel(${sid},${ei},'${isDD?'valueDo':'valueBefore'}',this.value)">${esc(isDD?el.valueDo:el.valueBefore||'')}</textarea></div>
-    <div><label><input class="eli-label-edit" value="${esc(lb2)}" oninput="uel(${sid},${ei},'${isDD?'labelDont':'labelAfter'}',this.value)" style="width:50px"></label><textarea rows=2 oninput="uel(${sid},${ei},'${isDD?'valueDont':'valueAfter'}',this.value)">${esc(isDD?el.valueDont:el.valueAfter||'')}</textarea></div></div></div>`;
+/* ═══════════════════════════════════════════════
+   SECTION MANAGEMENT
+   ═══════════════════════════════════════════════ */
+function addSec(tpl){
+  const s = {
+    id: nid(),
+    icon: tpl ? tpl.icon : '📄',
+    iconImg: '',
+    label: tpl ? ('SECTION ' + secs.length) : 'SECTION ' + secs.length,
+    heading: tpl ? tpl.nm : '新しいセクション',
+    align: 'center',
+    collapsed: false,
+    els: tpl ? deepClone(tpl.els).map(e => ({...e, id:nid(), align:'inherit', label:e.label||ELK[e.t]?.nm||e.t})) : [{id:nid(),t:'body',v:'テキストを入力してください',mk:'',align:'inherit',label:'📝 本文'}]
+  };
+  secs.push(s);
+  swTab(1);
+  renderAll();
+}
+function rmSec(id){secs=secs.filter(s=>s.id!==id);renderAll()}
+function mvSec(id,dir){
+  const i=secs.findIndex(s=>s.id===id);
+  const ni=i+dir;
+  if(ni<0||ni>=secs.length)return;
+  [secs[i],secs[ni]]=[secs[ni],secs[i]];
+  renderAll();
+}
+
+/* ═══════════════════════════════════════════════
+   ELEMENT MANAGEMENT
+   ═══════════════════════════════════════════════ */
+function addEl(secId, type){
+  const s = secs.find(x=>x.id===secId);
+  if(!s) return;
+  let el = {id:nid(), t:type, align:'inherit', label:ELK[type]?.nm||type};
+  switch(type){
+    case 'body': el.v='';el.mk='';break;
+    case 'subtitle': el.v='小見出し';break;
+    case 'image': case 'image_circle': el.v='';el.cap='';break;
+    case 'keypoint': el.v='';break;
+    case 'quote': el.v='';break;
+    case 'number': el.num='0';el.unit='';el.numLabel='';break;
+    case 'warn': el.v='';break;
+    case 'checklist': el.items=['項目1'];break;
+    case 'ba': el.labelB='BEFORE';el.labelA='AFTER';el.before='';el.after='';break;
+    case 'bubble': el.icon='💬';el.v='';el.name='';break;
+    case 'timeline': el.items=[{t:'STEP 1',v:''}];break;
+    case 'pts3': el.items=[{icon:'🎯',title:'',v:''}];break;
+    case 'cta': el.v='ボタンテキスト';el.url='https://';break;
+    case 'do_dont': el.labelD='Do';el.labelDn="Don't";el.doList=[''];el.dontList=[''];break;
+    case 'qa': el.items=[{q:'',a:''}];break;
+    case 'merit': el.items=[{icon:'✅',v:''}];break;
+    case 'price': el.items=[{k:'',v:''}];break;
+    case 'profile': el.img='';el.name='';el.bio='';break;
+    case 'stars': el.v=5;break;
+    case 'progress': el.prgLabel='';el.v=50;break;
+    case 'ribbon': el.v='NEW';break;
+    case 'toc': el.items=[''];break;
+    case 'accordion': el.items=[{t:'タイトル',v:'内容'}];break;
+    case 'table': el.headers=['列1','列2'];el.rows=[['','']];break;
+    case 'flow': el.items=['ステップ1'];break;
+    case 'divider': break;
+    case 'spacer': break;
   }
-  if(el.key==='qa'){const items=Array.isArray(el.value)?el.value:[{q:'',a:''}];return`<div class="eli" ${da}>${top}${items.map((it,qi)=>`<div style="background:#f9f9f9;border-radius:5px;padding:5px;margin-bottom:3px"><div class="rw"><div><label>Q${qi+1}</label><input type=text value="${esc(it.q)}" oninput="uqa(${sid},${ei},${qi},'q',this.value)"></div><div><label>A${qi+1}</label><textarea rows=1 oninput="uqa(${sid},${ei},${qi},'a',this.value)">${esc(it.a)}</textarea></div></div><button class="btn-del" onclick="rmQa(${sid},${ei},${qi})">×</button></div>`).join('')}<button class="add-b" onclick="addQa(${sid},${ei})">+質問</button></div>`;}
-  if(el.key==='price')return`<div class="eli" ${da}>${top}<div class="rw"><div><label>通常</label><input type=text value="${esc(el.valueOld||'')}" oninput="uel(${sid},${ei},'valueOld',this.value)"></div><div><label>特別</label><input type=text value="${esc(el.valueNew||'')}" oninput="uel(${sid},${ei},'valueNew',this.value)"></div></div></div>`;
-  if(el.key==='cta')return`<div class="eli" ${da}>${top}<label>文言</label><input type=text value="${esc(typeof el.value==='string'?el.value:'')}" oninput="uel(${sid},${ei},'value',this.value)"><label>URL</label><input type=url value="${esc(el.link||'')}" oninput="uel(${sid},${ei},'link',this.value)" placeholder="https://"></div>`;
-  const rows=['number','profile_name','profile_title','stars','ribbon','subtitle','title','heading_sub','progress'].includes(el.key)?1:2;
-  return`<div class="eli" ${da}>${top}<textarea rows=${rows} oninput="uel(${sid},${ei},'value',this.value)">${esc(typeof el.value==='string'?el.value:'')}</textarea></div>`;
+  s.els.push(el);
+  renderAll();
+}
+function rmEl(secId, elId){
+  const s=secs.find(x=>x.id===secId);
+  if(s) s.els = s.els.filter(e=>e.id!==elId);
+  renderAll();
 }
 
-function togHelp(btn){const h=btn.closest('.eli').querySelector('.help-box');h.style.display=h.style.display==='none'?'block':'none';}
-function hIconImg(sid,inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{uf(sid,'iconImg',e.target.result);renderTab();};r.readAsDataURL(f);}
+/* ═══════════════════════════════════════════════
+   DRAG & DROP (Elements within section)
+   ═══════════════════════════════════════════════ */
+let dragElId=null, dragSecId=null;
+function elDragStart(secId, elId, e){
+  dragSecId=secId; dragElId=elId;
+  e.dataTransfer.effectAllowed='move';
+  e.target.closest('.elBlock').classList.add('dragging');
+}
+function elDragOver(e){e.preventDefault();e.dataTransfer.dropEffect='move'}
+function elDrop(secId, elId, e){
+  e.preventDefault();
+  if(dragSecId!==secId) return;
+  const s=secs.find(x=>x.id===secId);
+  if(!s) return;
+  const from=s.els.findIndex(x=>x.id===dragElId);
+  const to=s.els.findIndex(x=>x.id===elId);
+  if(from<0||to<0||from===to) return;
+  const [item]=s.els.splice(from,1);
+  s.els.splice(to,0,item);
+  renderAll();
+}
+function elDragEnd(e){
+  document.querySelectorAll('.elBlock.dragging').forEach(x=>x.classList.remove('dragging'));
+  dragElId=null;dragSecId=null;
+}
 
-/* ==========================================
-   COLOR TAB
-========================================== */
-function renderColors(c){
-  const presetBtns=PRESETS.map((p,i)=>`<div class="cat-btn" onclick="applyPreset(${i})" style="cursor:pointer">${p.nm}</div>`).join('');
-  const rows=[
-    ['accent','アクセント色'],['accentLight','アクセント薄色'],
-    ['mainText','見出し文字色'],['bodyText','本文文字色'],
-    ['cardBg','カード背景色'],['pageBg','ページ背景色'],
-    ['kpBorder','KPボーダー色'],['kpBg','KP背景色'],
-    ['quoteBg','引用背景色'],
-    ['gradFrom','グラデ開始色'],['gradTo','グラデ終了色'],
-  ];
-  c.innerHTML=`<div class="ed-wrap">
-    <div class="set-section"><h4>🎨 プリセット（ワンクリック適用）</h4><div style="display:flex;gap:4px;flex-wrap:wrap">${presetBtns}</div></div>
-    <div class="set-section"><h4>🖌️ カスタムカラー</h4>
-    ${rows.map(([key,lb])=>`<div class="color-row"><label>${lb}</label><input type=color value="${colors[key]}" oninput="colors.${key}=this.value;this.nextElementSibling.value=this.value;renderPv()"><input type=text value="${colors[key]}" oninput="colors.${key}=this.value;this.previousElementSibling.value=this.value;renderPv()" style="flex:1"></div>`).join('')}
+/* ═══════════════════════════════════════════════
+   SECTION DRAG & DROP
+   ═══════════════════════════════════════════════ */
+let dragSId=null;
+function secDragStart(id,e){dragSId=id;e.dataTransfer.effectAllowed='move';e.target.closest('.secBlock').style.opacity='.4'}
+function secDragEnd(e){e.target.closest('.secBlock').style.opacity='1';dragSId=null}
+function secDragOver(e){e.preventDefault()}
+function secDrop(id,e){
+  e.preventDefault();
+  if(dragSId===null||dragSId===id)return;
+  const from=secs.findIndex(x=>x.id===dragSId);
+  const to=secs.findIndex(x=>x.id===id);
+  if(from<0||to<0)return;
+  const [item]=secs.splice(from,1);
+  secs.splice(to,0,item);
+  renderAll();
+}
+
+/* ═══════════════════════════════════════════════
+   TAB SYSTEM
+   ═══════════════════════════════════════════════ */
+function swTab(n){
+  aTab=n;
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',i===n));
+  renderTab();
+}
+function renderTab(){
+  const c=document.getElementById('tabC');
+  switch(aTab){
+    case 0: renderGallery(c);break;
+    case 1: renderEditor(c);break;
+    case 2: renderColors(c);break;
+    case 3: renderSettings(c);break;
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   GALLERY TAB
+   ═══════════════════════════════════════════════ */
+function renderGallery(c){
+  let h = '<div style="margin-bottom:12px">';
+  CATS.forEach(ct=>{
+    h += `<span class="catBtn ${ct.id===aCat?'on':''}" onclick="aCat='${ct.id}';renderTab()">${ct.nm}</span>`;
+  });
+  h += '</div><div class="tplGrid">';
+  T.filter(t=>t.cat===aCat).forEach(t=>{
+    h += `<div class="tplCard">
+      <button class="tplAdd" onclick="event.stopPropagation();useTpl(${t.id})">＋ 追加</button>
+      <h4>${t.icon} ${esc(t.nm)}</h4>
+      <p>${esc(t.desc)}</p>
+    </div>`;
+  });
+  h += '</div>';
+  c.innerHTML = h;
+}
+function useTpl(id){
+  const t = T.find(x=>x.id===id);
+  if(t) addSec(t);
+}
+
+/* ═══════════════════════════════════════════════
+   EDITOR TAB
+   ═══════════════════════════════════════════════ */
+function renderEditor(c){
+  if(!secs.length){
+    c.innerHTML='<div style="text-align:center;padding:40px;color:#94a3b8"><p style="font-size:32px;margin-bottom:12px">📄</p><p>テンプレートタブからセクションを追加してください</p></div>';
+    return;
+  }
+  let h='';
+  secs.forEach((s,si)=>{
+    h += `<div class="secBlock" draggable="true" ondragstart="secDragStart(${s.id},event)" ondragend="secDragEnd(event)" ondragover="secDragOver(event)" ondrop="secDrop(${s.id},event)">
+      <div class="secHead" onclick="secs.find(x=>x.id===${s.id}).collapsed=!secs.find(x=>x.id===${s.id}).collapsed;renderAll()">
+        <span class="grip" title="ドラッグで並び替え">⠿</span>
+        <span class="sn">${si+1}. ${esc(s.icon)} ${esc(s.heading)}</span>
+        <span style="display:flex;gap:4px">
+          <button class="btn btn-s" style="padding:4px 8px;font-size:11px" onclick="event.stopPropagation();mvSec(${s.id},-1)">▲</button>
+          <button class="btn btn-s" style="padding:4px 8px;font-size:11px" onclick="event.stopPropagation();mvSec(${s.id},1)">▼</button>
+          <button class="btn btn-d" style="padding:4px 8px;font-size:11px" onclick="event.stopPropagation();rmSec(${s.id})">✕</button>
+        </span>
+        <span class="arrow ${s.collapsed?'':'open'}">▼</span>
+      </div>
+      <div class="secBody ${s.collapsed?'hide':''}">
+        <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center">
+          <div class="fld" style="flex:0 0 60px;margin:0">
+            <label>アイコン</label>
+            <div style="display:flex;align-items:center;gap:4px">
+              ${s.iconImg ? `<img src="${s.iconImg}" style="width:28px;height:28px;border-radius:50%;object-fit:cover"><button onclick="secs.find(x=>x.id===${s.id}).iconImg='';renderAll()" style="border:none;background:none;cursor:pointer;font-size:11px;color:#dc2626">✕</button>` :
+              `<input value="${esc(s.icon)}" oninput="secs.find(x=>x.id===${s.id}).icon=this.value;renderPv()" style="width:40px;text-align:center">`}
+              <label style="cursor:pointer;font-size:14px;margin:0" title="画像アイコン">📷<input type="file" accept="image/*" hidden onchange="handleIconImg(${s.id},this.files[0])"></label>
+            </div>
+          </div>
+          <div class="fld" style="flex:1;margin:0">
+            <label>ラベル</label>
+            <input value="${esc(s.label)}" oninput="secs.find(x=>x.id===${s.id}).label=this.value;renderPv()">
+          </div>
+        </div>
+        <div class="fld">
+          <label>見出し</label>
+          <input value="${esc(s.heading)}" oninput="secs.find(x=>x.id===${s.id}).heading=this.value;renderPv()">
+        </div>
+        <label style="font-size:11px;font-weight:600;color:#64748b;margin-bottom:4px;display:block">配置</label>
+        <div class="alignBar">
+          ${['left','center','right'].map(a=>`<button class="${s.align===a?'on':''}" onclick="secs.find(x=>x.id===${s.id}).align='${a}';renderAll()">${a==='left'?'← 左':a==='center'?'◇ 中央':'→ 右'}</button>`).join('')}
+        </div>
+        <div style="font-size:11px;font-weight:700;color:#64748b;margin:12px 0 6px">要素 (ドラッグで並び替え)</div>
+        ${s.els.map(el => renderElEditor(s.id, el)).join('')}
+        <div class="addElBar">
+          ${Object.entries(ELK).map(([k,v])=>`<button onclick="addEl(${s.id},'${k}')">${v.nm}</button>`).join('')}
+        </div>
+      </div>
+    </div>`;
+  });
+  c.innerHTML = h;
+}
+
+function handleIconImg(secId, file){
+  if(!file) return;
+  handleImg(file, data=>{
+    const s=secs.find(x=>x.id===secId);
+    if(s){s.iconImg=data;renderAll()}
+  });
+}
+
+function renderElEditor(secId, el){
+  const alignBtns = `<div class="elAlignBar">
+    ${['inherit','left','center','right'].map(a=>`<button class="${el.align===a?'on':''}" onclick="secs.find(x=>x.id===${secId}).els.find(e=>e.id===${el.id}).align='${a}';renderAll()">${a==='inherit'?'継承':a==='left'?'←':a==='center'?'◇':'→'}</button>`).join('')}
+  </div>`;
+
+  let fields = '';
+  switch(el.t){
+    case 'body':
+      fields = `<textarea oninput="uel(${secId},${el.id},'v',this.value)" placeholder="本文テキスト（『テキスト』でマーカー）">${esc(el.v)}</textarea>
+      <div class="marker-bar"><span style="font-size:10px;color:#94a3b8;margin-right:4px">マーカー色:</span>
+        ${MARKER_COLORS.map(mc=>`<span class="mClr ${(el.mk||'')=== mc?'on':''}" style="background:${mc==='transparent'?'#f1f5f9':mc};${mc==='transparent'?'font-size:8px;display:flex;align-items:center;justify-content:center':''}${mc==='transparent'?'':''}" onclick="uel(${secId},${el.id},'mk','${mc}');renderAll()">${mc==='transparent'?'OFF':''}</span>`).join('')}
+      </div>`;
+      break;
+    case 'subtitle':
+      fields = `<input value="${esc(el.v)}" oninput="uel(${secId},${el.id},'v',this.value)" placeholder="小見出し">`;
+      break;
+    case 'image': case 'image_circle':
+      fields = `${el.v?`<img src="${el.v}" style="max-width:100px;border-radius:${el.t==='image_circle'?'50%':'8px'};margin-bottom:6px">`:''}<div class="drop-hint" ondragover="event.preventDefault()" ondrop="event.preventDefault();handleImg(event.dataTransfer.files[0],d=>{uel(${secId},${el.id},'v',d);renderAll()})">画像をドラッグ＆ドロップ</div><div style="display:flex;gap:4px;margin-top:4px"><label class="btn btn-s" style="font-size:11px">📁 選択<input type="file" accept="image/*" hidden onchange="handleImg(this.files[0],d=>{uel(${secId},${el.id},'v',d);renderAll()})"></label><input placeholder="または画像URL" value="${esc(el.v&&!el.v.startsWith('data:')?el.v:'')}" oninput="uel(${secId},${el.id},'v',this.value);renderPv()" style="flex:1;padding:4px 8px;border:1px solid #e2e8f0;border-radius:6px;font-size:11px"></div><input placeholder="キャプション" value="${esc(el.cap||'')}" oninput="uel(${secId},${el.id},'cap',this.value);renderPv()" style="margin-top:4px">`;
+      break;
+    case 'keypoint':
+      fields = `<textarea oninput="uel(${secId},${el.id},'v',this.value)" placeholder="キーポイント内容">${esc(el.v)}</textarea>`;
+      break;
+    case 'quote':
+      fields = `<textarea oninput="uel(${secId},${el.id},'v',this.value)" placeholder="引用テキスト">${esc(el.v)}</textarea>`;
+      break;
+    case 'number':
+      fields = `<div style="display:flex;gap:6px"><input value="${esc(el.num)}" oninput="uel(${secId},${el.id},'num',this.value)" placeholder="数値" style="flex:1"><input value="${esc(el.unit||'')}" oninput="uel(${secId},${el.id},'unit',this.value)" placeholder="単位" style="width:60px"></div><input value="${esc(el.numLabel||el.label||'')}" oninput="uel(${secId},${el.id},'numLabel',this.value)" placeholder="補足ラベル" style="margin-top:4px">`;
+      break;
+    case 'warn':
+      fields = `<textarea oninput="uel(${secId},${el.id},'v',this.value)" placeholder="警告内容">${esc(el.v)}</textarea>`;
+      break;
+    case 'checklist':
+      fields = (el.items||[]).map((it,i)=>`<div style="display:flex;gap:4px;margin:2px 0"><input value="${esc(it)}" oninput="uelArr(${secId},${el.id},'items',${i},this.value)" style="flex:1" placeholder="項目"><button onclick="uelArrRm(${secId},${el.id},'items',${i})" style="border:none;background:none;color:#dc2626;cursor:pointer">✕</button></div>`).join('') + `<button class="btn btn-s" style="font-size:11px;margin-top:4px" onclick="uelArrAdd(${secId},${el.id},'items','')">＋ 項目追加</button>`;
+      break;
+    case 'ba':
+      fields = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div><label style="font-size:10px;color:#dc2626">${esc(el.labelB||'BEFORE')}</label><input value="${esc(el.labelB||'BEFORE')}" oninput="uel(${secId},${el.id},'labelB',this.value)" style="font-size:11px;margin-bottom:4px" placeholder="ラベル"><textarea oninput="uel(${secId},${el.id},'before',this.value)" placeholder="ビフォー">${esc(el.before)}</textarea></div>
+        <div><label style="font-size:10px;color:#22c55e">${esc(el.labelA||'AFTER')}</label><input value="${esc(el.labelA||'AFTER')}" oninput="uel(${secId},${el.id},'labelA',this.value)" style="font-size:11px;margin-bottom:4px" placeholder="ラベル"><textarea oninput="uel(${secId},${el.id},'after',this.value)" placeholder="アフター">${esc(el.after)}</textarea></div>
+      </div>`;
+      break;
+    case 'bubble':
+      fields = `<div style="display:flex;gap:6px;margin-bottom:4px"><input value="${esc(el.icon)}" oninput="uel(${secId},${el.id},'icon',this.value)" style="width:40px;text-align:center" placeholder="🗣️"><input value="${esc(el.name||'')}" oninput="uel(${secId},${el.id},'name',this.value)" placeholder="名前" style="flex:1"></div><textarea oninput="uel(${secId},${el.id},'v',this.value)" placeholder="吹き出し内容">${esc(el.v)}</textarea>`;
+      break;
+    case 'timeline':
+      fields = (el.items||[]).map((it,i)=>`<div style="display:flex;gap:4px;margin:4px 0;align-items:flex-start"><input value="${esc(it.t)}" oninput="uelArrObj(${secId},${el.id},'items',${i},'t',this.value)" style="width:80px" placeholder="ラベル"><textarea oninput="uelArrObj(${secId},${el.id},'items',${i},'v',this.value)" style="flex:1;min-height:36px" placeholder="内容">${esc(it.v)}</textarea><button onclick="uelArrRm(${secId},${el.id},'items',${i})" style="border:none;background:none;color:#dc2626;cursor:pointer">✕</button></div>`).join('') + `<button class="btn btn-s" style="font-size:11px;margin-top:4px" onclick="uelArrAdd(${secId},${el.id},'items',{t:'STEP',v:''})">＋ 追加</button>`;
+      break;
+    case 'pts3':
+      fields = (el.items||[]).map((it,i)=>`<div style="display:flex;gap:4px;margin:4px 0"><input value="${esc(it.icon)}" oninput="uelArrObj(${secId},${el.id},'items',${i},'icon',this.value)" style="width:36px;text-align:center"><input value="${esc(it.title)}" oninput="uelArrObj(${secId},${el.id},'items',${i},'title',this.value)" placeholder="タイトル" style="width:80px"><input value="${esc(it.v)}" oninput="uelArrObj(${secId},${el.id},'items',${i},'v',this.value)" placeholder="説明" style="flex:1"><button onclick="uelArrRm(${secId},${el.id},'items',${i})" style="border:none;background:none;color:#dc2626;cursor:pointer">✕</button></div>`).join('') + `<button class="btn btn-s" style="font-size:11px;margin-top:4px" onclick="uelArrAdd(${secId},${el.id},'items',{icon:'✨',title:'',v:''})">＋ 追加</button>`;
+      break;
+    case 'cta':
+      fields = `<input value="${esc(el.v)}" oninput="uel(${secId},${el.id},'v',this.value)" placeholder="ボタンテキスト"><input value="${esc(el.url||'')}" oninput="uel(${secId},${el.id},'url',this.value)" placeholder="リンクURL (https://…)" style="margin-top:4px">`;
+      break;
+    case 'do_dont':
+      fields = `<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div><input value="${esc(el.labelD||'Do')}" oninput="uel(${secId},${el.id},'labelD',this.value)" style="font-size:11px;margin-bottom:4px;font-weight:700;color:#22c55e">${(el.doList||[]).map((it,i)=>`<div style="display:flex;gap:2px;margin:2px 0"><input value="${esc(it)}" oninput="uelArrIdx(${secId},${el.id},'doList',${i},this.value)" style="flex:1"><button onclick="uelArrRm(${secId},${el.id},'doList',${i})" style="border:none;background:none;color:#dc2626;cursor:pointer;font-size:11px">✕</button></div>`).join('')}<button class="btn btn-s" style="font-size:10px;margin-top:2px" onclick="uelArrAdd(${secId},${el.id},'doList','')">＋</button></div>
+        <div><input value="${esc(el.labelDn||"Don't")}" oninput="uel(${secId},${el.id},'labelDn',this.value)" style="font-size:11px;margin-bottom:4px;font-weight:700;color:#dc2626">${(el.dontList||[]).map((it,i)=>`<div style="display:flex;gap:2px;margin:2px 0"><input value="${esc(it)}" oninput="uelArrIdx(${secId},${el.id},'dontList',${i},this.value)" style="flex:1"><button onclick="uelArrRm(${secId},${el.id},'dontList',${i})" style="border:none;background:none;color:#dc2626;cursor:pointer;font-size:11px">✕</button></div>`).join('')}<button class="btn btn-s" style="font-size:10px;margin-top:2px" onclick="uelArrAdd(${secId},${el.id},'dontList','')">＋</button></div>
+      </div>`;
+      break;
+    case 'qa':
+      fields = (el.items||[]).map((it,i)=>`<div style="border:1px solid #e2e8f0;border-radius:8px;padding:8px;margin:4px 0">
+        <div style="display:flex;gap:4px;align-items:center;margin-bottom:4px"><span style="background:var(--acG);color:#fff;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0">Q</span><input value="${esc(it.q)}" oninput="uelArrObj(${secId},${el.id},'items',${i},'q',this.value)" placeholder="質問" style="flex:1"></div>
+        <div style="display:flex;gap:4px;align-items:center"><span style="background:#f0fdf4;color:#22c55e;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;flex-shrink:0">A</span><textarea oninput="uelArrObj(${secId},${el.id},'items',${i},'a',this.value)" placeholder="回答" style="flex:1;min-height:36px">${esc(it.a)}</textarea></div>
+        <button onclick="uelArrRm(${secId},${el.id},'items',${i})" style="border:none;background:none;color:#dc2626;cursor:pointer;font-size:11px;margin-top:4px">✕ 削除</button>
+      </div>`).join('') + `<button class="btn btn-s" style="font-size:11px;margin-top:4px" onclick="uelArrAdd(${secId},${el.id},'items',{q:'',a:''})">＋ 質問を追加</button>`;
+      break;
+    case 'merit':
+      fields = (el.items||[]).map((it,i)=>`<div style="display:flex;gap:4px;margin:2px 0"><input value="${esc(it.icon)}" oninput="uelArrObj(${secId},${el.id},'items',${i},'icon',this.value)" style="width:36px;text-align:center"><input value="${esc(it.v)}" oninput="uelArrObj(${secId},${el.id},'items',${i},'v',this.value)" style="flex:1" placeholder="メリット"><button onclick="uelArrRm(${secId},${el.id},'items',${i})" style="border:none;background:none;color:#dc2626;cursor:pointer">✕</button></div>`).join('') + `<button class="btn btn-s" style="font-size:11px;margin-top:4px" onclick="uelArrAdd(${secId},${el.id},'items',{icon:'✅',v:''})">＋ 追加</button>`;
+      break;
+    case 'price':
+      fields = (el.items||[]).map((it,i)=>`<div style="display:flex;gap:4px;margin:2px 0"><input value="${esc(it.k)}" oninput="uelArrObj(${secId},${el.id},'items',${i},'k',this.value)" placeholder="項目" style="flex:1"><input value="${esc(it.v)}" oninput="uelArrObj(${secId},${el.id},'items',${i},'v',this.value)" placeholder="価格" style="flex:1"><button onclick="uelArrRm(${secId},${el.id},'items',${i})" style="border:none;background:none;color:#dc2626;cursor:pointer">✕</button></div>`).join('') + `<button class="btn btn-s" style="font-size:11px;margin-top:4px" onclick="uelArrAdd(${secId},${el.id},'items',{k:'',v:''})">＋ 追加</button>`;
+      break;
+    case 'profile':
+      fields = `${el.img?`<img src="${el.img}" style="width:60px;height:60px;border-radius:50%;object-fit:cover;margin-bottom:6px">`:''}<label class="btn btn-s" style="font-size:11px">📷 写真<input type="file" accept="image/*" hidden onchange="handleImg(this.files[0],d=>{uel(${secId},${el.id},'img',d);renderAll()})"></label><input value="${esc(el.name)}" oninput="uel(${secId},${el.id},'name',this.value)" placeholder="名前" style="margin-top:4px"><textarea oninput="uel(${secId},${el.id},'bio',this.value)" placeholder="プロフィール" style="margin-top:4px">${esc(el.bio)}</textarea>`;
+      break;
+    case 'stars':
+      fields = `<div style="display:flex;gap:4px;align-items:center"><input type="range" min="0" max="5" step="0.5" value="${el.v}" oninput="uel(${secId},${el.id},'v',parseFloat(this.value));renderAll()"><span style="font-size:14px;font-weight:700">${el.v} / 5</span></div>`;
+      break;
+    case 'progress':
+      fields = `<input value="${esc(el.prgLabel||'')}" oninput="uel(${secId},${el.id},'prgLabel',this.value)" placeholder="ラベル"><input type="range" min="0" max="100" value="${el.v||50}" oninput="uel(${secId},${el.id},'v',parseInt(this.value));renderAll()" style="margin-top:4px"><span style="font-size:12px">${el.v||50}%</span>`;
+      break;
+    case 'ribbon':
+      fields = `<input value="${esc(el.v)}" oninput="uel(${secId},${el.id},'v',this.value)" placeholder="リボンテキスト">`;
+      break;
+    case 'toc':
+      fields = (el.items||[]).map((it,i)=>`<div style="display:flex;gap:4px;margin:2px 0"><span style="font-size:12px;color:#94a3b8;min-width:20px">${i+1}.</span><input value="${esc(it)}" oninput="uelArr(${secId},${el.id},'items',${i},this.value)" style="flex:1" placeholder="項目"><button onclick="uelArrRm(${secId},${el.id},'items',${i})" style="border:none;background:none;color:#dc2626;cursor:pointer">✕</button></div>`).join('') + `<button class="btn btn-s" style="font-size:11px;margin-top:4px" onclick="uelArrAdd(${secId},${el.id},'items','')">＋ 追加</button>`;
+      break;
+    case 'accordion':
+      fields = (el.items||[]).map((it,i)=>`<div style="border:1px solid #e2e8f0;border-radius:8px;padding:6px;margin:4px 0"><input value="${esc(it.t)}" oninput="uelArrObj(${secId},${el.id},'items',${i},'t',this.value)" placeholder="タイトル" style="font-weight:700;margin-bottom:4px"><textarea oninput="uelArrObj(${secId},${el.id},'items',${i},'v',this.value)" placeholder="内容">${esc(it.v)}</textarea><button onclick="uelArrRm(${secId},${el.id},'items',${i})" style="border:none;background:none;color:#dc2626;cursor:pointer;font-size:11px">✕</button></div>`).join('') + `<button class="btn btn-s" style="font-size:11px;margin-top:4px" onclick="uelArrAdd(${secId},${el.id},'items',{t:'',v:''})">＋ 追加</button>`;
+      break;
+    case 'table':
+      fields = `<div style="font-size:10px;color:#94a3b8;margin-bottom:4px">ヘッダー行</div><div style="display:flex;gap:4px;margin-bottom:6px">${(el.headers||[]).map((h,i)=>`<input value="${esc(h)}" oninput="uelArr(${secId},${el.id},'headers',${i},this.value)" style="flex:1" placeholder="列${i+1}">`).join('')}<button onclick="uelArrAdd(${secId},${el.id},'headers','列');(secs.find(x=>x.id===${secId}).els.find(e=>e.id===${el.id}).rows||[]).forEach(r=>r.push(''));renderAll()" style="border:none;background:var(--acL);color:var(--ac);cursor:pointer;border-radius:6px;padding:2px 8px;font-size:11px">＋列</button></div>
+      <div style="font-size:10px;color:#94a3b8;margin-bottom:4px">データ行</div>${(el.rows||[]).map((row,ri)=>`<div style="display:flex;gap:4px;margin:2px 0">${row.map((cell,ci)=>`<input value="${esc(cell)}" oninput="uelTblCell(${secId},${el.id},${ri},${ci},this.value)" style="flex:1">`).join('')}<button onclick="uelArrRm(${secId},${el.id},'rows',${ri})" style="border:none;background:none;color:#dc2626;cursor:pointer;font-size:11px">✕</button></div>`).join('')}
+      <button class="btn btn-s" style="font-size:11px;margin-top:4px" onclick="uelTblAddRow(${secId},${el.id})">＋ 行追加</button>`;
+      break;
+    case 'flow':
+      fields = (el.items||[]).map((it,i)=>`<div style="display:flex;gap:4px;margin:2px 0;align-items:center">${i>0?'<span style="color:var(--ac)">→</span>':''}<input value="${esc(it)}" oninput="uelArr(${secId},${el.id},'items',${i},this.value)" style="flex:1"><button onclick="uelArrRm(${secId},${el.id},'items',${i})" style="border:none;background:none;color:#dc2626;cursor:pointer">✕</button></div>`).join('') + `<button class="btn btn-s" style="font-size:11px;margin-top:4px" onclick="uelArrAdd(${secId},${el.id},'items','')">＋ 追加</button>`;
+      break;
+    case 'divider': fields='<span style="font-size:11px;color:#94a3b8">区切り線（設定不要）</span>';break;
+    case 'spacer': fields='<span style="font-size:11px;color:#94a3b8">余白（設定不要）</span>';break;
+  }
+
+  return `<div class="elBlock" draggable="true" ondragstart="elDragStart(${secId},${el.id},event)" ondragover="elDragOver(event)" ondrop="elDrop(${secId},${el.id},event)" ondragend="elDragEnd(event)">
+    <div class="elHead">
+      <span class="elGrip">⠿</span>
+      <span class="elLabel" contenteditable="true" onblur="uel(${secId},${el.id},'label',this.textContent);renderPv()">${esc(el.label||ELK[el.t]?.nm||el.t)}</span>
+      <button class="elRm" onclick="rmEl(${secId},${el.id})">✕</button>
     </div>
-    <div style="padding:8px;background:#f8f8f8;border-radius:8px;margin-top:8px">
-      <div style="font-size:10px;color:#888;margin-bottom:4px">プレビュー</div>
-      <div style="background:${colors.cardBg};border-radius:12px;padding:16px;box-shadow:0 2px 12px rgba(0,0,0,.06)">
-        <div style="height:3px;background:${grad()};border-radius:4px;margin-bottom:8px"></div>
-        <div style="font-size:10px;font-weight:700;color:${colors.accent};letter-spacing:2px">STEP 1</div>
-        <div style="font-size:14px;font-weight:900;color:${colors.mainText}">見出しサンプル</div>
-        <div style="font-size:11px;color:${colors.bodyText};margin-top:4px">本文のサンプルテキスト。<span style="color:${colors.accent};font-weight:700">『強調テキスト』</span></div>
-        <div style="margin-top:6px;border-left:3px solid ${colors.kpBorder};padding:6px 8px;background:${colors.kpBg};border-radius:0 6px 6px 0;font-size:10px;color:${colors.bodyText}">KEY POINT</div>
+    ${alignBtns}
+    ${fields}
+  </div>`;
+}
+
+/* ═══════════════════════════════════════════════
+   ELEMENT UPDATE HELPERS
+   ═══════════════════════════════════════════════ */
+function uel(secId,elId,key,val){
+  const s=secs.find(x=>x.id===secId);
+  if(!s)return;
+  const e=s.els.find(x=>x.id===elId);
+  if(e){e[key]=val;renderPv()}
+}
+function uelArr(secId,elId,key,idx,val){
+  const s=secs.find(x=>x.id===secId);if(!s)return;
+  const e=s.els.find(x=>x.id===elId);if(!e)return;
+  if(!e[key])e[key]=[];
+  e[key][idx]=val;renderPv();
+}
+function uelArrIdx(secId,elId,key,idx,val){uelArr(secId,elId,key,idx,val)}
+function uelArrObj(secId,elId,key,idx,prop,val){
+  const s=secs.find(x=>x.id===secId);if(!s)return;
+  const e=s.els.find(x=>x.id===elId);if(!e)return;
+  if(!e[key])e[key]=[];
+  if(!e[key][idx])e[key][idx]={};
+  e[key][idx][prop]=val;renderPv();
+}
+function uelArrRm(secId,elId,key,idx){
+  const s=secs.find(x=>x.id===secId);if(!s)return;
+  const e=s.els.find(x=>x.id===elId);if(!e||!e[key])return;
+  e[key].splice(idx,1);renderAll();
+}
+function uelArrAdd(secId,elId,key,val){
+  const s=secs.find(x=>x.id===secId);if(!s)return;
+  const e=s.els.find(x=>x.id===elId);if(!e)return;
+  if(!e[key])e[key]=[];
+  e[key].push(typeof val==='object'?deepClone(val):val);renderAll();
+}
+function uelTblCell(secId,elId,ri,ci,val){
+  const s=secs.find(x=>x.id===secId);if(!s)return;
+  const e=s.els.find(x=>x.id===elId);if(!e||!e.rows)return;
+  e.rows[ri][ci]=val;renderPv();
+}
+function uelTblAddRow(secId,elId){
+  const s=secs.find(x=>x.id===secId);if(!s)return;
+  const e=s.els.find(x=>x.id===elId);if(!e)return;
+  const cols=(e.headers||[]).length||2;
+  if(!e.rows)e.rows=[];
+  e.rows.push(Array(cols).fill(''));renderAll();
+}
+
+/* ═══════════════════════════════════════════════
+   COLORS TAB
+   ═══════════════════════════════════════════════ */
+function renderColors(c){
+  let h = '<div style="font-size:14px;font-weight:700;margin-bottom:12px">🎨 カラーカスタマイズ</div>';
+  h += '<div style="font-size:12px;font-weight:600;color:#64748b;margin-bottom:8px">プリセット</div>';
+  h += '<div class="presetGrid">';
+  PRESETS.forEach((p,i)=>{
+    h += `<button class="presetBtn" onclick="applyPreset(${i})" style="border-left:4px solid ${p.ac}">${p.nm}</button>`;
+  });
+  h += '</div>';
+  h += '<div style="font-size:12px;font-weight:600;color:#64748b;margin:16px 0 8px">個別カラー設定</div>';
+  h += '<div class="colorGrid">';
+  Object.keys(COLOR_LABELS).forEach(key=>{
+    h += `<div class="colorItem">
+      <label>${COLOR_LABELS[key]}</label>
+      <input type="color" value="${colors[key]}" oninput="colors['${key}']=this.value;this.nextElementSibling.value=this.value;applyColors();renderPv()">
+      <input type="text" value="${colors[key]}" oninput="colors['${key}']=this.value;this.previousElementSibling.value=this.value;applyColors();renderPv()">
+    </div>`;
+  });
+  h += '</div>';
+  // Live preview
+  h += `<div class="colorPv" style="margin-top:20px">
+    <div style="background:${colors.bg};padding:20px">
+      <div style="background:${colors.card};border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,.06);overflow:hidden">
+        <div style="height:4px;background:linear-gradient(135deg,${colors.gS},${colors.gE})"></div>
+        <div style="padding:24px">
+          <span style="display:inline-block;padding:4px 12px;border-radius:16px;font-size:11px;font-weight:700;background:${colors.acL};color:${colors.ac}">PREVIEW</span>
+          <h3 style="color:${colors.main};margin:8px 0;font-size:18px">プレビュー見出し</h3>
+          <p style="color:${colors.body};font-size:14px;line-height:1.8">本文テキストのプレビューです。『マーカーハイライト』はこのように表示されます。</p>
+          <div style="border-left:4px solid ${colors.kpBd};background:${colors.kpBg};padding:12px 16px;border-radius:0 8px 8px 0;margin-top:12px">
+            <span style="font-size:11px;font-weight:700;color:${colors.ac}">KEY POINT</span>
+            <p style="font-size:13px;color:${colors.body};margin-top:4px">キーポイントの表示例</p>
+          </div>
+        </div>
       </div>
     </div>
   </div>`;
+  h += `<button class="btn btn-d" style="margin-top:16px;width:100%" onclick="resetColors()">🔄 デフォルトカラーに戻す</button>`;
+  c.innerHTML = h;
 }
-function applyPreset(i){Object.assign(colors,PRESETS[i]);renderTab();renderPv();toast(PRESETS[i].nm+'テーマを適用');}
 
-/* ==========================================
+function applyPreset(i){
+  const p = PRESETS[i];
+  Object.keys(p).forEach(k=>{if(k!=='nm')colors[k]=p[k]});
+  applyColors();renderAll();
+}
+function resetColors(){
+  Object.assign(colors, DEFAULT_COLORS);
+  applyColors();renderAll();
+}
+
+/* ═══════════════════════════════════════════════
    SETTINGS TAB
-========================================== */
+   ═══════════════════════════════════════════════ */
 function renderSettings(c){
-  c.innerHTML=`<div class="ed-wrap">
-    <div class="set-section"><h4>📐 レイアウト</h4>
-      <label>カード最大幅（px）</label>
-      <input type=number value="${G.maxW}" min="320" max="2000" step="10" oninput="G.maxW=+this.value;document.querySelector('.pv-area').style.maxWidth=this.value+'px'">
-      <label>カード間余白（px）</label>
-      <input type=number value="${G.gap}" min="0" max="200" step="4" oninput="G.gap=+this.value;renderPv()">
-      <label>角丸（px）</label>
-      <input type=number value="${G.radius}" min="0" max="60" step="2" oninput="G.radius=+this.value;renderPv()">
-    </div>
-    <div class="set-section"><h4>💾 データ管理</h4>
-      <div style="font-size:10px;color:#888;margin-bottom:8px">💚 2秒ごとに自動保存されます（ブラウザ閉じてもOK）</div>
-      <button class="btn-ghost" style="width:100%;margin-bottom:5px" onclick="exportJSON()">JSONバックアップ保存</button>
-      <button class="btn-ghost" style="width:100%;margin-bottom:5px"><label style="margin:0;cursor:pointer;display:block;text-align:center">JSONから復元<input type=file accept=".json" style="display:none" onchange="importJSON(this)"></label></button>
-      <button class="btn-ghost" style="width:100%;margin-bottom:5px;color:#ef4444;border-color:#fcc" onclick="if(confirm('全データを削除しますか？')){secs=[];uid=0;localStorage.removeItem(SAVE_KEY);renderTab();renderPv();toast('削除しました')}">全データ削除</button>
-    </div>
+  let h = '<div style="font-size:14px;font-weight:700;margin-bottom:16px">⚙️ レイアウト設定</div>';
+  h += `<div class="settRow"><label>カード最大幅</label><input type="number" value="${G.maxW}" min="320" max="2000" step="10" oninput="G.maxW=parseInt(this.value)||700;renderPv()"> px</div>`;
+  h += `<div class="settRow"><label>カード間余白</label><input type="number" value="${G.gap}" min="0" max="200" step="4" oninput="G.gap=parseInt(this.value)||40;renderPv()"> px</div>`;
+  h += `<div class="settRow"><label>角丸</label><input type="number" value="${G.radius}" min="0" max="60" step="2" oninput="G.radius=parseInt(this.value)||0;renderPv()"> px</div>`;
+  h += '<hr style="margin:20px 0;border:none;border-top:1px solid #e2e8f0">';
+  h += '<div style="font-size:14px;font-weight:700;margin-bottom:12px">💾 データ管理</div>';
+  h += `<div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button class="btn btn-s" onclick="exportJSON()">📥 JSON保存</button>
+    <label class="btn btn-s" style="cursor:pointer">📤 JSON読込<input type="file" accept=".json" hidden onchange="importJSON(this.files[0])"></label>
   </div>`;
+  h += '<hr style="margin:20px 0;border:none;border-top:1px solid #e2e8f0">';
+  h += '<div style="font-size:14px;font-weight:700;margin-bottom:12px;color:#dc2626">🗑️ レイアウトリセット</div>';
+  h += '<p style="font-size:12px;color:#64748b;margin-bottom:12px">すべてのセクション・設定を初期状態に戻します。この操作は元に戻せません。</p>';
+  h += `<button class="btn btn-d" style="width:100%" onclick="resetAll()">🗑️ 全てリセットする</button>`;
+  c.innerHTML = h;
 }
-function exportJSON(){const d=JSON.stringify({colors,sections:secs,settings:G,uid},null,2);const b=new Blob([d],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='scroll-data.json';a.click();toast('保存しました');}
-function importJSON(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{try{const d=JSON.parse(e.target.result);if(d.colors)Object.assign(colors,d.colors);if(d.sections)secs=d.sections;if(d.settings)Object.assign(G,d.settings);uid=d.uid||Math.max(0,...secs.map(s=>s.id))+1;renderTab();renderPv();toast('復元しました');}catch(e){alert('エラー:'+e.message);}};r.readAsText(f);}
 
-/* ==========================================
-   ACTIONS
-========================================== */
-function uf(id,f,v){secs.find(s=>s.id===id)[f]=v;renderPv();}
-function uel(id,ei,f,v){secs.find(s=>s.id===id).els[ei][f]=v;renderPv();}
-function addEl(id,key){const el=key==='compare'?{key,valueBefore:'',valueAfter:''}:key==='do_dont'?{key,valueDo:'',valueDont:''}:key==='qa'?{key,value:[{q:'',a:''}]}:key==='price'?{key,valueOld:'',valueNew:''}:key==='cta'?{key,value:'',link:''}:{key,value:''};secs.find(s=>s.id===id).els.push(el);renderTab();renderPv();}
-function rmEl(id,ei){secs.find(s=>s.id===id).els.splice(ei,1);renderTab();renderPv();}
-function hImg(sid,ei,inp){const f=inp.files[0];if(!f)return;if(f.size>500*1024){const cv=document.createElement('canvas');const img=new Image();img.onload=()=>{let w=img.width,h=img.height;const mx=1200;if(w>mx){h=h*(mx/w);w=mx;}cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);uel(sid,ei,'value',cv.toDataURL('image/jpeg',.7));renderTab();};img.src=URL.createObjectURL(f);}else{const r=new FileReader();r.onload=e=>{uel(sid,ei,'value',e.target.result);renderTab();};r.readAsDataURL(f);}}
-function uqa(sid,ei,qi,field,val){const el=secs.find(s=>s.id===sid).els[ei];if(!Array.isArray(el.value))el.value=[{q:'',a:''}];el.value[qi][field]=val;renderPv();}
-function addQa(sid,ei){const el=secs.find(s=>s.id===sid).els[ei];if(!Array.isArray(el.value))el.value=[];el.value.push({q:'',a:''});renderTab();renderPv();}
-function rmQa(sid,ei,qi){secs.find(s=>s.id===sid).els[ei].value.splice(qi,1);renderTab();renderPv();}
-function togS(id){document.getElementById('sec-'+id)?.classList.toggle('shut');}
-function rmS(id){if(!confirm('削除？'))return;secs=secs.filter(s=>s.id!==id);renderTab();renderPv();}
-function mvS(id,d){const i=secs.findIndex(s=>s.id===id);const j=i+d;if(j<0||j>=secs.length)return;[secs[i],secs[j]]=[secs[j],secs[i]];renderTab();renderPv();}
-function dupS(id){const s=secs.find(x=>x.id===id);const n=JSON.parse(JSON.stringify(s));n.id=uid++;secs.splice(secs.findIndex(x=>x.id===id)+1,0,n);renderTab();renderPv();}
+/* ═══════════════════════════════════════════════
+   RESET ALL (Layout Reset)
+   ═══════════════════════════════════════════════ */
+function resetAll(){
+  if(!confirm('⚠️ すべてのセクション・カラー設定・レイアウト設定を初期状態に戻します。\nこの操作は元に戻せません。\n\nリセットしますか？')) return;
+  secs = [];
+  uid = 0;
+  Object.assign(colors, DEFAULT_COLORS);
+  G.maxW = 700;
+  G.gap = 40;
+  G.radius = 20;
+  localStorage.removeItem(SAVE_KEY);
+  applyColors();
+  renderAll();
+  alert('✅ リセット完了しました');
+}
 
-/* DRAG */
-function dS(e,sid,ei){dragSid=sid;dragEi=ei;e.dataTransfer.effectAllowed='move';e.target.closest('.eli').classList.add('dragging');}
-function dE(e){document.querySelectorAll('.eli').forEach(el=>el.classList.remove('dragging','drag-over'));dragSid=null;dragEi=null;}
-function dO(e,sid,ei){e.preventDefault();if(sid===dragSid&&ei!==dragEi)e.currentTarget.classList.add('drag-over');}
-function dL(e){e.currentTarget.classList.remove('drag-over');}
-function dD(e,sid,ei){e.preventDefault();e.currentTarget.classList.remove('drag-over');if(dragSid!==sid||dragEi===ei||dragEi===null)return;const s=secs.find(x=>x.id===sid);const item=s.els.splice(dragEi,1)[0];s.els.splice(ei>dragEi?ei-1:ei,0,item);renderTab();renderPv();}
+/* ═══════════════════════════════════════════════
+   JSON EXPORT / IMPORT
+   ═══════════════════════════════════════════════ */
+function exportJSON(){
+  const data = JSON.stringify({secs,uid,colors,G}, null, 2);
+  const blob = new Blob([data], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'scroll-data.json';
+  a.click();
+}
+function importJSON(file){
+  if(!file)return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const d = JSON.parse(e.target.result);
+      if(d.secs) secs = d.secs;
+      if(d.uid) uid = d.uid;
+      if(d.colors) Object.assign(colors, d.colors);
+      if(d.G) Object.assign(G, d.G);
+      applyColors();renderAll();
+      alert('✅ データを読み込みました');
+    }catch(err){alert('❌ JSONの読み込みに失敗しました')}
+  };
+  reader.readAsText(file);
+}
 
-/* ==========================================
-   RENDER CARD
-========================================== */
-function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function clr(v){return esc(v).replace(/『([^』]*)』/g,`<span style="color:${colors.accent};font-weight:700">『$1』</span>`);}
-function getA(el,p){const a=el.align&&el.align!=='inherit'?el.align:(p||'left');return`text-align:${a}`;}
+/* ═══════════════════════════════════════════════
+   PREVIEW RENDERING
+   ═══════════════════════════════════════════════ */
+function renderPv(){
+  const pv = document.getElementById('pvScroll');
+  if(!secs.length){
+    pv.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#94a3b8;text-align:center"><div><p style="font-size:48px;margin-bottom:16px">📄</p><p style="font-size:16px">左パネルのテンプレートからセクションを追加してください</p></div></div>';
+    return;
+  }
+  let h = '';
+  secs.forEach(s => {
+    h += renderCard(s);
+  });
+  pv.innerHTML = `<div style="max-width:${G.maxW}px;margin:0 auto;display:flex;flex-direction:column;gap:${G.gap}px">${h}</div>`;
+}
 
-function renderCard(s,m){
-  const p=m?'12px 14px':'40px 36px';const ast=`text-align:${s.align||'left'}`;
-  const f=n=>m?Math.round(n*.6)+'px':n+'px';
-  let h='';
+function getAlign(el, sec){
+  return el.align && el.align !== 'inherit' ? el.align : sec.align || 'center';
+}
+function alignStyle(align){
+  return `text-align:${align}`;
+}
 
-  // icon
-  if(s.iconImg)h+=`<img src="${s.iconImg}" style="width:${f(36)};height:${f(36)};border-radius:${m?'4px':'8px'};object-fit:cover;margin-bottom:4px;display:block;${s.align==='center'?'margin-left:auto;margin-right:auto':s.align==='right'?'margin-left:auto':''}">`;
-  else if(s.icon)h+=`<div style="font-size:${f(30)};margin-bottom:3px;${ast}">${s.icon}</div>`;
-  if(s.label)h+=`<div style="font-size:${f(12)};font-weight:700;letter-spacing:3px;color:${colors.accent};margin-bottom:3px;${ast}">${esc(s.label)}</div>`;
-  if(s.heading)h+=`<div style="font-size:${f(23)};font-weight:900;color:${colors.mainText};margin-bottom:${m?'5px':'16px'};line-height:1.35;${ast}">${esc(s.heading)}</div>`;
+function renderCard(s){
+  const hasRibbon = s.els.some(e=>e.t==='ribbon');
+  let h = `<div class="pvCard" style="border-radius:${G.radius}px;${hasRibbon?'overflow:hidden':''}">`;
+  h += `<div class="acLine" style="background:linear-gradient(135deg,${colors.gS},${colors.gE})"></div>`;
+  h += '<div class="inner">';
 
-  (s.els||[]).forEach(el=>{
-    const v=typeof el.value==='string'?el.value:'';
-    const ea=getA(el,s.align);const lb=el.label||ELK.find(k=>k.key===el.key)?.lb||'';
-    switch(el.key){
-      case 'title':h+=`<div style="font-size:${f(32)};font-weight:900;color:${colors.mainText};line-height:1.3;white-space:pre-wrap;${ea}">${clr(v)}</div>`;break;
-      case 'subtitle':h+=`<div style="font-size:${f(15)};color:${colors.bodyText};opacity:.7;margin-top:6px;white-space:pre-wrap;line-height:1.7;${ea}">${esc(v)}</div>`;break;
-      case 'heading_sub':h+=`<div style="font-size:${f(17)};font-weight:700;color:${colors.mainText};margin:${m?'4px 0':'12px 0 6px'};${ea}">${esc(v)}</div>`;break;
-      case 'body':h+=`<div style="font-size:${f(15)};line-height:2;white-space:pre-wrap;color:${colors.bodyText};${ea}">${clr(v)}</div>`;break;
-      case 'small':h+=`<div style="font-size:${f(11)};color:${colors.bodyText};opacity:.6;margin-top:8px;white-space:pre-wrap;${ea}">${esc(v)}</div>`;break;
-      case 'keypoint':h+=`<div style="margin-top:${m?'5px':'20px'};border-left:4px solid ${colors.kpBorder};padding:${m?'6px 8px':'16px 20px'};background:${colors.kpBg};border-radius:0 12px 12px 0"><div style="font-size:${f(10)};font-weight:700;color:${colors.kpBorder};letter-spacing:2px;margin-bottom:${m?'2px':'6px'}">${esc(lb).toUpperCase()}</div><div style="font-size:${f(14)};line-height:2;white-space:pre-wrap;color:${colors.bodyText}">${clr(v)}</div></div>`;break;
-      case 'quote':h+=`<div style="margin-top:${m?'5px':'20px'};padding:${m?'8px 12px':'24px 28px'};border-radius:14px;background:${colors.quoteBg};font-size:${f(16)};line-height:1.9;color:${colors.mainText};font-weight:500;font-style:italic;position:relative;${ea}"><span style="font-size:${m?'24px':'56px'};position:absolute;top:-6px;left:12px;opacity:.1;font-family:Georgia">"</span>${clr(v)}</div>`;break;
-      case 'number':h+=`<div style="font-size:${f(48)};font-weight:900;color:${colors.accent};line-height:1.1;letter-spacing:-2px;font-family:'Inter';margin:${m?'4px 0':'10px 0'};${ea}">${esc(v)}</div>`;break;
-      case 'image':if(v)h+=`<img src="${v}" style="width:100%;border-radius:${m?'6px':'12px'};margin:${m?'3px 0':'10px 0'};box-shadow:0 4px 16px rgba(0,0,0,.05)">`;else h+=`<div style="background:linear-gradient(135deg,#f8f8f8,#eee);border-radius:${m?'6px':'12px'};padding:${m?'14px':'32px'};text-align:center;color:#ccc;font-size:${f(11)};margin:${m?'3px 0':'10px 0'}">📷</div>`;break;
-      case 'image_circle':if(v)h+=`<img src="${v}" style="width:${m?'36px':'100px'};height:${m?'36px':'100px'};border-radius:50%;object-fit:cover;display:block;margin:0 auto ${m?'3px':'10px'};box-shadow:0 4px 16px rgba(0,0,0,.07)">`;else h+=`<div style="width:${m?'36px':'100px'};height:${m?'36px':'100px'};border-radius:50%;background:#f0f0f0;margin:0 auto ${m?'3px':'10px'};display:flex;align-items:center;justify-content:center;color:#ccc;font-size:${m?'12px':'24px'}">👤</div>`;break;
-      case 'warning':h+=`<div style="margin-top:${m?'3px':'16px'};border-left:4px solid #f59e0b;padding:${m?'5px 7px':'16px 20px'};border-radius:0 12px 12px 0;background:linear-gradient(135deg,#fffbeb,#fef3c7)"><div style="font-size:${f(14)};line-height:2;white-space:pre-wrap;color:#92400e">${clr(v)}</div></div>`;break;
-      case 'checklist':v.split('\n').filter(Boolean).forEach(l=>{h+=`<div style="display:flex;gap:8px;align-items:flex-start;padding:${m?'2px 0':'8px 0'};border-bottom:1px solid rgba(0,0,0,.04)"><div style="width:${m?'12px':'20px'};height:${m?'12px':'20px'};border-radius:5px;background:${colors.accent};display:flex;align-items:center;justify-content:center;font-size:${f(10)};color:#fff;font-weight:700;flex-shrink:0">✓</div><span style="font-size:${f(14)};line-height:1.7;color:${colors.bodyText}">${esc(l)}</span></div>`;});break;
-      case 'checklist_negative':v.split('\n').filter(Boolean).forEach(l=>{h+=`<div style="display:flex;gap:8px;align-items:flex-start;padding:${m?'2px 0':'8px 0'};border-bottom:1px solid rgba(0,0,0,.04)"><div style="width:${m?'12px':'20px'};height:${m?'12px':'20px'};border-radius:5px;background:#ef4444;display:flex;align-items:center;justify-content:center;font-size:${f(10)};color:#fff;font-weight:700;flex-shrink:0">✕</div><span style="font-size:${f(14)};line-height:1.7;color:${colors.bodyText}">${esc(l)}</span></div>`;});break;
-      case 'compare':{const lb1=el.labelBefore||'BEFORE',lb2=el.labelAfter||'AFTER';h+=`<div style="display:flex;gap:${m?'3px':'12px'};margin-top:${m?'3px':'16px'}"><div style="flex:1;border-radius:12px;padding:${m?'5px':'16px'};background:linear-gradient(135deg,#fef2f2,#fee2e2)"><div style="font-size:${f(10)};font-weight:700;letter-spacing:1.5px;color:#dc2626;margin-bottom:3px">${esc(lb1)}</div><div style="font-size:${f(13)};line-height:1.8;white-space:pre-wrap;color:#7f1d1d">${esc(el.valueBefore||'')}</div></div><div style="flex:1;border-radius:12px;padding:${m?'5px':'16px'};background:linear-gradient(135deg,#f0fdf4,#dcfce7)"><div style="font-size:${f(10)};font-weight:700;letter-spacing:1.5px;color:#16a34a;margin-bottom:3px">${esc(lb2)}</div><div style="font-size:${f(13)};line-height:1.8;white-space:pre-wrap;color:#14532d">${esc(el.valueAfter||'')}</div></div></div>`;break;}
-      case 'do_dont':{const dl=el.labelDo||'DO',dn=el.labelDont||"DON'T";h+=`<div style="display:flex;gap:${m?'3px':'12px'};margin-top:${m?'3px':'16px'}"><div style="flex:1;border-radius:12px;padding:${m?'5px':'16px'};background:#f0fdf4;border:1px solid #bbf7d0"><div style="font-size:${f(10)};font-weight:700;letter-spacing:1.5px;color:#16a34a;margin-bottom:3px">⭕${esc(dl)}</div><div style="font-size:${f(13)};line-height:1.8;white-space:pre-wrap;color:#14532d">${esc(el.valueDo||'')}</div></div><div style="flex:1;border-radius:12px;padding:${m?'5px':'16px'};background:#fef2f2;border:1px solid #fecaca"><div style="font-size:${f(10)};font-weight:700;letter-spacing:1.5px;color:#dc2626;margin-bottom:3px">✕${esc(dn)}</div><div style="font-size:${f(13)};line-height:1.8;white-space:pre-wrap;color:#7f1d1d">${esc(el.valueDont||'')}</div></div></div>`;break;}
-      case 'bubble_q':h+=`<div style="display:flex;justify-content:flex-end;margin-top:${m?'3px':'10px'}"><div style="background:#f1f5f9;border-radius:16px 16px 4px 16px;padding:${m?'5px 8px':'12px 18px'};max-width:82%;font-size:${f(14)};line-height:1.8;color:#334155">${clr(v)}</div></div>`;break;
-      case 'bubble_a':h+=`<div style="display:flex;margin-top:${m?'2px':'5px'}"><div style="background:${colors.accentLight};border-radius:16px 16px 16px 4px;padding:${m?'5px 8px':'12px 18px'};max-width:82%;font-size:${f(14)};line-height:1.8;color:${colors.mainText}">${clr(v)}</div></div>`;break;
-      case 'timeline':v.split('\n').filter(Boolean).forEach(l=>{const[t,...r]=l.split('|');h+=`<div style="display:flex;gap:${m?'4px':'12px'};align-items:flex-start;padding:${m?'2px 0':'8px 0'}"><div style="min-width:${m?'24px':'48px'};font-weight:900;color:${colors.accent};font-size:${f(13)};font-family:'Inter'">${esc(t)}</div><div style="width:${m?'6px':'10px'};height:${m?'6px':'10px'};border-radius:50%;background:${colors.accent};flex-shrink:0;margin-top:${m?'2px':'4px'};box-shadow:0 0 0 3px ${colors.cardBg},0 0 0 4px #e5e5e5"></div><div style="font-size:${f(13)};line-height:1.7;flex:1;color:${colors.bodyText}">${esc(r.join('|'))}</div></div>`;});break;
-      case 'points3':v.split('\n').filter(Boolean).forEach((l,i)=>{const[t,...d]=l.split('|');h+=`<div style="display:flex;gap:${m?'5px':'12px'};margin-bottom:${m?'4px':'14px'};align-items:flex-start"><div style="width:${m?'18px':'34px'};height:${m?'18px':'34px'};border-radius:8px;background:${colors.accentLight};color:${colors.accent};display:flex;align-items:center;justify-content:center;font-weight:900;font-size:${f(15)};flex-shrink:0">${i+1}</div><div><div style="font-weight:700;font-size:${f(14)};color:${colors.mainText}">${esc(t)}</div><div style="font-size:${f(12)};color:${colors.bodyText};opacity:.7;line-height:1.5">${esc(d.join('|'))}</div></div></div>`;});break;
-      case 'colored_body':h+=`<div style="background:${colors.accentLight};border-radius:12px;padding:${m?'6px 10px':'20px 24px'};margin-top:${m?'3px':'12px'};font-size:${f(15)};line-height:2;white-space:pre-wrap;color:${colors.mainText};font-weight:600;${ea}">${clr(v)}</div>`;break;
-      case 'transition':h+=`<div style="text-align:center;padding:${m?'6px 0':'20px 0'}"><div style="font-size:${f(14)};color:${colors.bodyText};opacity:.6;line-height:1.9;white-space:pre-wrap;margin-bottom:4px">${clr(v)}</div><div style="font-size:${f(24)};opacity:.2">↓</div></div>`;break;
-      case 'profile_name':h+=`<div style="font-size:${f(22)};font-weight:900;color:${colors.mainText};margin-top:4px;${ea}">${esc(v)}</div>`;break;
-      case 'profile_title':h+=`<div style="font-size:${f(12)};color:${colors.accent};font-weight:600;margin-bottom:6px;${ea}">${esc(v)}</div>`;break;
-      case 'qa':const qi=Array.isArray(el.value)?el.value:[];qi.forEach(it=>{h+=`<div style="margin-bottom:${m?'5px':'16px'}"><div style="display:flex;gap:5px;font-weight:700;font-size:${f(14)};color:${colors.mainText};margin-bottom:3px;align-items:flex-start"><span style="flex-shrink:0;width:${m?'14px':'24px'};height:${m?'14px':'24px'};border-radius:6px;background:${colors.accent};color:#fff;display:flex;align-items:center;justify-content:center;font-size:${f(11)};font-weight:900">Q</span><span style="padding-top:1px">${esc(it.q)}</span></div><div style="font-size:${f(13)};color:${colors.bodyText};line-height:1.8;padding:${m?'4px 6px':'10px 14px'};background:${colors.accentLight};border-radius:8px;margin-left:${m?'18px':'30px'}">${esc(it.a)}</div></div>`;});break;
-      case 'merit_list':v.split('\n').filter(Boolean).forEach(l=>{const p=l.split('|');h+=`<div style="display:flex;gap:${m?'6px':'12px'};padding:${m?'3px 0':'12px 0'};border-bottom:1px solid rgba(0,0,0,.04);align-items:flex-start"><span style="font-size:${f(24)}">${p[0]||'✨'}</span><div><div style="font-weight:700;font-size:${f(14)};color:${colors.mainText}">${esc(p[1]||'')}</div><div style="font-size:${f(12)};color:${colors.bodyText};opacity:.7">${esc(p[2]||'')}</div></div></div>`;});break;
-      case 'cta':{const lk=el.link||'#';h+=`<div style="text-align:center;margin-top:${m?'6px':'24px'}"><a href="${esc(lk)}" target="_blank" rel="noopener" style="display:inline-block;background:${grad()};color:#fff;padding:${m?'6px 16px':'14px 48px'};border-radius:60px;font-weight:900;font-size:${f(17)};box-shadow:0 6px 24px ${colors.accent}40;text-decoration:none">${esc(v)}</a></div>`;break;}
-      case 'flow':h+=`<div style="display:flex;flex-direction:column;align-items:center;margin-top:${m?'3px':'12px'};gap:${m?'2px':'4px'}">`;v.split('\n').filter(Boolean).forEach((s,i,a)=>{h+=`<div style="background:${colors.accentLight};color:${colors.mainText};padding:${m?'4px 10px':'10px 26px'};border-radius:8px;font-weight:700;font-size:${f(13)};min-width:${m?'60px':'160px'};text-align:center">${esc(s)}</div>`;if(i<a.length-1)h+=`<div style="color:${colors.accent};font-size:${f(13)};opacity:.4">▼</div>`;});h+='</div>';break;
-      case 'summary':h+=`<div style="background:${colors.kpBg};border-radius:12px;padding:${m?'6px':'20px'};margin-top:${m?'3px':'12px'}">`;v.split('\n').filter(Boolean).forEach(l=>{h+=`<div style="display:flex;gap:7px;align-items:flex-start;margin-bottom:${m?'2px':'7px'}"><span style="color:${colors.accent};font-size:${f(13)}">✦</span><span style="font-size:${f(13)};line-height:1.7;color:${colors.bodyText}">${esc(l)}</span></div>`;});h+='</div>';break;
-      case 'table':const rows=v.split('\n').filter(Boolean).map(r=>r.split('|').filter(c=>c!==''));if(rows.length){h+=`<div style="overflow-x:auto;margin:${m?'3px 0':'12px 0'}"><table style="width:100%;border-collapse:separate;border-spacing:0;border-radius:10px;overflow:hidden;border:1px solid rgba(0,0,0,.08)">`;rows.forEach((r,ri)=>{h+='<tr>';r.forEach(c=>{ri===0?h+=`<th style="padding:${m?'3px 5px':'8px 12px'};font-size:${f(11)};font-weight:700;background:${colors.accentLight};color:${colors.mainText};text-align:left;border-bottom:2px solid rgba(0,0,0,.06)">${esc(c.trim())}</th>`:h+=`<td style="padding:${m?'3px 5px':'8px 12px'};font-size:${f(12)};color:${colors.bodyText};border-bottom:1px solid rgba(0,0,0,.04)">${esc(c.trim())}</td>`;});h+='</tr>';});h+='</table></div>';}break;
-      case 'stars':const sv=parseFloat(v)||5;h+=`<div style="font-size:${f(20)};letter-spacing:2px;margin:4px 0;${ea}">${'★'.repeat(Math.floor(sv))}${'☆'.repeat(5-Math.floor(sv))}<span style="font-size:${f(13)};color:${colors.bodyText};opacity:.6;margin-left:4px">${sv}</span></div>`;break;
-      case 'price':h+=`<div style="${ea};margin:${m?'4px 0':'12px 0'}"><span style="font-size:${f(16)};color:${colors.bodyText};opacity:.5;text-decoration:line-through;margin-right:8px">${esc(el.valueOld||'')}</span><span style="font-size:${f(36)};font-weight:900;color:${colors.accent};font-family:'Inter'">${esc(el.valueNew||'')}</span></div>`;break;
-      case 'progress':const pp=v.split('|');h+=`<div style="margin:${m?'2px 0':'6px 0'}"><div style="display:flex;justify-content:space-between;font-size:${f(11)};font-weight:600;margin-bottom:2px;color:${colors.bodyText}"><span>${esc(pp[0]||'')}</span><span style="color:${colors.accent}">${parseInt(pp[1])||0}%</span></div><div style="height:${m?'4px':'6px'};background:rgba(0,0,0,.06);border-radius:3px;overflow:hidden"><div style="height:100%;width:${parseInt(pp[1])||0}%;background:${grad()};border-radius:3px"></div></div></div>`;break;
-      case 'ribbon':h+=`<div style="position:absolute;top:12px;right:-26px;background:#ef4444;color:#fff;font-size:${f(9)};font-weight:700;padding:3px 32px;transform:rotate(45deg);letter-spacing:1px">${esc(v)}</div>`;break;
-      case 'toc':v.split('\n').filter(Boolean).forEach((l,i)=>{h+=`<div style="display:flex;align-items:center;gap:10px;padding:${m?'2px 0':'8px 0'};border-bottom:1px solid rgba(0,0,0,.04);font-size:${f(13)}"><span style="color:${colors.accent};font-weight:900;font-family:'Inter';min-width:18px">${String(i+1).padStart(2,'0')}</span><span style="color:${colors.bodyText}">${esc(l)}</span></div>`;});break;
-      case 'accordion':v.split('\n').filter(Boolean).forEach(l=>{const[t,...b]=l.split('|');h+=`<div style="border:1px solid rgba(0,0,0,.06);border-radius:7px;margin-top:${m?'2px':'5px'}"><div style="padding:${m?'4px 8px':'8px 12px'};font-weight:700;font-size:${f(13)};background:rgba(0,0,0,.02)">${esc(t)}</div><div style="padding:${m?'4px 8px':'8px 12px'};font-size:${f(12)};color:${colors.bodyText};border-top:1px solid rgba(0,0,0,.04)">${esc(b.join('|'))}</div></div>`;});break;
-      case 'divider':h+=`<hr style="border:none;border-top:1px solid rgba(0,0,0,.06);margin:${m?'6px 0':'18px 0'}">`;break;
+  // Ribbon
+  s.els.filter(e=>e.t==='ribbon').forEach(el=>{
+    h += `<div class="ribbon" style="background:linear-gradient(135deg,${colors.gS},${colors.gE})">${esc(el.v)}</div>`;
+  });
+
+  // Icon + Label + Heading
+  if(s.label || s.heading){
+    const ha = s.align || 'center';
+    h += `<div style="${alignStyle(ha)}">`;
+    if(s.iconImg){
+      h += `<img src="${s.iconImg}" style="width:40px;height:40px;border-radius:50%;object-fit:cover;margin-bottom:8px;display:block;${ha==='center'?'margin-left:auto;margin-right:auto':ha==='right'?'margin-left:auto':''}">`;
+    } else if(s.icon){
+      h += `<span style="font-size:28px;display:block;margin-bottom:8px">${esc(s.icon)}</span>`;
+    }
+    if(s.label){
+      h += `<span class="lbl" style="background:${colors.acL};color:${colors.ac}">${esc(s.label)}</span>`;
+    }
+    if(s.heading){
+      h += `<h2 style="color:${colors.main}">${esc(s.heading)}</h2>`;
+    }
+    h += '</div>';
+  }
+
+  // Elements
+  s.els.forEach(el=>{
+    if(el.t==='ribbon') return; // already rendered
+    const a = getAlign(el, s);
+    const as = alignStyle(a);
+    const mkColor = el.mk || colors.marker;
+    switch(el.t){
+      case 'body':
+        h += `<div class="bodyTxt" style="${as};color:${colors.body}">${applyMarker(el.v, mkColor)}</div>`;
+        break;
+      case 'subtitle':
+        h += `<h3 style="${as};color:${colors.main};font-size:17px;font-weight:700;margin:20px 0 8px">${esc(el.v)}</h3>`;
+        break;
+      case 'image':
+        if(el.v) h += `<div class="img-block" style="${as}"><img src="${el.v}" alt="${esc(el.cap||'')}"><div style="font-size:12px;color:${colors.sub};margin-top:6px">${esc(el.cap||'')}</div></div>`;
+        break;
+      case 'image_circle':
+        if(el.v) h += `<div class="img-block circle" style="${as}"><img src="${el.v}" alt="${esc(el.cap||'')}"><div style="font-size:12px;color:${colors.sub};margin-top:6px">${esc(el.cap||'')}</div></div>`;
+        break;
+      case 'keypoint':
+        h += `<div class="kp" style="border-left-color:${colors.kpBd};background:${colors.kpBg}"><div class="kpLabel" style="color:${colors.ac}">${esc(el.label||'KEY POINT')}</div><div style="font-size:14px;line-height:1.8;color:${colors.body}">${nl2br(el.v)}</div></div>`;
+        break;
+      case 'quote':
+        h += `<div class="qt" style="background:${colors.qtBg};${as}"><div style="font-size:14px;line-height:1.8;color:${colors.body};font-style:italic;padding-left:20px">${nl2br(el.v)}</div>${el.label?`<div style="font-size:12px;color:${colors.sub};margin-top:8px;text-align:right">— ${esc(el.label)}</div>`:''}</div>`;
+        break;
+      case 'number':
+        h += `<div class="numBlock" style="${as}"><div class="num" style="background:linear-gradient(135deg,${colors.gS},${colors.gE});-webkit-background-clip:text;-webkit-text-fill-color:transparent">${esc(el.num)}${el.unit?`<span style="font-size:28px">${esc(el.unit)}</span>`:''}</div><div class="numLabel" style="color:${colors.sub}">${esc(el.numLabel||el.label||'')}</div></div>`;
+        break;
+      case 'warn':
+        h += `<div class="warn"><div class="warnLabel">${esc(el.label||'⚠️ 注意')}</div><div style="font-size:14px;color:#991b1b">${nl2br(el.v)}</div></div>`;
+        break;
+      case 'checklist':
+        h += `<div style="${as}">`;
+        if(el.label) h += `<div style="font-size:13px;font-weight:700;color:${colors.main};margin-bottom:8px">${esc(el.label)}</div>`;
+        (el.items||[]).forEach(it=>{
+          h += `<div class="cl-item" style="${a==='center'?'justify-content:center':a==='right'?'justify-content:flex-end':''}"><span class="ck" style="background:linear-gradient(135deg,${colors.gS},${colors.gE})">✓</span><span style="color:${colors.body}">${esc(it)}</span></div>`;
+        });
+        h += '</div>';
+        break;
+      case 'ba':
+        h += `<div class="ba"><div class="bf"><div class="baLabel" style="color:#dc2626">${esc(el.labelB||'BEFORE')}</div><div style="font-size:14px;color:#991b1b">${nl2br(el.before)}</div></div><div class="af"><div class="baLabel" style="color:#22c55e">${esc(el.labelA||'AFTER')}</div><div style="font-size:14px;color:#166534">${nl2br(el.after)}</div></div></div>`;
+        break;
+      case 'bubble':
+        h += `<div class="bubble"><div class="bIcon" style="background:${colors.acL}">${esc(el.icon)}</div><div><div class="bBody">${nl2br(el.v)}</div>${el.name?`<div style="font-size:11px;color:${colors.sub};margin-top:4px">${esc(el.name)}</div>`:''}</div></div>`;
+        break;
+      case 'timeline':
+        h += '<div>';
+        (el.items||[]).forEach((it,i)=>{
+          h += `<div class="tl-item"><div class="tl-dot" style="background:${colors.ac}"></div>${i<(el.items.length-1)?`<div class="tl-line"></div>`:''}<div style="flex:1"><div style="font-size:12px;font-weight:700;color:${colors.ac}">${esc(it.t)}</div><div style="font-size:14px;color:${colors.body};margin-top:2px">${nl2br(it.v)}</div></div></div>`;
+        });
+        h += '</div>';
+        break;
+      case 'pts3':
+        h += `<div class="pts3" style="${(el.items||[]).length<=2?'grid-template-columns:repeat('+(el.items||[]).length+',1fr)':''}">`;
+        (el.items||[]).forEach(it=>{
+          h += `<div><div class="ptIcon">${esc(it.icon)}</div><div class="ptTtl" style="color:${colors.main}">${esc(it.title)}</div><div style="font-size:12px;color:${colors.body};margin-top:4px">${esc(it.v)}</div></div>`;
+        });
+        h += '</div>';
+        break;
+      case 'cta':
+        h += `<div class="ctaWrap" style="${as}"><a href="${esc(el.url||'#')}" class="ctaBtn" style="background:linear-gradient(135deg,${colors.gS},${colors.gE})" target="_blank" rel="noopener">${esc(el.v)}</a></div>`;
+        break;
+      case 'do_dont':
+        h += `<div class="dd"><div class="do"><div class="ddLabel" style="color:#22c55e">✅ ${esc(el.labelD||'Do')}</div>${(el.doList||[]).map(it=>'<div style="font-size:14px;color:#166534;margin:4px 0">・'+esc(it)+'</div>').join('')}</div><div class="dont"><div class="ddLabel" style="color:#dc2626">❌ ${esc(el.labelDn||"Don't")}</div>${(el.dontList||[]).map(it=>'<div style="font-size:14px;color:#991b1b;margin:4px 0">・'+esc(it)+'</div>').join('')}</div></div>`;
+        break;
+      case 'qa':
+        (el.items||[]).forEach(it=>{
+          h += `<div class="qa-item"><div class="qa-q"><span class="qa-badge q" style="background:linear-gradient(135deg,${colors.gS},${colors.gE})">Q</span><div class="qa-txt" style="color:${colors.main};font-weight:600">${esc(it.q)}</div></div><div class="qa-q" style="margin-left:38px"><span class="qa-badge a">A</span><div class="qa-txt" style="color:${colors.body}">${nl2br(it.a)}</div></div></div>`;
+        });
+        break;
+      case 'merit':
+        (el.items||[]).forEach(it=>{
+          h += `<div class="merit" style="${a==='center'?'justify-content:center':a==='right'?'justify-content:flex-end':''}"><span class="mIcon">${esc(it.icon)}</span><span style="font-size:14px;color:${colors.body}">${esc(it.v)}</span></div>`;
+        });
+        break;
+      case 'price':
+        h += `<div class="price-tbl"><div class="pHead" style="background:linear-gradient(135deg,${colors.gS},${colors.gE})">${esc(el.label||'料金表')}</div><div class="pBody">${(el.items||[]).map(it=>`<div class="pRow"><span style="color:${colors.body}">${esc(it.k)}</span><span style="font-weight:700;color:${colors.main}">${esc(it.v)}</span></div>`).join('')}</div></div>`;
+        break;
+      case 'profile':
+        h += `<div class="profile" style="${a==='center'?'justify-content:center':a==='right'?'justify-content:flex-end':''}">${el.img?`<img src="${el.img}">`:`<div style="width:80px;height:80px;border-radius:50%;background:${colors.acL};display:flex;align-items:center;justify-content:center;font-size:32px">👤</div>`}<div class="prInfo"><div class="prName" style="color:${colors.main}">${esc(el.name)}</div><div class="prBio" style="color:${colors.sub}">${nl2br(el.bio)}</div></div></div>`;
+        break;
+              case 'stars':
+        const full = Math.floor(el.v||0);
+        const half = (el.v||0) % 1 >= 0.5;
+        h += `<div class="stars" style="${as}">${'★'.repeat(full)}${half?'☆':''}${'☆'.repeat(5-full-(half?1:0))}</div>`;
+        break;
+      case 'progress':
+        h += `<div class="progress" style="${as}"><div class="prgLabel" style="color:${colors.main}">${esc(el.prgLabel||'')}</div><div class="prgBar"><div class="prgFill" style="width:${el.v||50}%;background:linear-gradient(135deg,${colors.gS},${colors.gE})"></div></div><div style="font-size:11px;color:${colors.sub};margin-top:4px">${el.v||50}%</div></div>`;
+        break;
+      case 'toc':
+        h += `<div class="toc" style="${as}">`;
+        (el.items||[]).forEach((it,i)=>{
+          h += `<a style="color:${colors.ac}">${i+1}. ${esc(it)}</a>`;
+        });
+        h += '</div>';
+        break;
+      case 'accordion':
+        (el.items||[]).forEach(it=>{
+          h += `<details class="acc-item"><summary style="color:${colors.main}">${esc(it.t)}</summary><div class="accBody" style="color:${colors.body}">${nl2br(it.v)}</div></details>`;
+        });
+        break;
+      case 'table':
+        h += '<div style="overflow-x:auto;margin:16px 0"><table style="width:100%;border-collapse:collapse;font-size:14px">';
+        if(el.headers){
+          h += '<thead><tr>';
+          el.headers.forEach(th=>{
+            h += `<th style="background:${colors.acL};color:${colors.main};padding:10px 14px;text-align:left;font-weight:700;border-bottom:2px solid ${colors.ac}">${esc(th)}</th>`;
+          });
+          h += '</tr></thead>';
+        }
+        h += '<tbody>';
+        (el.rows||[]).forEach((row,ri)=>{
+          h += `<tr style="background:${ri%2===0?'transparent':colors.acL+'33'}">`;
+          row.forEach(cell=>{
+            h += `<td style="padding:10px 14px;border-bottom:1px solid #e2e8f0;color:${colors.body}">${esc(cell)}</td>`;
+          });
+          h += '</tr>';
+        });
+        h += '</tbody></table></div>';
+        break;
+      case 'flow':
+        h += `<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:${a==='center'?'center':a==='right'?'flex-end':'flex-start'};margin:16px 0">`;
+        (el.items||[]).forEach((it,i)=>{
+          if(i>0) h += `<span style="font-size:20px;color:${colors.ac}">→</span>`;
+          h += `<div style="background:${colors.acL};padding:10px 20px;border-radius:10px;font-weight:600;font-size:14px;color:${colors.main};border:1px solid ${colors.ac}30">${esc(it)}</div>`;
+        });
+        h += '</div>';
+        break;
+      case 'divider':
+        h += '<div class="divider"></div>';
+        break;
+      case 'spacer':
+        h += '<div class="spacer"></div>';
+        break;
     }
   });
-  const rd=m?8:G.radius;
-  return`<div style="background:${colors.cardBg};border-radius:${rd}px;box-shadow:0 1px 3px rgba(0,0,0,.04),0 8px 32px rgba(0,0,0,.06);padding:${p};position:relative;overflow:hidden"><div style="position:absolute;top:0;left:0;right:0;height:4px;background:${grad()}"></div>${h}</div>`;
+
+  h += '</div></div>'; // close .inner and .pvCard
+  return h;
 }
 
-/* ==========================================
-   PREVIEW & EXPORT
-========================================== */
-function renderPv(){
-  const c=document.getElementById('pvArea');c.style.maxWidth=G.maxW+'px';
-  if(!secs.length){c.innerHTML='<div class="empty-pv">← テンプレートからカードを追加</div>';return;}
-  c.innerHTML=secs.map(s=>`<div style="margin-bottom:${G.gap}px">${renderCard(s,false)}</div>`).join('');
-}
+/* ═══════════════════════════════════════════════
+   HTML EXPORT
+   ═══════════════════════════════════════════════ */
 function doExport(){
-  const bl=secs.map(s=>renderCard(s,false)).join(`\n<div style="height:${G.gap}px"></div>\n`);
-  const html=`<!DOCTYPE html><html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>スクロール資料</title><link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet"><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Noto Sans JP','Inter',sans-serif;background:${colors.pageBg};padding:40px 20px}a{color:inherit}</style></head><body><div style="max-width:${G.maxW}px;margin:0 auto">${bl}</div></body></html>`;
-  document.getElementById('expArea').value=html;document.getElementById('moBg').classList.add('show');
-}
-function dlFile(){const b=new Blob([document.getElementById('expArea').value],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='scroll-doc.html';a.click();}
+  let cards = '';
+  secs.forEach(s => { cards += renderCard(s); });
 
-renderTab();renderPv();
+  const html = `<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>スクロール資料</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter','Noto Sans JP',sans-serif;background:${colors.bg};min-height:100vh;padding:${G.gap}px 20px}
+.container{max-width:${G.maxW}px;margin:0 auto;display:flex;flex-direction:column;gap:${G.gap}px}
+.pvCard{background:${colors.card};border-radius:${G.radius}px;box-shadow:0 1px 3px rgba(0,0,0,.04),0 8px 32px rgba(0,0,0,.06);overflow:hidden;position:relative}
+.pvCard .acLine{height:4px;background:linear-gradient(135deg,${colors.gS},${colors.gE})}
+.pvCard .inner{padding:32px 36px}
+.pvCard .lbl{display:inline-block;padding:4px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.06em;margin-bottom:12px;background:${colors.acL};color:${colors.ac}}
+.pvCard h2{font-size:22px;font-weight:900;line-height:1.4;margin-bottom:16px;letter-spacing:-.02em;color:${colors.main}}
+.pvCard .bodyTxt{font-size:15px;line-height:1.9;color:${colors.body}}
+.pvCard .bodyTxt mark{background:${colors.marker};padding:2px 4px;border-radius:3px}
+.pvCard .kp{border-left:4px solid ${colors.kpBd};background:${colors.kpBg};padding:16px 20px;border-radius:0 12px 12px 0;margin:16px 0}
+.pvCard .kp .kpLabel{font-size:11px;font-weight:700;color:${colors.ac};margin-bottom:4px}
+.pvCard .qt{background:${colors.qtBg};border-radius:12px;padding:20px 24px;margin:16px 0;position:relative}
+.pvCard .qt::before{content:'"';position:absolute;top:8px;left:12px;font-size:40px;color:${colors.ac};opacity:.2}
+.pvCard .numBlock{margin:16px 0}
+.pvCard .numBlock .num{font-size:56px;font-weight:900;background:linear-gradient(135deg,${colors.gS},${colors.gE});-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.pvCard .numBlock .numLabel{font-size:13px;color:${colors.sub};margin-top:4px}
+.pvCard .warn{background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:16px 20px;margin:16px 0}
+.pvCard .warn .warnLabel{font-size:12px;font-weight:700;color:#dc2626;margin-bottom:4px}
+.pvCard .cl-item{display:flex;align-items:flex-start;gap:8px;margin:8px 0;font-size:14px}
+.pvCard .cl-item .ck{width:20px;height:20px;border-radius:50%;background:linear-gradient(135deg,${colors.gS},${colors.gE});color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:2px}
+.pvCard .ba{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+.pvCard .ba>div{padding:16px;border-radius:12px}
+.pvCard .ba .bf{background:#fef2f2}
+.pvCard .ba .af{background:#f0fdf4}
+.pvCard .ba .baLabel{font-size:11px;font-weight:700;margin-bottom:6px}
+.pvCard .bubble{display:flex;gap:12px;margin:12px 0;align-items:flex-start}
+.pvCard .bubble .bIcon{width:36px;height:36px;border-radius:50%;background:${colors.acL};display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.pvCard .bubble .bBody{background:#f1f5f9;border-radius:0 14px 14px 14px;padding:12px 16px;font-size:14px;line-height:1.7;flex:1}
+.pvCard .tl-item{display:flex;gap:14px;margin:12px 0;position:relative}
+.pvCard .tl-item .tl-dot{width:12px;height:12px;border-radius:50%;background:${colors.ac};flex-shrink:0;margin-top:4px;position:relative;z-index:1}
+.pvCard .tl-item .tl-line{position:absolute;left:5px;top:16px;width:2px;height:calc(100% + 12px);background:#e2e8f0}
+.pvCard .tl-item:last-child .tl-line{display:none}
+.pvCard .pts3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin:16px 0}
+.pvCard .pts3>div{text-align:center;padding:16px;background:#f8fafc;border-radius:12px}
+.pvCard .pts3 .ptIcon{font-size:28px;margin-bottom:8px}
+.pvCard .pts3 .ptTtl{font-size:13px;font-weight:700}
+.pvCard .ctaWrap{margin:20px 0}
+.pvCard .ctaBtn{display:inline-block;padding:16px 40px;border-radius:60px;font-size:15px;font-weight:700;color:#fff;background:linear-gradient(135deg,${colors.gS},${colors.gE});text-decoration:none;box-shadow:0 4px 20px rgba(124,58,237,.25);transition:.2s;cursor:pointer}
+.pvCard .ctaBtn:hover{transform:translateY(-2px);box-shadow:0 6px 28px rgba(124,58,237,.35)}
+.pvCard .dd{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:16px 0}
+.pvCard .dd>div{padding:16px;border-radius:12px}
+.pvCard .dd .do{background:#f0fdf4;border:1px solid #bbf7d0}
+.pvCard .dd .dont{background:#fef2f2;border:1px solid #fecaca}
+.pvCard .dd .ddLabel{font-size:12px;font-weight:700;margin-bottom:6px}
+.pvCard .qa-item{margin:12px 0}
+.pvCard .qa-item .qa-q{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px}
+.pvCard .qa-item .qa-badge{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;flex-shrink:0}
+.pvCard .qa-item .qa-badge.q{background:linear-gradient(135deg,${colors.gS},${colors.gE});color:#fff}
+.pvCard .qa-item .qa-badge.a{background:#f0fdf4;color:#22c55e}
+.pvCard .qa-item .qa-txt{font-size:14px;line-height:1.7;padding-top:4px}
+.pvCard .merit{display:flex;align-items:flex-start;gap:10px;margin:10px 0}
+.pvCard .merit .mIcon{font-size:20px;flex-shrink:0}
+.pvCard .price-tbl{border:2px solid ${colors.ac};border-radius:14px;overflow:hidden;margin:16px 0}
+.pvCard .price-tbl .pHead{background:linear-gradient(135deg,${colors.gS},${colors.gE});color:#fff;padding:14px;text-align:center;font-weight:700}
+.pvCard .price-tbl .pBody{padding:16px}
+.pvCard .price-tbl .pRow{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:14px}
+.pvCard .price-tbl .pRow:last-child{border:none}
+.pvCard .profile{display:flex;gap:20px;align-items:center;margin:16px 0}
+.pvCard .profile img{width:80px;height:80px;border-radius:50%;object-fit:cover}
+.pvCard .profile .prInfo{flex:1}
+.pvCard .profile .prName{font-size:16px;font-weight:700;color:${colors.main}}
+.pvCard .profile .prBio{font-size:13px;color:${colors.sub};margin-top:4px;line-height:1.6}
+.pvCard .stars{font-size:24px;margin:8px 0;letter-spacing:2px;color:#f59e0b}
+.pvCard .progress{margin:12px 0}
+.pvCard .progress .prgLabel{font-size:12px;font-weight:600;margin-bottom:4px}
+.pvCard .progress .prgBar{height:12px;background:#e2e8f0;border-radius:6px;overflow:hidden}
+.pvCard .progress .prgFill{height:100%;border-radius:6px}
+.pvCard .ribbon{position:absolute;top:20px;right:-35px;background:linear-gradient(135deg,${colors.gS},${colors.gE});color:#fff;padding:6px 40px;font-size:11px;font-weight:700;transform:rotate(45deg)}
+.pvCard .divider{height:1px;background:#e2e8f0;margin:20px 0}
+.pvCard .spacer{height:24px}
+.pvCard .toc{margin:16px 0}
+.pvCard .toc a{display:block;padding:8px 0;border-bottom:1px solid #f1f5f9;font-size:14px;color:${colors.ac};text-decoration:none}
+.pvCard .acc-item{border:1px solid #e2e8f0;border-radius:10px;margin:8px 0;overflow:hidden}
+.pvCard .acc-item summary{padding:12px 16px;font-weight:600;font-size:14px;cursor:pointer;color:${colors.main}}
+.pvCard .acc-item .accBody{padding:0 16px 12px;font-size:14px;line-height:1.7;color:${colors.body}}
+.pvCard .img-block{margin:16px 0}
+.pvCard .img-block img{max-width:100%;border-radius:12px}
+.pvCard .img-block.circle img{width:120px;height:120px;border-radius:50%;object-fit:cover}
+@media(max-width:600px){
+  body{padding:20px 12px}
+  .pvCard .inner{padding:24px 20px}
+  .pvCard h2{font-size:18px}
+  .pvCard .ba,.pvCard .dd{grid-template-columns:1fr}
+  .pvCard .pts3{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="container">
+${cards}
+</div>
+</body>
+</html>`;
+
+  document.getElementById('exportArea').value = html;
+  document.getElementById('modalBg').classList.add('show');
+}
+
+function dlFile(){
+  const html = document.getElementById('exportArea').value;
+  const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'scroll-doc.html';
+  a.click();
+}
+
+/* ═══════════════════════════════════════════════
+   RENDER ALL (master refresh)
+   ═══════════════════════════════════════════════ */
+function renderAll(){
+  applyColors();
+  renderTab();
+  renderPv();
+}
+
+/* ═══════════════════════════════════════════════
+   INITIALIZATION
+   ═══════════════════════════════════════════════ */
+autoLoad();
+applyColors();
+renderAll();
 </script>
 </body>
 </html>
