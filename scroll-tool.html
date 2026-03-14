@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>スクロール資料ジェネレーター</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #1a1a2e;
+  --accent: #6c3ce0;
+  --accent-light: #ede8ff;
+  --card-bg: #ffffff;
+  --page-bg: #f5f5f7;
+  --shadow: 0 4px 24px rgba(0,0,0,0.07);
+  --radius: 16px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { font-family:'Noto Sans JP',sans-serif; background:var(--page-bg); color:#333; line-height:1.8; }
+
+/* Header */
+.app-header {
+  background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
+  color:#fff; padding:28px 24px; text-align:center;
+}
+.app-header h1 { font-size:22px; font-weight:900; }
+.app-header p { font-size:13px; opacity:.8; margin-top:4px; }
+
+/* Layout */
+.layout { display:flex; min-height:calc(100vh - 90px); }
+.panel-left {
+  width:42%; background:#fff; border-right:1px solid #e5e5e5;
+  padding:20px; overflow-y:auto; max-height:calc(100vh - 90px);
+}
+.panel-right {
+  width:58%; padding:24px; overflow-y:auto;
+  max-height:calc(100vh - 90px); background:var(--page-bg);
+}
+
+/* Theme Picker */
+.theme-bar {
+  display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;
+  padding-bottom:16px; border-bottom:1px solid #eee;
+}
+.theme-chip {
+  padding:6px 14px; border-radius:20px; font-size:12px; font-weight:700;
+  border:2px solid transparent; cursor:pointer; transition:all .2s;
+}
+.theme-chip:hover { transform:scale(1.05); }
+.theme-chip.active { border-color:var(--primary); box-shadow:0 2px 8px rgba(0,0,0,.15); }
+
+/* Sections Editor */
+.sec-editor {
+  background:#fafafa; border:1px solid #e8e8e8; border-radius:12px;
+  margin-bottom:12px; overflow:hidden;
+}
+.sec-top {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:14px 16px; cursor:pointer; user-select:none;
+}
+.sec-top h3 { font-size:13px; color:var(--accent); font-weight:700; }
+.sec-top .arrow { color:#aaa; transition:transform .2s; }
+.sec-editor.closed .sec-content { display:none; }
+.sec-editor.closed .arrow { transform:rotate(-90deg); }
+.sec-content { padding:0 16px 16px; }
+
+label { display:block; font-size:11px; font-weight:700; color:#888; margin:12px 0 4px; text-transform:uppercase; letter-spacing:.5px; }
+input[type=text],textarea,select {
+  width:100%; padding:9px 12px; border:1px solid #ddd; border-radius:8px;
+  font-family:inherit; font-size:13px; line-height:1.6;
+}
+input:focus,textarea:focus,select:focus { outline:none; border-color:var(--accent); }
+textarea { resize:vertical; min-height:80px; }
+
+.row { display:flex; gap:8px; }
+.row>* { flex:1; }
+
+/* Buttons */
+button {
+  padding:8px 16px; border:none; border-radius:8px;
+  font-family:inherit; font-size:12px; font-weight:700; cursor:pointer;
+}
+.btn-main { background:var(--accent); color:#fff; }
+.btn-main:hover { opacity:.9; }
+.btn-ghost { background:#eee; color:#555; }
+.btn-ghost:hover { background:#ddd; }
+.btn-red { background:#ff4757; color:#fff; font-size:11px; padding:5px 12px; }
+.btn-export {
+  background:linear-gradient(135deg,#667eea,#764ba2);
+  color:#fff; padding:10px 22px; font-size:13px;
+}
+.btn-sm { padding:4px 10px; font-size:11px; background:#e8e8e8; border-radius:6px; }
+.action-bar { display:flex; gap:8px; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; }
+
+/* Elements UI */
+.el-list { margin-top:8px; }
+.el-item {
+  background:#fff; border:1px solid #e8e8e8; border-radius:8px;
+  padding:10px 12px; margin-bottom:8px;
+}
+.el-item-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
+.el-item-head span { font-size:11px; font-weight:700; color:var(--accent); text-transform:uppercase; }
+.el-remove { background:none; border:none; color:#ccc; cursor:pointer; font-size:16px; padding:0; }
+.el-remove:hover { color:#ff4757; }
+
+.add-el-bar { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+.add-el-btn {
+  padding:4px 10px; font-size:11px; border-radius:6px;
+  background:var(--accent-light); color:var(--accent); font-weight:600;
+  border:none; cursor:pointer;
+}
+.add-el-btn:hover { background:var(--accent); color:#fff; }
+
+/* Preview */
+.preview-scroll { max-width:640px; margin:0 auto; }
+.pv-block {
+  background:var(--card-bg); border-radius:var(--radius);
+  box-shadow:var(--shadow); padding:36px 32px; margin-bottom:36px;
+}
+.pv-icon { font-size:26px; margin-bottom:2px; }
+.pv-label { font-size:26px; font-weight:900; margin-bottom:6px; }
+.pv-heading { font-size:20px; font-weight:900; margin-bottom:16px; }
+.pv-body { font-size:15.5px; line-height:2; white-space:pre-wrap; }
+.pv-kp {
+  margin-top:20px; border-left:4px solid; padding:16px 18px 16px 22px;
+  border-radius:0 12px 12px 0;
+}
+.pv-kp-title { font-size:12px; font-weight:700; letter-spacing:1px; margin-bottom:8px; }
+.pv-kp-body { font-size:14.5px; line-height:2; white-space:pre-wrap; }
+.pv-quote {
+  margin-top:18px; padding:16px 20px; border-radius:12px;
+  font-style:italic; font-size:15px; line-height:1.9; position:relative;
+}
+.pv-quote::before { content:'"'; font-size:48px; position:absolute; top:-8px; left:12px; opacity:.2; }
+.pv-number-big { font-size:48px; font-weight:900; line-height:1.2; margin:12px 0; }
+.pv-divider { border:none; border-top:1px solid #eee; margin:20px 0; }
+
+.empty-msg { text-align:center; color:#bbb; padding:60px 20px; font-size:14px; }
+
+/* Modal */
+.modal-bg {
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,.45);
+  z-index:1000; justify-content:center; align-items:center;
+}
+.modal-bg.show { display:flex; }
+.modal-box {
+  background:#fff; border-radius:16px; padding:28px; width:90%; max-width:620px;
+  max-height:80vh; overflow-y:auto;
+}
+.modal-box h2 { margin-bottom:12px; font-size:18px; }
+.modal-box textarea { height:280px; font-family:monospace; font-size:11px; }
+
+@media(max-width:900px){
+  .layout{flex-direction:column}
+  .panel-left,.panel-right{width:100%;max-height:none}
+}
+</style>
+</head>
+<body>
+
+<div class="app-header">
+  <h1>📜 スクロール資料ジェネレーター</h1>
+  <p>テーマを選ぶ → セクションを入力 → 構成要素を自由に組み合わせ → HTMLエクスポート</p>
+</div>
+
+<div class="layout">
+<!-- ========== LEFT ========== -->
+<div class="panel-left" id="leftPanel">
+
+  <div style="font-size:12px;font-weight:700;color:#888;margin-bottom:8px;">テーマカラー</div>
+  <div class="theme-bar" id="themeBar"></div>
+
+  <div class="action-bar">
+    <button class="btn-main" onclick="addSection()">＋ セクション追加</button>
+    <button class="btn-export" onclick="doExport()">HTMLエクスポート</button>
+  </div>
+
+  <div id="secList"></div>
+</div>
+
+<!-- ========== RIGHT ========== -->
+<div class="panel-right">
+  <div class="preview-scroll" id="preview">
+    <div class="empty-msg">← セクションを追加してください</div>
+  </div>
+</div>
+</div>
+
+<!-- Modal -->
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="modal-box">
+    <h2>HTMLエクスポート</h2>
+    <p style="font-size:12px;color:#888;margin-bottom:10px;">.htmlファイルとして保存できます</p>
+    <textarea id="exportArea" readonly></textarea>
+    <div style="display:flex;gap:8px;margin-top:12px;">
+      <button class="btn-main" onclick="navigator.clipboard.writeText(document.getElementById('exportArea').value);alert('コピーしました')">コピー</button>
+      <button class="btn-main" style="background:#2ed573" onclick="dlExport()">ダウンロード</button>
+      <button class="btn-ghost" onclick="document.getElementById('modalBg').classList.remove('show')">閉じる</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ======== THEMES ======== */
+const THEMES = [
+  { name:'ビジネス', main:'#1a3a5c', accent:'#2563eb', accentLight:'#e8f0fe', kpBorder:'#2563eb', kpBg:'#f0f5ff', quoteBg:'#f0f5ff', bg:'#f4f6f9', hlColor:'#bfdbfe' },
+  { name:'恋愛', main:'#6b2142', accent:'#e84393', accentLight:'#fde8f0', kpBorder:'#e84393', kpBg:'#fff0f6', quoteBg:'#fff0f6', bg:'#fdf5f8', hlColor:'#fbb6ce' },
+  { name:'占い・スピ', main:'#2d1b69', accent:'#6c3ce0', accentLight:'#ede8ff', kpBorder:'#6c3ce0', kpBg:'#f5f0ff', quoteBg:'#f5f0ff', bg:'#f5f3fa', hlColor:'#d4bfff' },
+  { name:'自己啓発', main:'#5c3d10', accent:'#e67e22', accentLight:'#fef3e2', kpBorder:'#e67e22', kpBg:'#fff8ef', quoteBg:'#fff8ef', bg:'#fdf8f0', hlColor:'#fcd9a8' },
+  { name:'健康・美容', main:'#1a4a3a', accent:'#00b894', accentLight:'#e6faf4', kpBorder:'#00b894', kpBg:'#f0fdf8', quoteBg:'#f0fdf8', bg:'#f2f9f6', hlColor:'#a8ecd8' },
+  { name:'教育', main:'#3b3510', accent:'#f39c12', accentLight:'#fef9e7', kpBorder:'#f39c12', kpBg:'#fffdf0', quoteBg:'#fffdf0', bg:'#fdfbf2', hlColor:'#fce8a0' },
+  { name:'シンプル', main:'#222', accent:'#555', accentLight:'#f0f0f0', kpBorder:'#999', kpBg:'#fafafa', quoteBg:'#f5f5f5', bg:'#f5f5f5', hlColor:'#e0e0e0' },
+];
+let currentTheme = THEMES[2]; // default: 占い・スピ
+
+/* ======== ELEMENT TYPES ======== */
+const EL_TYPES = [
+  { key:'body',    label:'本文', default:true },
+  { key:'keypoint',label:'KEY POINT' },
+  { key:'quote',   label:'引用・声' },
+  { key:'number',  label:'数字強調' },
+  { key:'divider', label:'区切り線' },
+];
+
+/* ======== DATA ======== */
+let sections = [];
+let uid = 0;
+
+/* ======== THEME BAR ======== */
+function renderThemeBar(){
+  document.getElementById('themeBar').innerHTML = THEMES.map((t,i)=>`
+    <div class="theme-chip ${t===currentTheme?'active':''}"
+         style="background:${t.accentLight};color:${t.accent}"
+         onclick="pickTheme(${i})">
+      ${t.name}
+    </div>`).join('');
+}
+function pickTheme(i){ currentTheme=THEMES[i]; renderThemeBar(); renderPreview(); }
+renderThemeBar();
+
+/* ======== SECTIONS ======== */
+function addSection(){
+  const id = uid++;
+  sections.push({
+    id,
+    icon:'',
+    label:'',
+    heading:'',
+    elements:[{ key:'body', value:'' }]
+  });
+  renderEditor(); renderPreview();
+}
+
+function removeSection(id){
+  if(!confirm('削除しますか？'))return;
+  sections=sections.filter(s=>s.id!==id);
+  renderEditor(); renderPreview();
+}
+function moveSection(id,d){
+  const i=sections.findIndex(s=>s.id===id);
+  const j=i+d; if(j<0||j>=sections.length)return;
+  [sections[i],sections[j]]=[sections[j],sections[i]];
+  renderEditor(); renderPreview();
+}
+function toggleSec(id){
+  document.getElementById('sec-'+id).classList.toggle('closed');
+}
+
+function addElement(secId, key){
+  const s=sections.find(x=>x.id===secId);
+  if(key==='divider') s.elements.push({key,value:''});
+  else s.elements.push({key,value:''});
+  renderEditor(); renderPreview();
+}
+function removeElement(secId, elIdx){
+  sections.find(x=>x.id===secId).elements.splice(elIdx,1);
+  renderEditor(); renderPreview();
+}
+
+function updateField(secId, field, val){
+  sections.find(x=>x.id===secId)[field]=val;
+  renderPreview();
+}
+function updateEl(secId, elIdx, val){
+  sections.find(x=>x.id===secId).elements[elIdx].value=val;
+  renderPreview();
+}
+
+/* ======== RENDER EDITOR ======== */
+function renderEditor(){
+  document.getElementById('secList').innerHTML = sections.map((s,si)=>{
+    const title = s.label || s.heading || `セクション ${si+1}`;
+    const elsHtml = s.elements.map((el,ei)=>{
+      const type = EL_TYPES.find(t=>t.key===el.key);
+      if(el.key==='divider') return `
+        <div class="el-item">
+          <div class="el-item-head"><span>── 区切り線 ──</span>
+          <button class="el-remove" onclick="removeElement(${s.id},${ei})">×</button></div>
+        </div>`;
+      return `
+        <div class="el-item">
+          <div class="el-item-head"><span>${type?type.label:el.key}</span>
+          <button class="el-remove" onclick="removeElement(${s.id},${ei})">×</button></div>
+          <textarea rows="${el.key==='number'?1:3}" oninput="updateEl(${s.id},${ei},this.value)">${esc(el.value)}</textarea>
+        </div>`;
+    }).join('');
+
+    const unusedEls = EL_TYPES.filter(t=>t.key==='divider'||t.key==='body'||!s.elements.find(e=>e.key===t.key));
+
+    return `
+    <div class="sec-editor" id="sec-${s.id}">
+      <div class="sec-top" onclick="toggleSec(${s.id})">
+        <h3>${s.icon||'📄'} ${esc(title)}</h3><span class="arrow">▼</span>
+      </div>
+      <div class="sec-content">
+        <div class="row">
+          <div><label>アイコン</label><input type=text value="${esc(s.icon)}" oninput="updateField(${s.id},'icon',this.value)" placeholder="🎤"></div>
+          <div><label>ラベル</label><input type=text value="${esc(s.label)}" oninput="updateField(${s.id},'label',this.value)" placeholder="STEP 1（任意）"></div>
+        </div>
+        <label>見出し</label>
+        <input type=text value="${esc(s.heading)}" oninput="updateField(${s.id},'heading',this.value)" placeholder="見出しを入力">
+
+        <label style="margin-top:16px">構成要素</label>
+        <div class="el-list">${elsHtml}</div>
+        <div class="add-el-bar">
+          ${EL_TYPES.map(t=>`<button class="add-el-btn" onclick="addElement(${s.id},'${t.key}')">+ ${t.label}</button>`).join('')}
+        </div>
+
+        <div style="display:flex;justify-content:space-between;margin-top:16px">
+          <div><button class="btn-sm" onclick="moveSection(${s.id},-1)">↑</button> <button class="btn-sm" onclick="moveSection(${s.id},1)">↓</button></div>
+          <button class="btn-red" onclick="removeSection(${s.id})">削除</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+/* ======== RENDER PREVIEW ======== */
+function renderPreview(){
+  const c = document.getElementById('preview');
+  if(!sections.length){ c.innerHTML='<div class="empty-msg">← セクションを追加してください</div>'; return; }
+  const t = currentTheme;
+  c.innerHTML = sections.map(s=>{
+    let inner = '';
+    if(s.icon) inner += `<div class="pv-icon">${s.icon}</div>`;
+    if(s.label) inner += `<div class="pv-label" style="color:${t.main}">${esc(s.label)}</div>`;
+    if(s.heading) inner += `<div class="pv-heading" style="color:${t.main}">${esc(s.heading)}</div>`;
+
+    s.elements.forEach(el=>{
+      if(el.key==='body'){
+        inner+=`<div class="pv-body">${colorize(el.value,t)}</div>`;
+      } else if(el.key==='keypoint'){
+        inner+=`<div class="pv-kp" style="border-color:${t.kpBorder};background:${t.kpBg}">
+          <div class="pv-kp-title" style="color:${t.kpBorder}">KEY POINT</div>
+          <div class="pv-kp-body">${colorize(el.value,t)}</div></div>`;
+      } else if(el.key==='quote'){
+        inner+=`<div class="pv-quote" style="background:${t.quoteBg};color:${t.main}">${colorize(el.value,t)}</div>`;
+      } else if(el.key==='number'){
+        inner+=`<div class="pv-number-big" style="color:${t.accent}">${esc(el.value)}</div>`;
+      } else if(el.key==='divider'){
+        inner+=`<hr class="pv-divider">`;
+      }
+    });
+    return `<div class="pv-block">${inner}</div>`;
+  }).join('');
+}
+
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+function colorize(text,t){
+  return esc(text).replace(/『([^』]*)』/g, `<span style="color:${t.accent};font-weight:700">『$1』</span>`);
+}
+
+/* ======== EXPORT ======== */
+function doExport(){
+  const t=currentTheme;
+  const blocks = sections.map(s=>{
+    let h='';
+    if(s.icon) h+=`<div style="font-size:26px;margin-bottom:2px">${s.icon}</div>`;
+    if(s.label) h+=`<div style="font-size:26px;font-weight:900;color:${t.main};margin-bottom:6px">${esc(s.label)}</div>`;
+    if(s.heading) h+=`<div style="font-size:20px;font-weight:900;color:${t.main};margin-bottom:16px">${esc(s.heading)}</div>`;
+    s.elements.forEach(el=>{
+      if(el.key==='body') h+=`<div style="font-size:15.5px;line-height:2;white-space:pre-wrap">${colorize(el.value,t)}</div>`;
+      else if(el.key==='keypoint') h+=`<div style="margin-top:20px;border-left:4px solid ${t.kpBorder};padding:16px 18px 16px 22px;background:${t.kpBg};border-radius:0 12px 12px 0"><div style="font-size:12px;font-weight:700;color:${t.kpBorder};letter-spacing:1px;margin-bottom:8px">KEY POINT</div><div style="font-size:14.5px;line-height:2;white-space:pre-wrap">${colorize(el.value,t)}</div></div>`;
+      else if(el.key==='quote') h+=`<div style="margin-top:18px;padding:16px 20px;border-radius:12px;background:${t.quoteBg};font-style:italic;font-size:15px;line-height:1.9;color:${t.main}">${colorize(el.value,t)}</div>`;
+      else if(el.key==='number') h+=`<div style="font-size:48px;font-weight:900;color:${t.accent};line-height:1.2;margin:12px 0">${esc(el.value)}</div>`;
+      else if(el.key==='divider') h+=`<hr style="border:none;border-top:1px solid #eee;margin:20px 0">`;
+    });
+    return `<div style="background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.07);padding:36px 32px;margin-bottom:36px;max-width:640px;margin-left:auto;margin-right:auto">${h}</div>`;
+  }).join('\n');
+
+  const html=`<!DOCTYPE html>
+<html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>スクロール資料</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Noto Sans JP',sans-serif;background:${t.bg};padding:40px 20px}</style>
+</head><body>
+${blocks}
+</body></html>`;
+
+  document.getElementById('exportArea').value=html;
+  document.getElementById('modalBg').classList.add('show');
+}
+
+function dlExport(){
+  const b=new Blob([document.getElementById('exportArea').value],{type:'text/html'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(b);
+  a.download='scroll-doc.html'; a.click();
+}
+
+// Init with sample
+sections.push({
+  id:uid++, icon:'🎤', label:'STEP 1', heading:'Threadsで集客する',
+  elements:[
+    {key:'body', value:'Threadsでは、\n『これ私のことだ！』と悩みを持ったターゲットに\n刺さる投稿で『この人の占い、ちょっと気になるな』と思ってもらう。\nそして、LINEオプチャへと誘導していきます。\n\nこれがSTEP 1のすべてです。'},
+    {key:'keypoint', value:'ここでのThreadsの役割は、繁華街の看板と同じです。\n看板を見て『おっ、良さそう』と思った人がお店に入ってくる。\n投稿で何かを売る必要はありません。\n『気になる』と思わせて、LINEオプチャに来てもらう。\nこれだけに集中してください。'}
+  ]
+});
+renderEditor(); renderPreview();
+</script>
+</body>
+</html>
