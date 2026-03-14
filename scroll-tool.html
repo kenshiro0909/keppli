@@ -3,419 +3,527 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>スクロール資料ジェネレーター</title>
+<title>スクロール資料ジェネレーター v3</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
 <style>
-:root {
-  --primary: #1a1a2e;
-  --accent: #6c3ce0;
-  --accent-light: #ede8ff;
-  --card-bg: #ffffff;
-  --page-bg: #f5f5f7;
-  --shadow: 0 4px 24px rgba(0,0,0,0.07);
-  --radius: 16px;
+:root{
+  --main:#1a1a2e;--accent:#6c3ce0;--accent-light:#ede8ff;
+  --card-bg:#fff;--page-bg:#f5f5f7;--shadow:0 4px 24px rgba(0,0,0,.07);--radius:16px;
 }
-* { margin:0; padding:0; box-sizing:border-box; }
-body { font-family:'Noto Sans JP',sans-serif; background:var(--page-bg); color:#333; line-height:1.8; }
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--page-bg);color:#333;line-height:1.8;font-size:14px;}
 
-/* Header */
-.app-header {
-  background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);
-  color:#fff; padding:28px 24px; text-align:center;
-}
-.app-header h1 { font-size:22px; font-weight:900; }
-.app-header p { font-size:13px; opacity:.8; margin-top:4px; }
+/* === HEADER === */
+.hd{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:22px 20px;text-align:center;}
+.hd h1{font-size:20px;font-weight:900;}.hd p{font-size:12px;opacity:.8;margin-top:2px;}
 
-/* Layout */
-.layout { display:flex; min-height:calc(100vh - 90px); }
-.panel-left {
-  width:42%; background:#fff; border-right:1px solid #e5e5e5;
-  padding:20px; overflow-y:auto; max-height:calc(100vh - 90px);
-}
-.panel-right {
-  width:58%; padding:24px; overflow-y:auto;
-  max-height:calc(100vh - 90px); background:var(--page-bg);
-}
+/* === LAYOUT === */
+.wrap{display:flex;min-height:calc(100vh - 74px);}
+.pL{width:40%;background:#fff;border-right:1px solid #e5e5e5;overflow-y:auto;max-height:calc(100vh - 74px);padding:16px;}
+.pR{width:60%;overflow-y:auto;max-height:calc(100vh - 74px);padding:20px;background:var(--page-bg);}
 
-/* Theme Picker */
-.theme-bar {
-  display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;
-  padding-bottom:16px; border-bottom:1px solid #eee;
-}
-.theme-chip {
-  padding:6px 14px; border-radius:20px; font-size:12px; font-weight:700;
-  border:2px solid transparent; cursor:pointer; transition:all .2s;
-}
-.theme-chip:hover { transform:scale(1.05); }
-.theme-chip.active { border-color:var(--primary); box-shadow:0 2px 8px rgba(0,0,0,.15); }
+/* === TABS === */
+.tabs{display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid #eee;}
+.tab{padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;color:#999;border-bottom:2px solid transparent;margin-bottom:-2px;transition:.2s;}
+.tab.active{color:var(--accent);border-color:var(--accent);}
 
-/* Sections Editor */
-.sec-editor {
-  background:#fafafa; border:1px solid #e8e8e8; border-radius:12px;
-  margin-bottom:12px; overflow:hidden;
-}
-.sec-top {
-  display:flex; justify-content:space-between; align-items:center;
-  padding:14px 16px; cursor:pointer; user-select:none;
-}
-.sec-top h3 { font-size:13px; color:var(--accent); font-weight:700; }
-.sec-top .arrow { color:#aaa; transition:transform .2s; }
-.sec-editor.closed .sec-content { display:none; }
-.sec-editor.closed .arrow { transform:rotate(-90deg); }
-.sec-content { padding:0 16px 16px; }
+/* === TEMPLATE GALLERY === */
+.gal{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.gal-item{border:2px solid #e8e8e8;border-radius:12px;overflow:hidden;cursor:pointer;transition:.2s;background:#fff;}
+.gal-item:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.1);}
+.gal-item.chosen{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light);}
+.gal-preview{padding:16px;min-height:120px;font-size:11px;line-height:1.6;overflow:hidden;position:relative;}
+.gal-name{padding:8px 12px;font-size:11px;font-weight:700;background:#fafafa;border-top:1px solid #eee;text-align:center;color:#666;}
 
-label { display:block; font-size:11px; font-weight:700; color:#888; margin:12px 0 4px; text-transform:uppercase; letter-spacing:.5px; }
-input[type=text],textarea,select {
-  width:100%; padding:9px 12px; border:1px solid #ddd; border-radius:8px;
-  font-family:inherit; font-size:13px; line-height:1.6;
-}
-input:focus,textarea:focus,select:focus { outline:none; border-color:var(--accent); }
-textarea { resize:vertical; min-height:80px; }
+/* === THEME BAR === */
+.tbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+.tchip{padding:5px 12px;border-radius:16px;font-size:11px;font-weight:700;border:2px solid transparent;cursor:pointer;transition:.2s;}
+.tchip:hover{transform:scale(1.05);}.tchip.on{border-color:var(--main);box-shadow:0 2px 8px rgba(0,0,0,.12);}
 
-.row { display:flex; gap:8px; }
-.row>* { flex:1; }
+/* === EDITOR === */
+.sec-ed{background:#fafafa;border:1px solid #e8e8e8;border-radius:10px;margin-bottom:10px;overflow:hidden;}
+.sec-hd{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;cursor:pointer;user-select:none;}
+.sec-hd h3{font-size:12px;font-weight:700;color:var(--accent);}.sec-hd .arr{color:#aaa;transition:.2s;}
+.sec-ed.shut .sec-bd{display:none;}.sec-ed.shut .arr{transform:rotate(-90deg);}
+.sec-bd{padding:0 14px 14px;}
+label{display:block;font-size:10px;font-weight:700;color:#888;margin:10px 0 3px;text-transform:uppercase;letter-spacing:.5px;}
+input[type=text],textarea,select{width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:7px;font-family:inherit;font-size:12px;line-height:1.6;}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent);}
+textarea{resize:vertical;min-height:60px;}
+.rw{display:flex;gap:6px;}.rw>*{flex:1;}
 
-/* Buttons */
-button {
-  padding:8px 16px; border:none; border-radius:8px;
-  font-family:inherit; font-size:12px; font-weight:700; cursor:pointer;
-}
-.btn-main { background:var(--accent); color:#fff; }
-.btn-main:hover { opacity:.9; }
-.btn-ghost { background:#eee; color:#555; }
-.btn-ghost:hover { background:#ddd; }
-.btn-red { background:#ff4757; color:#fff; font-size:11px; padding:5px 12px; }
-.btn-export {
-  background:linear-gradient(135deg,#667eea,#764ba2);
-  color:#fff; padding:10px 22px; font-size:13px;
-}
-.btn-sm { padding:4px 10px; font-size:11px; background:#e8e8e8; border-radius:6px; }
-.action-bar { display:flex; gap:8px; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; }
+/* --- element items --- */
+.eli{background:#fff;border:1px solid #e8e8e8;border-radius:7px;padding:8px 10px;margin-bottom:6px;}
+.eli-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.eli-top span{font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;}
+.eli-x{background:none;border:none;color:#ccc;cursor:pointer;font-size:14px;padding:0;}.eli-x:hover{color:#ff4757;}
+.add-bar{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;}
+.add-btn{padding:3px 8px;font-size:10px;border-radius:5px;background:var(--accent-light);color:var(--accent);font-weight:600;border:none;cursor:pointer;}
+.add-btn:hover{background:var(--accent);color:#fff;}
 
-/* Elements UI */
-.el-list { margin-top:8px; }
-.el-item {
-  background:#fff; border:1px solid #e8e8e8; border-radius:8px;
-  padding:10px 12px; margin-bottom:8px;
-}
-.el-item-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; }
-.el-item-head span { font-size:11px; font-weight:700; color:var(--accent); text-transform:uppercase; }
-.el-remove { background:none; border:none; color:#ccc; cursor:pointer; font-size:16px; padding:0; }
-.el-remove:hover { color:#ff4757; }
+/* --- image upload --- */
+.img-drop{border:2px dashed #ccc;border-radius:8px;padding:16px;text-align:center;cursor:pointer;font-size:11px;color:#999;transition:.2s;position:relative;}
+.img-drop:hover{border-color:var(--accent);color:var(--accent);}
+.img-drop input{position:absolute;inset:0;opacity:0;cursor:pointer;}
+.img-thumb{max-width:100%;max-height:100px;border-radius:6px;margin-top:6px;}
 
-.add-el-bar { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
-.add-el-btn {
-  padding:4px 10px; font-size:11px; border-radius:6px;
-  background:var(--accent-light); color:var(--accent); font-weight:600;
-  border:none; cursor:pointer;
-}
-.add-el-btn:hover { background:var(--accent); color:#fff; }
+/* === BUTTONS === */
+button{padding:7px 14px;border:none;border-radius:7px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;}
+.bM{background:var(--accent);color:#fff;}.bM:hover{opacity:.9;}
+.bG{background:#eee;color:#555;}.bG:hover{background:#ddd;}
+.bR{background:#ff4757;color:#fff;font-size:10px;padding:4px 10px;}
+.bE{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:9px 20px;font-size:12px;}
+.bSm{padding:3px 8px;font-size:10px;background:#e8e8e8;border-radius:5px;}
+.abar{display:flex;gap:6px;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;}
 
-/* Preview */
-.preview-scroll { max-width:640px; margin:0 auto; }
-.pv-block {
-  background:var(--card-bg); border-radius:var(--radius);
-  box-shadow:var(--shadow); padding:36px 32px; margin-bottom:36px;
-}
-.pv-icon { font-size:26px; margin-bottom:2px; }
-.pv-label { font-size:26px; font-weight:900; margin-bottom:6px; }
-.pv-heading { font-size:20px; font-weight:900; margin-bottom:16px; }
-.pv-body { font-size:15.5px; line-height:2; white-space:pre-wrap; }
-.pv-kp {
-  margin-top:20px; border-left:4px solid; padding:16px 18px 16px 22px;
-  border-radius:0 12px 12px 0;
-}
-.pv-kp-title { font-size:12px; font-weight:700; letter-spacing:1px; margin-bottom:8px; }
-.pv-kp-body { font-size:14.5px; line-height:2; white-space:pre-wrap; }
-.pv-quote {
-  margin-top:18px; padding:16px 20px; border-radius:12px;
-  font-style:italic; font-size:15px; line-height:1.9; position:relative;
-}
-.pv-quote::before { content:'"'; font-size:48px; position:absolute; top:-8px; left:12px; opacity:.2; }
-.pv-number-big { font-size:48px; font-weight:900; line-height:1.2; margin:12px 0; }
-.pv-divider { border:none; border-top:1px solid #eee; margin:20px 0; }
+/* === PREVIEW === */
+.pv-area{max-width:640px;margin:0 auto;}
+.empty{text-align:center;color:#bbb;padding:50px 20px;font-size:13px;}
 
-.empty-msg { text-align:center; color:#bbb; padding:60px 20px; font-size:14px; }
+/* === MODAL === */
+.mo-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;justify-content:center;align-items:center;}
+.mo-bg.show{display:flex;}
+.mo-box{background:#fff;border-radius:14px;padding:24px;width:92%;max-width:600px;max-height:80vh;overflow-y:auto;}
+.mo-box h2{margin-bottom:10px;font-size:17px;}.mo-box textarea{height:250px;font-family:monospace;font-size:11px;}
 
-/* Modal */
-.modal-bg {
-  display:none; position:fixed; inset:0; background:rgba(0,0,0,.45);
-  z-index:1000; justify-content:center; align-items:center;
-}
-.modal-bg.show { display:flex; }
-.modal-box {
-  background:#fff; border-radius:16px; padding:28px; width:90%; max-width:620px;
-  max-height:80vh; overflow-y:auto;
-}
-.modal-box h2 { margin-bottom:12px; font-size:18px; }
-.modal-box textarea { height:280px; font-family:monospace; font-size:11px; }
-
-@media(max-width:900px){
-  .layout{flex-direction:column}
-  .panel-left,.panel-right{width:100%;max-height:none}
-}
+@media(max-width:900px){.wrap{flex-direction:column;}.pL,.pR{width:100%;max-height:none;}}
 </style>
 </head>
 <body>
 
-<div class="app-header">
-  <h1>📜 スクロール資料ジェネレーター</h1>
-  <p>テーマを選ぶ → セクションを入力 → 構成要素を自由に組み合わせ → HTMLエクスポート</p>
-</div>
+<div class="hd"><h1>📜 スクロール資料ジェネレーター v3</h1><p>20種類のテンプレートから選んで、中身を自由にカスタマイズ</p></div>
 
-<div class="layout">
-<!-- ========== LEFT ========== -->
-<div class="panel-left" id="leftPanel">
-
-  <div style="font-size:12px;font-weight:700;color:#888;margin-bottom:8px;">テーマカラー</div>
-  <div class="theme-bar" id="themeBar"></div>
-
-  <div class="action-bar">
-    <button class="btn-main" onclick="addSection()">＋ セクション追加</button>
-    <button class="btn-export" onclick="doExport()">HTMLエクスポート</button>
+<div class="wrap">
+<div class="pL" id="leftP">
+  <div class="tabs">
+    <div class="tab active" onclick="switchTab(0)">テンプレート</div>
+    <div class="tab" onclick="switchTab(1)">エディタ</div>
   </div>
-
-  <div id="secList"></div>
+  <div id="tabContent"></div>
+</div>
+<div class="pR"><div class="pv-area" id="pvArea"><div class="empty">← テンプレートを選んでください</div></div></div>
 </div>
 
-<!-- ========== RIGHT ========== -->
-<div class="panel-right">
-  <div class="preview-scroll" id="preview">
-    <div class="empty-msg">← セクションを追加してください</div>
-  </div>
-</div>
-</div>
-
-<!-- Modal -->
-<div class="modal-bg" id="modalBg" onclick="if(event.target===this)this.classList.remove('show')">
-  <div class="modal-box">
+<div class="mo-bg" id="moBg" onclick="if(event.target===this)this.classList.remove('show')">
+  <div class="mo-box">
     <h2>HTMLエクスポート</h2>
-    <p style="font-size:12px;color:#888;margin-bottom:10px;">.htmlファイルとして保存できます</p>
-    <textarea id="exportArea" readonly></textarea>
-    <div style="display:flex;gap:8px;margin-top:12px;">
-      <button class="btn-main" onclick="navigator.clipboard.writeText(document.getElementById('exportArea').value);alert('コピーしました')">コピー</button>
-      <button class="btn-main" style="background:#2ed573" onclick="dlExport()">ダウンロード</button>
-      <button class="btn-ghost" onclick="document.getElementById('modalBg').classList.remove('show')">閉じる</button>
+    <textarea id="expArea" readonly></textarea>
+    <div style="display:flex;gap:6px;margin-top:10px;">
+      <button class="bM" onclick="navigator.clipboard.writeText(document.getElementById('expArea').value);alert('コピーしました')">コピー</button>
+      <button class="bM" style="background:#2ed573" onclick="dlFile()">ダウンロード</button>
+      <button class="bG" onclick="document.getElementById('moBg').classList.remove('show')">閉じる</button>
     </div>
   </div>
 </div>
 
 <script>
-/* ======== THEMES ======== */
-const THEMES = [
-  { name:'ビジネス', main:'#1a3a5c', accent:'#2563eb', accentLight:'#e8f0fe', kpBorder:'#2563eb', kpBg:'#f0f5ff', quoteBg:'#f0f5ff', bg:'#f4f6f9', hlColor:'#bfdbfe' },
-  { name:'恋愛', main:'#6b2142', accent:'#e84393', accentLight:'#fde8f0', kpBorder:'#e84393', kpBg:'#fff0f6', quoteBg:'#fff0f6', bg:'#fdf5f8', hlColor:'#fbb6ce' },
-  { name:'占い・スピ', main:'#2d1b69', accent:'#6c3ce0', accentLight:'#ede8ff', kpBorder:'#6c3ce0', kpBg:'#f5f0ff', quoteBg:'#f5f0ff', bg:'#f5f3fa', hlColor:'#d4bfff' },
-  { name:'自己啓発', main:'#5c3d10', accent:'#e67e22', accentLight:'#fef3e2', kpBorder:'#e67e22', kpBg:'#fff8ef', quoteBg:'#fff8ef', bg:'#fdf8f0', hlColor:'#fcd9a8' },
-  { name:'健康・美容', main:'#1a4a3a', accent:'#00b894', accentLight:'#e6faf4', kpBorder:'#00b894', kpBg:'#f0fdf8', quoteBg:'#f0fdf8', bg:'#f2f9f6', hlColor:'#a8ecd8' },
-  { name:'教育', main:'#3b3510', accent:'#f39c12', accentLight:'#fef9e7', kpBorder:'#f39c12', kpBg:'#fffdf0', quoteBg:'#fffdf0', bg:'#fdfbf2', hlColor:'#fce8a0' },
-  { name:'シンプル', main:'#222', accent:'#555', accentLight:'#f0f0f0', kpBorder:'#999', kpBg:'#fafafa', quoteBg:'#f5f5f5', bg:'#f5f5f5', hlColor:'#e0e0e0' },
+/* ========================================
+   THEMES
+======================================== */
+const THEMES=[
+  {name:'ビジネス',main:'#1a3a5c',accent:'#2563eb',acL:'#e8f0fe',kpB:'#2563eb',kpBg:'#f0f5ff',qBg:'#f0f5ff',bg:'#f4f6f9',hl:'#bfdbfe'},
+  {name:'恋愛',main:'#6b2142',accent:'#e84393',acL:'#fde8f0',kpB:'#e84393',kpBg:'#fff0f6',qBg:'#fff0f6',bg:'#fdf5f8',hl:'#fbb6ce'},
+  {name:'占い',main:'#2d1b69',accent:'#6c3ce0',acL:'#ede8ff',kpB:'#6c3ce0',kpBg:'#f5f0ff',qBg:'#f5f0ff',bg:'#f5f3fa',hl:'#d4bfff'},
+  {name:'自己啓発',main:'#5c3d10',accent:'#e67e22',acL:'#fef3e2',kpB:'#e67e22',kpBg:'#fff8ef',qBg:'#fff8ef',bg:'#fdf8f0',hl:'#fcd9a8'},
+  {name:'健康',main:'#1a4a3a',accent:'#00b894',acL:'#e6faf4',kpB:'#00b894',kpBg:'#f0fdf8',qBg:'#f0fdf8',bg:'#f2f9f6',hl:'#a8ecd8'},
+  {name:'教育',main:'#3b3510',accent:'#f39c12',acL:'#fef9e7',kpB:'#f39c12',kpBg:'#fffdf0',qBg:'#fffdf0',bg:'#fdfbf2',hl:'#fce8a0'},
+  {name:'モノトーン',main:'#222',accent:'#555',acL:'#f0f0f0',kpB:'#999',kpBg:'#fafafa',qBg:'#f5f5f5',bg:'#f5f5f5',hl:'#e0e0e0'},
 ];
-let currentTheme = THEMES[2]; // default: 占い・スピ
+let cTheme=THEMES[2];
 
-/* ======== ELEMENT TYPES ======== */
-const EL_TYPES = [
-  { key:'body',    label:'本文', default:true },
-  { key:'keypoint',label:'KEY POINT' },
-  { key:'quote',   label:'引用・声' },
-  { key:'number',  label:'数字強調' },
-  { key:'divider', label:'区切り線' },
+/* ========================================
+   20 CARD TEMPLATES
+======================================== */
+const TEMPLATES=[
+  // 1
+  {id:1, name:'ステップ基本', desc:'STEP番号＋見出し＋本文＋KEY POINT',
+   icon:'🎤',label:'STEP 1',heading:'見出しテキスト',
+   elements:[{key:'body',value:'ここに本文が入ります。\n『強調テキスト』は自動でカラーになります。'},{key:'keypoint',value:'ここにキーポイントが入ります。'}]},
+  // 2
+  {id:2, name:'シンプル本文', desc:'見出しと本文だけ。余計な装飾なし',
+   icon:'',label:'',heading:'シンプルな見出し',
+   elements:[{key:'body',value:'装飾を最小限にしたシンプルなカード。\n読みやすさ重視のデザインです。'}]},
+  // 3
+  {id:3, name:'引用カード', desc:'誰かの声や心の声を引用風に',
+   icon:'💬',label:'',heading:'お客様の声',
+   elements:[{key:'quote',value:'この占いを受けて、人生が変わりました。自分のことをこんなに理解してもらえたのは初めてです。'},{key:'body',value:'── 30代女性・会社員'}]},
+  // 4
+  {id:4, name:'数字インパクト', desc:'大きな数字で実績・データを強調',
+   icon:'📊',label:'',heading:'実績',
+   elements:[{key:'number',value:'3,000名+'},{key:'body',value:'これまでにご相談いただいた方の累計人数です。\nおひとりおひとりと丁寧に向き合ってきました。'}]},
+  // 5
+  {id:5, name:'画像ヒーロー', desc:'大きな画像を上部に配置',
+   icon:'',label:'',heading:'',
+   elements:[{key:'image',value:''},{key:'body',value:'画像の下に説明文を入れるレイアウト。\nビジュアルで惹きつけたいときに。'}]},
+  // 6
+  {id:6, name:'警告・注意', desc:'注意喚起や重要な警告',
+   icon:'⚠️',label:'注意',heading:'ここだけは絶対に守ってください',
+   elements:[{key:'warning',value:'これを守らないと、すべてが台無しになります。\n必ず最後まで読んでください。'}]},
+  // 7
+  {id:7, name:'チェックリスト', desc:'確認事項をリスト表示',
+   icon:'✅',label:'',heading:'準備チェックリスト',
+   elements:[{key:'checklist',value:'プロフィールを設定した\nアイコン画像を用意した\n自己紹介文を書いた\n最初の投稿を下書きした'}]},
+  // 8
+  {id:8, name:'ビフォーアフター', desc:'変化・比較を並べて表示',
+   icon:'🔄',label:'',heading:'受講前と受講後',
+   elements:[{key:'compare',valueBefore:'毎日不安で眠れない\n自分に自信がない\n何をしたらいいかわからない',valueAfter:'心が穏やかになった\n自分の強みがわかった\n行動に迷いがなくなった'}]},
+  // 9
+  {id:9, name:'吹き出し会話', desc:'読者の心の声と回答',
+   icon:'',label:'',heading:'',
+   elements:[{key:'bubble_q',value:'でも、私には特別なスキルなんてないし…'},{key:'bubble_a',value:'大丈夫です。スキルがなくても始められる方法があります。\nそれをこれからお伝えしますね。'}]},
+  // 10
+  {id:10, name:'タイムライン', desc:'時系列で流れを説明',
+   icon:'📅',label:'',heading:'1日のスケジュール',
+   elements:[{key:'timeline',value:'7:00|朝の投稿を1つアップ\n12:00|コメント返しとリサーチ\n19:00|夜の投稿を1つアップ\n22:00|DM対応と振り返り'}]},
+  // 11
+  {id:11, name:'ポイント3つ', desc:'3つのポイントをアイコン付きで',
+   icon:'💡',label:'',heading:'成功の3つの鍵',
+   elements:[{key:'points3',value:'継続する|毎日1投稿を3ヶ月続ける\n分析する|反応の良い投稿を研究する\n改善する|データを元に内容を磨く'}]},
+  // 12
+  {id:12, name:'フル装飾', desc:'全要素入り：画像＋本文＋KP＋引用',
+   icon:'🌟',label:'STEP 3',heading:'信頼を勝ち取る',
+   elements:[{key:'image',value:''},{key:'body',value:'ここが最も重要なステップです。\n『信頼』がすべての土台になります。'},{key:'keypoint',value:'信頼なくして、成約なし。\nまずは与えることに集中してください。'},{key:'quote',value:'信頼は一日では築けない。でも一日で壊れる。'}]},
+  // 13
+  {id:13, name:'背景色カード', desc:'アクセントカラー背景で目立たせる',
+   icon:'📢',label:'重要',heading:'ここが一番大事です',
+   elements:[{key:'colored_body',value:'このセクションだけは、何度も読み返してください。\nすべてのステップの中で最も重要な内容です。'}]},
+  // 14
+  {id:14, name:'区切り＋次への導線', desc:'セクション間の繋ぎに',
+   icon:'',label:'',heading:'',
+   elements:[{key:'transition',value:'ここまでの内容はいかがでしたか？\n次のステップでは、いよいよ実践編に入ります。'}]},
+  // 15
+  {id:15, name:'プロフィール', desc:'自己紹介カード',
+   icon:'👤',label:'',heading:'自己紹介',
+   elements:[{key:'image',value:''},{key:'profile_name',value:'山田 花子'},{key:'profile_title',value:'恋愛カウンセラー / 占い師'},{key:'body',value:'はじめまして。\n10年間で3,000人以上の恋愛相談に乗ってきました。\nあなたの悩みに寄り添います。'}]},
+  // 16
+  {id:16, name:'Q&A', desc:'質問と回答のセット',
+   icon:'❓',label:'Q&A',heading:'よくある質問',
+   elements:[{key:'qa',value:'初心者でも大丈夫ですか？|はい、まったくの初心者からスタートした方がほとんどです。ご安心ください。\nどのくらいで結果が出ますか？|個人差はありますが、3ヶ月継続された方の多くが変化を実感されています。'}]},
+  // 17
+  {id:17, name:'メリット一覧', desc:'メリットをアイコン付きで列挙',
+   icon:'🎁',label:'',heading:'参加するメリット',
+   elements:[{key:'merit_list',value:'✨|完全個別サポート|あなた専用のアドバイス\n📱|LINEでいつでも相談|24時間以内に返信\n📚|動画教材見放題|100本以上のコンテンツ\n🤝|仲間とつながれる|専用コミュニティ参加権'}]},
+  // 18
+  {id:18, name:'CTA（行動喚起）', desc:'ボタン付きの行動促進カード',
+   icon:'🚀',label:'',heading:'今すぐ始めましょう',
+   elements:[{key:'body',value:'ここまで読んでくださったあなたは、\nもう一歩を踏み出す準備ができています。'},{key:'cta',value:'LINEで無料相談する'}]},
+  // 19
+  {id:19, name:'ステップ図解', desc:'矢印で流れを図示',
+   icon:'🗺️',label:'',heading:'全体の流れ',
+   elements:[{key:'flow',value:'Threadsで発信\nLINEオプチャに誘導\n信頼関係を構築\n個別相談へ\n成約'}]},
+  // 20
+  {id:20, name:'まとめカード', desc:'セクション末尾のまとめ用',
+   icon:'📝',label:'まとめ',heading:'この章のポイント',
+   elements:[{key:'summary',value:'ポイント1：Threadsは看板。売り込まない\nポイント2：LINEオプチャで信頼を築く\nポイント3：焦らず3ヶ月は継続する'}]},
 ];
 
-/* ======== DATA ======== */
-let sections = [];
-let uid = 0;
+/* ========================================
+   STATE
+======================================== */
+let sections=[];
+let uid=0;
+let activeTab=0;
+let chosenTplId=null;
 
-/* ======== THEME BAR ======== */
-function renderThemeBar(){
-  document.getElementById('themeBar').innerHTML = THEMES.map((t,i)=>`
-    <div class="theme-chip ${t===currentTheme?'active':''}"
-         style="background:${t.accentLight};color:${t.accent}"
-         onclick="pickTheme(${i})">
-      ${t.name}
+/* ========================================
+   TAB SWITCH
+======================================== */
+function switchTab(n){
+  activeTab=n;
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===n));
+  renderTabContent();
+}
+
+function renderTabContent(){
+  const c=document.getElementById('tabContent');
+  if(activeTab===0) renderGallery(c);
+  else renderEditor(c);
+}
+
+/* ========================================
+   GALLERY
+======================================== */
+function renderGallery(c){
+  const themeHtml=THEMES.map((t,i)=>`<div class="tchip ${t===cTheme?'on':''}" style="background:${t.acL};color:${t.accent}" onclick="pickTheme(${i})">${t.name}</div>`).join('');
+  const cards=TEMPLATES.map(t=>`
+    <div class="gal-item ${chosenTplId===t.id?'chosen':''}" onclick="previewTpl(${t.id})">
+      <div class="gal-preview" id="galPv${t.id}"></div>
+      <div class="gal-name">${t.name}</div>
     </div>`).join('');
-}
-function pickTheme(i){ currentTheme=THEMES[i]; renderThemeBar(); renderPreview(); }
-renderThemeBar();
-
-/* ======== SECTIONS ======== */
-function addSection(){
-  const id = uid++;
-  sections.push({
-    id,
-    icon:'',
-    label:'',
-    heading:'',
-    elements:[{ key:'body', value:'' }]
-  });
-  renderEditor(); renderPreview();
+  c.innerHTML=`
+    <div style="font-size:11px;font-weight:700;color:#888;margin-bottom:6px;">テーマカラー</div>
+    <div class="tbar">${themeHtml}</div>
+    <div style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-size:11px;font-weight:700;color:#888;">カードテンプレート（クリックでプレビュー）</span>
+      <button class="bM" onclick="useTpl()" ${chosenTplId?'':'disabled'} style="${chosenTplId?'':'opacity:.4;cursor:default'}">このテンプレートを使う →</button>
+    </div>
+    <div class="gal">${cards}</div>`;
+  TEMPLATES.forEach(t=>{const el=document.getElementById('galPv'+t.id);if(el)el.innerHTML=renderBlock(t,cTheme,true);});
 }
 
-function removeSection(id){
-  if(!confirm('削除しますか？'))return;
-  sections=sections.filter(s=>s.id!==id);
-  renderEditor(); renderPreview();
-}
-function moveSection(id,d){
-  const i=sections.findIndex(s=>s.id===id);
-  const j=i+d; if(j<0||j>=sections.length)return;
-  [sections[i],sections[j]]=[sections[j],sections[i]];
-  renderEditor(); renderPreview();
-}
-function toggleSec(id){
-  document.getElementById('sec-'+id).classList.toggle('closed');
+function pickTheme(i){cTheme=THEMES[i];renderTabContent();renderPreview();}
+
+function previewTpl(id){
+  chosenTplId=id;
+  renderTabContent();
+  // show in main preview
+  const t=TEMPLATES.find(x=>x.id===id);
+  document.getElementById('pvArea').innerHTML=renderBlock(t,cTheme,false);
 }
 
-function addElement(secId, key){
-  const s=sections.find(x=>x.id===secId);
-  if(key==='divider') s.elements.push({key,value:''});
-  else s.elements.push({key,value:''});
-  renderEditor(); renderPreview();
-}
-function removeElement(secId, elIdx){
-  sections.find(x=>x.id===secId).elements.splice(elIdx,1);
-  renderEditor(); renderPreview();
-}
-
-function updateField(secId, field, val){
-  sections.find(x=>x.id===secId)[field]=val;
-  renderPreview();
-}
-function updateEl(secId, elIdx, val){
-  sections.find(x=>x.id===secId).elements[elIdx].value=val;
+function useTpl(){
+  if(!chosenTplId)return;
+  const t=TEMPLATES.find(x=>x.id===chosenTplId);
+  const s={id:uid++,tplId:t.id,icon:t.icon,label:t.label,heading:t.heading,elements:JSON.parse(JSON.stringify(t.elements))};
+  sections.push(s);
+  chosenTplId=null;
+  switchTab(1);
   renderPreview();
 }
 
-/* ======== RENDER EDITOR ======== */
-function renderEditor(){
-  document.getElementById('secList').innerHTML = sections.map((s,si)=>{
-    const title = s.label || s.heading || `セクション ${si+1}`;
-    const elsHtml = s.elements.map((el,ei)=>{
-      const type = EL_TYPES.find(t=>t.key===el.key);
-      if(el.key==='divider') return `
-        <div class="el-item">
-          <div class="el-item-head"><span>── 区切り線 ──</span>
-          <button class="el-remove" onclick="removeElement(${s.id},${ei})">×</button></div>
-        </div>`;
-      return `
-        <div class="el-item">
-          <div class="el-item-head"><span>${type?type.label:el.key}</span>
-          <button class="el-remove" onclick="removeElement(${s.id},${ei})">×</button></div>
-          <textarea rows="${el.key==='number'?1:3}" oninput="updateEl(${s.id},${ei},this.value)">${esc(el.value)}</textarea>
-        </div>`;
-    }).join('');
-
-    const unusedEls = EL_TYPES.filter(t=>t.key==='divider'||t.key==='body'||!s.elements.find(e=>e.key===t.key));
-
-    return `
-    <div class="sec-editor" id="sec-${s.id}">
-      <div class="sec-top" onclick="toggleSec(${s.id})">
-        <h3>${s.icon||'📄'} ${esc(title)}</h3><span class="arrow">▼</span>
-      </div>
-      <div class="sec-content">
-        <div class="row">
-          <div><label>アイコン</label><input type=text value="${esc(s.icon)}" oninput="updateField(${s.id},'icon',this.value)" placeholder="🎤"></div>
-          <div><label>ラベル</label><input type=text value="${esc(s.label)}" oninput="updateField(${s.id},'label',this.value)" placeholder="STEP 1（任意）"></div>
-        </div>
-        <label>見出し</label>
-        <input type=text value="${esc(s.heading)}" oninput="updateField(${s.id},'heading',this.value)" placeholder="見出しを入力">
-
-        <label style="margin-top:16px">構成要素</label>
-        <div class="el-list">${elsHtml}</div>
-        <div class="add-el-bar">
-          ${EL_TYPES.map(t=>`<button class="add-el-btn" onclick="addElement(${s.id},'${t.key}')">+ ${t.label}</button>`).join('')}
-        </div>
-
-        <div style="display:flex;justify-content:space-between;margin-top:16px">
-          <div><button class="btn-sm" onclick="moveSection(${s.id},-1)">↑</button> <button class="btn-sm" onclick="moveSection(${s.id},1)">↓</button></div>
-          <button class="btn-red" onclick="removeSection(${s.id})">削除</button>
-        </div>
-      </div>
+/* ========================================
+   EDITOR
+======================================== */
+function renderEditor(c){
+  const themeHtml=THEMES.map((t,i)=>`<div class="tchip ${t===cTheme?'on':''}" style="background:${t.acL};color:${t.accent}" onclick="pickTheme(${i})">${t.name}</div>`).join('');
+  let html=`
+    <div style="font-size:11px;font-weight:700;color:#888;margin-bottom:6px;">テーマカラー</div>
+    <div class="tbar">${themeHtml}</div>
+    <div class="abar">
+      <button class="bM" onclick="switchTab(0)">← テンプレから追加</button>
+      <button class="bE" onclick="doExport()">HTMLエクスポート</button>
     </div>`;
-  }).join('');
+  if(!sections.length){
+    html+=`<div style="text-align:center;color:#bbb;padding:30px;font-size:12px;">テンプレートタブからカードを追加してください</div>`;
+  }else{
+    html+=sections.map((s,si)=>{
+      const title=s.label||s.heading||`セクション ${si+1}`;
+      const elsHtml=s.elements.map((el,ei)=>renderElEditor(s.id,el,ei)).join('');
+      const addBtns=EL_KEYS.map(k=>`<button class="add-btn" onclick="addEl(${s.id},'${k.key}')">+ ${k.label}</button>`).join('');
+      return `
+      <div class="sec-ed" id="sec-${s.id}">
+        <div class="sec-hd" onclick="togSec(${s.id})"><h3>${s.icon||'📄'} ${esc(title)}</h3><span class="arr">▼</span></div>
+        <div class="sec-bd">
+          <div class="rw">
+            <div><label>アイコン</label><input type=text value="${esc(s.icon)}" oninput="uf(${s.id},'icon',this.value)" placeholder="🎤"></div>
+            <div><label>ラベル</label><input type=text value="${esc(s.label)}" oninput="uf(${s.id},'label',this.value)" placeholder="STEP 1"></div>
+          </div>
+          <label>見出し</label><input type=text value="${esc(s.heading)}" oninput="uf(${s.id},'heading',this.value)" placeholder="見出し">
+          <label style="margin-top:12px;">構成要素</label>
+          ${elsHtml}
+          <div class="add-bar">${addBtns}</div>
+          <div style="display:flex;justify-content:space-between;margin-top:12px;">
+            <div><button class="bSm" onclick="mvSec(${s.id},-1)">↑</button> <button class="bSm" onclick="mvSec(${s.id},1)">↓</button></div>
+            <button class="bR" onclick="rmSec(${s.id})">削除</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  c.innerHTML=html;
 }
 
-/* ======== RENDER PREVIEW ======== */
+const EL_KEYS=[
+  {key:'body',label:'本文'},{key:'keypoint',label:'KEY POINT'},{key:'quote',label:'引用'},
+  {key:'number',label:'数字強調'},{key:'image',label:'画像'},{key:'warning',label:'警告'},
+  {key:'checklist',label:'チェックリスト'},{key:'compare',label:'ビフォーアフター'},
+  {key:'bubble_q',label:'吹き出し（質問）'},{key:'bubble_a',label:'吹き出し（回答）'},
+  {key:'timeline',label:'タイムライン'},{key:'points3',label:'ポイント3つ'},
+  {key:'colored_body',label:'色付き本文'},{key:'transition',label:'次への導線'},
+  {key:'profile_name',label:'名前'},{key:'profile_title',label:'肩書き'},
+  {key:'qa',label:'Q&A'},{key:'merit_list',label:'メリット一覧'},
+  {key:'cta',label:'CTAボタン'},{key:'flow',label:'フロー図'},
+  {key:'summary',label:'まとめ'},{key:'divider',label:'区切り線'},
+];
+
+function renderElEditor(secId,el,ei){
+  const label=EL_KEYS.find(k=>k.key===el.key)?.label||el.key;
+  if(el.key==='divider') return `<div class="eli"><div class="eli-top"><span>── 区切り線 ──</span><button class="eli-x" onclick="rmEl(${secId},${ei})">×</button></div></div>`;
+  if(el.key==='image') return `<div class="eli"><div class="eli-top"><span>${label}</span><button class="eli-x" onclick="rmEl(${secId},${ei})">×</button></div>
+    <div class="img-drop" onclick="this.querySelector('input').click()">📷 クリックまたはドラッグで画像追加<input type="file" accept="image/*" onchange="handleImg(${secId},${ei},this)"></div>
+    ${el.value?`<img class="img-thumb" src="${el.value}">`:''}</div>`;
+  if(el.key==='compare') return `<div class="eli"><div class="eli-top"><span>${label}</span><button class="eli-x" onclick="rmEl(${secId},${ei})">×</button></div>
+    <label>Before</label><textarea rows=3 oninput="uel(${secId},${ei},'valueBefore',this.value)">${esc(el.valueBefore||'')}</textarea>
+    <label>After</label><textarea rows=3 oninput="uel(${secId},${ei},'valueAfter',this.value)">${esc(el.valueAfter||'')}</textarea></div>`;
+  return `<div class="eli"><div class="eli-top"><span>${label}</span><button class="eli-x" onclick="rmEl(${secId},${ei})">×</button></div>
+    <textarea rows="${['number','profile_name','profile_title','cta'].includes(el.key)?1:3}" oninput="uel(${secId},${ei},'value',this.value)">${esc(el.value||'')}</textarea></div>`;
+}
+
+function handleImg(secId,ei,input){
+  const file=input.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    sections.find(s=>s.id===secId).elements[ei].value=e.target.result;
+    renderTabContent(); renderPreview();
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ========================================
+   EDITOR ACTIONS
+======================================== */
+function uf(id,f,v){sections.find(s=>s.id===id)[f]=v;renderPreview();}
+function uel(id,ei,f,v){sections.find(s=>s.id===id).elements[ei][f]=v;renderPreview();}
+function addEl(id,key){
+  const el=key==='compare'?{key,valueBefore:'',valueAfter:''}:{key,value:''};
+  sections.find(s=>s.id===id).elements.push(el);
+  renderTabContent();renderPreview();
+}
+function rmEl(id,ei){sections.find(s=>s.id===id).elements.splice(ei,1);renderTabContent();renderPreview();}
+function togSec(id){document.getElementById('sec-'+id).classList.toggle('shut');}
+function rmSec(id){if(!confirm('削除しますか？'))return;sections=sections.filter(s=>s.id!==id);renderTabContent();renderPreview();}
+function mvSec(id,d){const i=sections.findIndex(s=>s.id===id);const j=i+d;if(j<0||j>=sections.length)return;[sections[i],sections[j]]=[sections[j],sections[i]];renderTabContent();renderPreview();}
+
+/* ========================================
+   RENDER BLOCK (preview & gallery)
+======================================== */
+function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function clr(text,t){return esc(text).replace(/『([^』]*)』/g,`<span style="color:${t.accent};font-weight:700">『$1』</span>`);}
+
+function renderBlock(s,t,mini){
+  const sc=mini?'transform:scale(0.65);transform-origin:top left;':'';
+  let h='';
+  if(s.icon)h+=`<div style="font-size:${mini?'18px':'26px'};margin-bottom:2px">${s.icon}</div>`;
+  if(s.label)h+=`<div style="font-size:${mini?'16px':'26px'};font-weight:900;color:${t.main};margin-bottom:4px">${esc(s.label)}</div>`;
+  if(s.heading)h+=`<div style="font-size:${mini?'13px':'20px'};font-weight:900;color:${t.main};margin-bottom:12px">${esc(s.heading)}</div>`;
+
+  (s.elements||[]).forEach(el=>{
+    const fs=mini?'11px':'15.5px';
+    const lh=mini?'1.6':'2';
+    switch(el.key){
+      case 'body':
+        h+=`<div style="font-size:${fs};line-height:${lh};white-space:pre-wrap">${clr(el.value||'',t)}</div>`;break;
+      case 'keypoint':
+        h+=`<div style="margin-top:${mini?'8px':'20px'};border-left:4px solid ${t.kpB};padding:${mini?'8px 10px':'16px 18px 16px 22px'};background:${t.kpBg};border-radius:0 10px 10px 0">
+          <div style="font-size:${mini?'9px':'12px'};font-weight:700;color:${t.kpB};letter-spacing:1px;margin-bottom:${mini?'4px':'8px'}">KEY POINT</div>
+          <div style="font-size:${mini?'10px':'14.5px'};line-height:${lh};white-space:pre-wrap">${clr(el.value||'',t)}</div></div>`;break;
+      case 'quote':
+        h+=`<div style="margin-top:${mini?'8px':'18px'};padding:${mini?'10px':'16px 20px'};border-radius:10px;background:${t.qBg};font-style:italic;font-size:${fs};line-height:1.8;color:${t.main};position:relative">
+          <span style="font-size:${mini?'24px':'40px'};position:absolute;top:${mini?'-2px':'-6px'};left:${mini?'6px':'10px'};opacity:.15">"</span>${clr(el.value||'',t)}</div>`;break;
+      case 'number':
+        h+=`<div style="font-size:${mini?'28px':'48px'};font-weight:900;color:${t.accent};line-height:1.2;margin:${mini?'6px 0':'12px 0'}">${esc(el.value||'')}</div>`;break;
+      case 'image':
+        if(el.value)h+=`<img src="${el.value}" style="width:100%;border-radius:10px;margin:${mini?'6px 0':'12px 0'}">`;
+        else h+=`<div style="background:#f0f0f0;border-radius:10px;padding:${mini?'16px':'32px'};text-align:center;color:#bbb;font-size:${mini?'10px':'13px'};margin:${mini?'6px 0':'12px 0'}">📷 画像</div>`;break;
+      case 'warning':
+        h+=`<div style="background:#fff3cd;border-left:4px solid #ffc107;padding:${mini?'8px 10px':'16px 20px'};border-radius:0 10px 10px 0;margin-top:${mini?'6px':'12px'}">
+          <div style="font-size:${fs};line-height:${lh};white-space:pre-wrap;color:#856404">${clr(el.value||'',t)}</div></div>`;break;
+      case 'checklist':
+        h+=(el.value||'').split('\n').filter(Boolean).map(line=>
+          `<div style="display:flex;gap:8px;align-items:flex-start;margin-top:${mini?'3px':'8px'}">
+            <span style="color:${t.accent};font-size:${mini?'12px':'18px'}">☑</span>
+            <span style="font-size:${fs};line-height:${lh}">${esc(line)}</span></div>`).join('');break;
+      case 'compare':
+        h+=`<div style="display:flex;gap:${mini?'6px':'12px'};margin-top:${mini?'6px':'12px'}">
+          <div style="flex:1;background:#fee;border-radius:10px;padding:${mini?'8px':'16px'}"><div style="font-size:${mini?'9px':'12px'};font-weight:700;color:#e74c3c;margin-bottom:4px">BEFORE</div><div style="font-size:${mini?'10px':'14px'};line-height:1.7;white-space:pre-wrap">${esc(el.valueBefore||'')}</div></div>
+          <div style="flex:1;background:#efe;border-radius:10px;padding:${mini?'8px':'16px'}"><div style="font-size:${mini?'9px':'12px'};font-weight:700;color:#27ae60;margin-bottom:4px">AFTER</div><div style="font-size:${mini?'10px':'14px'};line-height:1.7;white-space:pre-wrap">${esc(el.valueAfter||'')}</div></div></div>`;break;
+      case 'bubble_q':
+        h+=`<div style="margin-top:${mini?'6px':'12px'};display:flex;justify-content:flex-end"><div style="background:#f0f0f0;border-radius:16px 16px 4px 16px;padding:${mini?'8px 12px':'14px 18px'};max-width:85%;font-size:${fs};line-height:1.7">${clr(el.value||'',t)}</div></div>`;break;
+      case 'bubble_a':
+        h+=`<div style="margin-top:${mini?'4px':'8px'};display:flex;justify-content:flex-start"><div style="background:${t.acL};border-radius:16px 16px 16px 4px;padding:${mini?'8px 12px':'14px 18px'};max-width:85%;font-size:${fs};line-height:1.7">${clr(el.value||'',t)}</div></div>`;break;
+      case 'timeline':
+        h+=(el.value||'').split('\n').filter(Boolean).map(line=>{
+          const[time,...rest]=line.split('|');
+          return `<div style="display:flex;gap:${mini?'6px':'14px'};margin-top:${mini?'4px':'10px'};align-items:flex-start">
+            <div style="min-width:${mini?'36px':'56px'};font-weight:900;color:${t.accent};font-size:${mini?'10px':'14px'}">${esc(time)}</div>
+            <div style="width:3px;min-height:${mini?'16px':'24px'};background:${t.acL};border-radius:2px;margin-top:4px"></div>
+            <div style="font-size:${fs};line-height:1.7">${esc(rest.join('|'))}</div></div>`;
+        }).join('');break;
+      case 'points3':
+        h+=`<div style="margin-top:${mini?'6px':'12px'}">`;
+        h+=(el.value||'').split('\n').filter(Boolean).map((line,i)=>{
+          const[title,...desc]=line.split('|');
+          return `<div style="display:flex;gap:${mini?'8px':'14px'};margin-bottom:${mini?'6px':'14px'};align-items:flex-start">
+            <div style="width:${mini?'24px':'36px'};height:${mini?'24px':'36px'};border-radius:50%;background:${t.acL};color:${t.accent};display:flex;align-items:center;justify-content:center;font-weight:900;font-size:${mini?'11px':'16px'};flex-shrink:0">${i+1}</div>
+            <div><div style="font-weight:700;font-size:${mini?'11px':'15px'};color:${t.main}">${esc(title)}</div><div style="font-size:${mini?'10px':'13.5px'};color:#666;line-height:1.6">${esc(desc.join('|'))}</div></div></div>`;
+        }).join('');
+        h+=`</div>`;break;
+      case 'colored_body':
+        h+=`<div style="background:${t.acL};border-radius:12px;padding:${mini?'10px':'20px 24px'};margin-top:${mini?'6px':'12px'}">
+          <div style="font-size:${fs};line-height:${lh};white-space:pre-wrap;color:${t.main};font-weight:700">${clr(el.value||'',t)}</div></div>`;break;
+      case 'transition':
+        h+=`<div style="text-align:center;padding:${mini?'10px 0':'24px 0'};color:${t.accent}">
+          <div style="font-size:${mini?'10px':'14px'};line-height:1.8;white-space:pre-wrap;color:#666">${clr(el.value||'',t)}</div>
+          <div style="font-size:${mini?'20px':'32px'};margin-top:${mini?'4px':'8px'}">↓</div></div>`;break;
+      case 'profile_name':
+        h+=`<div style="font-size:${mini?'14px':'24px'};font-weight:900;color:${t.main};margin-top:${mini?'4px':'8px'}">${esc(el.value||'')}</div>`;break;
+      case 'profile_title':
+        h+=`<div style="font-size:${mini?'10px':'13px'};color:${t.accent};font-weight:700;margin-bottom:${mini?'4px':'8px'}">${esc(el.value||'')}</div>`;break;
+      case 'qa':
+        h+=(el.value||'').split('\n').filter(Boolean).map(line=>{
+          const[q,a]=line.split('|');
+          return `<div style="margin-top:${mini?'6px':'14px'}">
+            <div style="font-weight:700;color:${t.accent};font-size:${mini?'11px':'15px'};margin-bottom:4px">Q. ${esc(q)}</div>
+            <div style="font-size:${mini?'10px':'14px'};color:#555;line-height:1.7;padding-left:${mini?'8px':'12px'};border-left:3px solid ${t.acL}">A. ${esc(a||'')}</div></div>`;
+        }).join('');break;
+      case 'merit_list':
+        h+=(el.value||'').split('\n').filter(Boolean).map(line=>{
+          const parts=line.split('|');
+          const icon=parts[0]||'✨',title=parts[1]||'',desc=parts[2]||'';
+          return `<div style="display:flex;gap:${mini?'8px':'14px'};margin-top:${mini?'6px':'12px'};align-items:flex-start">
+            <span style="font-size:${mini?'16px':'24px'}">${icon}</span>
+            <div><div style="font-weight:700;font-size:${mini?'11px':'15px'};color:${t.main}">${esc(title)}</div><div style="font-size:${mini?'10px':'13px'};color:#777">${esc(desc)}</div></div></div>`;
+        }).join('');break;
+      case 'cta':
+        h+=`<div style="text-align:center;margin-top:${mini?'10px':'24px'}"><div style="display:inline-block;background:${t.accent};color:#fff;padding:${mini?'8px 20px':'16px 48px'};border-radius:60px;font-weight:900;font-size:${mini?'12px':'18px'};box-shadow:0 4px 16px ${t.accent}40">${esc(el.value||'')}</div></div>`;break;
+      case 'flow':
+        h+=`<div style="display:flex;flex-direction:column;align-items:center;margin-top:${mini?'6px':'12px'}">`;
+        h+=(el.value||'').split('\n').filter(Boolean).map((step,i,arr)=>{
+          let out=`<div style="background:${t.acL};color:${t.main};padding:${mini?'6px 14px':'12px 28px'};border-radius:8px;font-weight:700;font-size:${mini?'10px':'15px'};text-align:center">${esc(step)}</div>`;
+          if(i<arr.length-1)out+=`<div style="color:${t.accent};font-size:${mini?'14px':'22px'};margin:${mini?'2px 0':'6px 0'}">▼</div>`;
+          return out;
+        }).join('');
+        h+=`</div>`;break;
+      case 'summary':
+        h+=`<div style="background:${t.kpBg};border-radius:12px;padding:${mini?'10px':'20px 24px'};margin-top:${mini?'6px':'12px'}">`;
+        h+=(el.value||'').split('\n').filter(Boolean).map(line=>
+          `<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:${mini?'3px':'8px'}">
+            <span style="color:${t.accent}">✔</span><span style="font-size:${mini?'10px':'14px'};line-height:1.7">${esc(line)}</span></div>`).join('');
+        h+=`</div>`;break;
+      case 'divider':
+        h+=`<hr style="border:none;border-top:1px solid #eee;margin:${mini?'8px 0':'16px 0'}">`;break;
+    }
+  });
+  return `<div style="background:#fff;border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.06);padding:${mini?'12px':'36px 32px'};${sc}">${h}</div>`;
+}
+
+/* ========================================
+   PREVIEW
+======================================== */
 function renderPreview(){
-  const c = document.getElementById('preview');
-  if(!sections.length){ c.innerHTML='<div class="empty-msg">← セクションを追加してください</div>'; return; }
-  const t = currentTheme;
-  c.innerHTML = sections.map(s=>{
-    let inner = '';
-    if(s.icon) inner += `<div class="pv-icon">${s.icon}</div>`;
-    if(s.label) inner += `<div class="pv-label" style="color:${t.main}">${esc(s.label)}</div>`;
-    if(s.heading) inner += `<div class="pv-heading" style="color:${t.main}">${esc(s.heading)}</div>`;
-
-    s.elements.forEach(el=>{
-      if(el.key==='body'){
-        inner+=`<div class="pv-body">${colorize(el.value,t)}</div>`;
-      } else if(el.key==='keypoint'){
-        inner+=`<div class="pv-kp" style="border-color:${t.kpBorder};background:${t.kpBg}">
-          <div class="pv-kp-title" style="color:${t.kpBorder}">KEY POINT</div>
-          <div class="pv-kp-body">${colorize(el.value,t)}</div></div>`;
-      } else if(el.key==='quote'){
-        inner+=`<div class="pv-quote" style="background:${t.quoteBg};color:${t.main}">${colorize(el.value,t)}</div>`;
-      } else if(el.key==='number'){
-        inner+=`<div class="pv-number-big" style="color:${t.accent}">${esc(el.value)}</div>`;
-      } else if(el.key==='divider'){
-        inner+=`<hr class="pv-divider">`;
-      }
-    });
-    return `<div class="pv-block">${inner}</div>`;
-  }).join('');
+  const c=document.getElementById('pvArea');
+  if(!sections.length){c.innerHTML='<div class="empty">← テンプレートからカードを追加してください</div>';return;}
+  c.innerHTML=sections.map(s=>renderBlock(s,cTheme,false)).join('<div style="height:36px"></div>');
 }
 
-function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function colorize(text,t){
-  return esc(text).replace(/『([^』]*)』/g, `<span style="color:${t.accent};font-weight:700">『$1』</span>`);
-}
-
-/* ======== EXPORT ======== */
+/* ========================================
+   EXPORT
+======================================== */
 function doExport(){
-  const t=currentTheme;
-  const blocks = sections.map(s=>{
-    let h='';
-    if(s.icon) h+=`<div style="font-size:26px;margin-bottom:2px">${s.icon}</div>`;
-    if(s.label) h+=`<div style="font-size:26px;font-weight:900;color:${t.main};margin-bottom:6px">${esc(s.label)}</div>`;
-    if(s.heading) h+=`<div style="font-size:20px;font-weight:900;color:${t.main};margin-bottom:16px">${esc(s.heading)}</div>`;
-    s.elements.forEach(el=>{
-      if(el.key==='body') h+=`<div style="font-size:15.5px;line-height:2;white-space:pre-wrap">${colorize(el.value,t)}</div>`;
-      else if(el.key==='keypoint') h+=`<div style="margin-top:20px;border-left:4px solid ${t.kpBorder};padding:16px 18px 16px 22px;background:${t.kpBg};border-radius:0 12px 12px 0"><div style="font-size:12px;font-weight:700;color:${t.kpBorder};letter-spacing:1px;margin-bottom:8px">KEY POINT</div><div style="font-size:14.5px;line-height:2;white-space:pre-wrap">${colorize(el.value,t)}</div></div>`;
-      else if(el.key==='quote') h+=`<div style="margin-top:18px;padding:16px 20px;border-radius:12px;background:${t.quoteBg};font-style:italic;font-size:15px;line-height:1.9;color:${t.main}">${colorize(el.value,t)}</div>`;
-      else if(el.key==='number') h+=`<div style="font-size:48px;font-weight:900;color:${t.accent};line-height:1.2;margin:12px 0">${esc(el.value)}</div>`;
-      else if(el.key==='divider') h+=`<hr style="border:none;border-top:1px solid #eee;margin:20px 0">`;
-    });
-    return `<div style="background:#fff;border-radius:16px;box-shadow:0 4px 24px rgba(0,0,0,.07);padding:36px 32px;margin-bottom:36px;max-width:640px;margin-left:auto;margin-right:auto">${h}</div>`;
-  }).join('\n');
-
+  const t=cTheme;
+  const blocks=sections.map(s=>renderBlock(s,t,false)).join('\n');
   const html=`<!DOCTYPE html>
 <html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>スクロール資料</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
 <style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Noto Sans JP',sans-serif;background:${t.bg};padding:40px 20px}</style>
 </head><body>
+<div style="max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:36px;">
 ${blocks}
+</div>
 </body></html>`;
-
-  document.getElementById('exportArea').value=html;
-  document.getElementById('modalBg').classList.add('show');
+  document.getElementById('expArea').value=html;
+  document.getElementById('moBg').classList.add('show');
+}
+function dlFile(){
+  const b=new Blob([document.getElementById('expArea').value],{type:'text/html'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='scroll-doc.html';a.click();
 }
 
-function dlExport(){
-  const b=new Blob([document.getElementById('exportArea').value],{type:'text/html'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(b);
-  a.download='scroll-doc.html'; a.click();
-}
-
-// Init with sample
-sections.push({
-  id:uid++, icon:'🎤', label:'STEP 1', heading:'Threadsで集客する',
-  elements:[
-    {key:'body', value:'Threadsでは、\n『これ私のことだ！』と悩みを持ったターゲットに\n刺さる投稿で『この人の占い、ちょっと気になるな』と思ってもらう。\nそして、LINEオプチャへと誘導していきます。\n\nこれがSTEP 1のすべてです。'},
-    {key:'keypoint', value:'ここでのThreadsの役割は、繁華街の看板と同じです。\n看板を見て『おっ、良さそう』と思った人がお店に入ってくる。\n投稿で何かを売る必要はありません。\n『気になる』と思わせて、LINEオプチャに来てもらう。\nこれだけに集中してください。'}
-  ]
-});
-renderEditor(); renderPreview();
+/* ========================================
+   INIT
+======================================== */
+renderTabContent();
 </script>
 </body>
 </html>
