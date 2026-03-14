@@ -3,331 +3,298 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>スクロール資料ジェネレーター v3</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
+<title>スクロール資料ジェネレーター Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
 :root{
-  --main:#1a1a2e;--accent:#6c3ce0;--accent-light:#ede8ff;
-  --card-bg:#fff;--page-bg:#f5f5f7;--shadow:0 4px 24px rgba(0,0,0,.07);--radius:16px;
+  --main:#0f172a;--accent:#6c3ce0;--acL:#ede8ff;
+  --card:#fff;--bg:#f0f0f5;--shadow:0 8px 40px rgba(0,0,0,.08);--R:20px;
 }
-*{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'Noto Sans JP',sans-serif;background:var(--page-bg);color:#333;line-height:1.8;font-size:14px;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans JP','Inter',sans-serif;background:#e8e8ed;color:#333;line-height:1.8;font-size:13px}
 
-/* === HEADER === */
-.hd{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:22px 20px;text-align:center;}
-.hd h1{font-size:20px;font-weight:900;}.hd p{font-size:12px;opacity:.8;margin-top:2px;}
+.hd{background:linear-gradient(135deg,#4f46e5,#7c3aed,#a855f7);color:#fff;padding:20px;text-align:center;position:relative;overflow:hidden}
+.hd::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(255,255,255,.08) 0%,transparent 60%);animation:hdShine 6s ease-in-out infinite}
+@keyframes hdShine{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,-20px)}}
+.hd h1{font-size:18px;font-weight:900;position:relative}.hd p{font-size:11px;opacity:.7;margin-top:2px;position:relative}
 
-/* === LAYOUT === */
-.wrap{display:flex;min-height:calc(100vh - 74px);}
-.pL{width:40%;background:#fff;border-right:1px solid #e5e5e5;overflow-y:auto;max-height:calc(100vh - 74px);padding:16px;}
-.pR{width:60%;overflow-y:auto;max-height:calc(100vh - 74px);padding:20px;background:var(--page-bg);}
+.wrap{display:flex;height:calc(100vh - 64px)}
+.pL{width:420px;min-width:420px;background:#fff;border-right:1px solid #e2e2e2;display:flex;flex-direction:column}
+.pR{flex:1;overflow-y:auto;background:var(--bg);padding:24px}
 
-/* === TABS === */
-.tabs{display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid #eee;}
-.tab{padding:10px 18px;font-size:13px;font-weight:700;cursor:pointer;color:#999;border-bottom:2px solid transparent;margin-bottom:-2px;transition:.2s;}
-.tab.active{color:var(--accent);border-color:var(--accent);}
+.pL-head{padding:12px 16px;border-bottom:1px solid #eee;flex-shrink:0}
+.tabs{display:flex;gap:0;background:#f5f5f5;border-radius:10px;padding:3px}
+.tab{flex:1;text-align:center;padding:8px;font-size:12px;font-weight:700;border-radius:8px;cursor:pointer;color:#888;transition:.2s}
+.tab.on{background:#fff;color:var(--accent);box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.pL-body{flex:1;overflow-y:auto;padding:16px}
 
-/* === TEMPLATE GALLERY === */
-.gal{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
-.gal-item{border:2px solid #e8e8e8;border-radius:12px;overflow:hidden;cursor:pointer;transition:.2s;background:#fff;}
-.gal-item:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.1);}
-.gal-item.chosen{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-light);}
-.gal-preview{padding:16px;min-height:120px;font-size:11px;line-height:1.6;overflow:hidden;position:relative;}
-.gal-name{padding:8px 12px;font-size:11px;font-weight:700;background:#fafafa;border-top:1px solid #eee;text-align:center;color:#666;}
+/* Theme */
+.tbar{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:14px}
+.tc{width:28px;height:28px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:.2s;position:relative}
+.tc:hover{transform:scale(1.15)}.tc.on{border-color:var(--main);box-shadow:0 0 0 2px #fff,0 0 0 4px var(--main)}
 
-/* === THEME BAR === */
-.tbar{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
-.tchip{padding:5px 12px;border-radius:16px;font-size:11px;font-weight:700;border:2px solid transparent;cursor:pointer;transition:.2s;}
-.tchip:hover{transform:scale(1.05);}.tchip.on{border-color:var(--main);box-shadow:0 2px 8px rgba(0,0,0,.12);}
+/* Gallery */
+.gal{display:flex;flex-direction:column;gap:14px}
+.gal-card{background:#fff;border:1.5px solid #e8e8e8;border-radius:14px;overflow:hidden;transition:.2s}
+.gal-card:hover{border-color:#ccc;box-shadow:0 4px 20px rgba(0,0,0,.06)}
+.gal-top{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;border-bottom:1px solid #f0f0f0}
+.gal-top h4{font-size:12px;font-weight:700;color:var(--main)}.gal-top span{font-size:10px;color:#999}
+.gal-pv{padding:12px;max-height:200px;overflow:hidden;background:#fafafa}
+.gal-foot{padding:8px 14px;display:flex;justify-content:flex-end}
+.gal-use{padding:6px 16px;border:none;border-radius:8px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;color:#fff;background:linear-gradient(135deg,#4f46e5,#7c3aed);transition:.2s}
+.gal-use:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(124,58,237,.3)}
 
-/* === EDITOR === */
-.sec-ed{background:#fafafa;border:1px solid #e8e8e8;border-radius:10px;margin-bottom:10px;overflow:hidden;}
-.sec-hd{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;cursor:pointer;user-select:none;}
-.sec-hd h3{font-size:12px;font-weight:700;color:var(--accent);}.sec-hd .arr{color:#aaa;transition:.2s;}
-.sec-ed.shut .sec-bd{display:none;}.sec-ed.shut .arr{transform:rotate(-90deg);}
-.sec-bd{padding:0 14px 14px;}
-label{display:block;font-size:10px;font-weight:700;color:#888;margin:10px 0 3px;text-transform:uppercase;letter-spacing:.5px;}
-input[type=text],textarea,select{width:100%;padding:8px 10px;border:1px solid #ddd;border-radius:7px;font-family:inherit;font-size:12px;line-height:1.6;}
-input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent);}
-textarea{resize:vertical;min-height:60px;}
-.rw{display:flex;gap:6px;}.rw>*{flex:1;}
+/* Editor */
+.sec-ed{background:#fafafa;border:1.5px solid #e8e8e8;border-radius:12px;margin-bottom:10px;overflow:hidden;transition:.2s}
+.sec-ed:hover{border-color:#ddd}
+.sec-hd{display:flex;justify-content:space-between;align-items:center;padding:11px 14px;cursor:pointer;user-select:none}
+.sec-hd h3{font-size:12px;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:6px}
+.sec-hd .arr{color:#ccc;transition:.2s;font-size:10px}.sec-ed.shut .sec-bd{display:none}.sec-ed.shut .arr{transform:rotate(-90deg)}
+.sec-bd{padding:0 14px 14px}
+label{display:block;font-size:10px;font-weight:700;color:#999;margin:10px 0 3px;letter-spacing:.3px}
+input[type=text],textarea,select{width:100%;padding:8px 11px;border:1.5px solid #e2e2e2;border-radius:8px;font-family:inherit;font-size:12px;line-height:1.6;background:#fff;transition:.2s}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px rgba(108,60,224,.08)}
+textarea{resize:vertical;min-height:50px}
+select{appearance:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center #fff;padding-right:28px}
+.rw{display:flex;gap:6px}.rw>*{flex:1}
 
-/* --- element items --- */
-.eli{background:#fff;border:1px solid #e8e8e8;border-radius:7px;padding:8px 10px;margin-bottom:6px;}
-.eli-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
-.eli-top span{font-size:10px;font-weight:700;color:var(--accent);text-transform:uppercase;}
-.eli-x{background:none;border:none;color:#ccc;cursor:pointer;font-size:14px;padding:0;}.eli-x:hover{color:#ff4757;}
-.add-bar{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;}
-.add-btn{padding:3px 8px;font-size:10px;border-radius:5px;background:var(--accent-light);color:var(--accent);font-weight:600;border:none;cursor:pointer;}
-.add-btn:hover{background:var(--accent);color:#fff;}
+.eli{background:#fff;border:1.5px solid #eee;border-radius:8px;padding:8px 10px;margin-bottom:6px;transition:.2s}
+.eli:hover{border-color:#ddd}
+.eli-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.eli-top span{font-size:10px;font-weight:700;color:var(--accent)}
+.eli-x{background:none;border:none;color:#ddd;cursor:pointer;font-size:14px;padding:0;transition:.2s}.eli-x:hover{color:#ef4444}
 
-/* --- image upload --- */
-.img-drop{border:2px dashed #ccc;border-radius:8px;padding:16px;text-align:center;cursor:pointer;font-size:11px;color:#999;transition:.2s;position:relative;}
-.img-drop:hover{border-color:var(--accent);color:var(--accent);}
-.img-drop input{position:absolute;inset:0;opacity:0;cursor:pointer;}
-.img-thumb{max-width:100%;max-height:100px;border-radius:6px;margin-top:6px;}
+.add-bar{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.add-btn{padding:4px 9px;font-size:10px;border-radius:6px;background:var(--acL);color:var(--accent);font-weight:600;border:none;cursor:pointer;transition:.2s}
+.add-btn:hover{background:var(--accent);color:#fff}
 
-/* === BUTTONS === */
-button{padding:7px 14px;border:none;border-radius:7px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;}
-.bM{background:var(--accent);color:#fff;}.bM:hover{opacity:.9;}
-.bG{background:#eee;color:#555;}.bG:hover{background:#ddd;}
-.bR{background:#ff4757;color:#fff;font-size:10px;padding:4px 10px;}
-.bE{background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:9px 20px;font-size:12px;}
-.bSm{padding:3px 8px;font-size:10px;background:#e8e8e8;border-radius:5px;}
-.abar{display:flex;gap:6px;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;}
+.img-drop{border:2px dashed #ddd;border-radius:10px;padding:20px;text-align:center;cursor:pointer;font-size:11px;color:#bbb;transition:.2s;position:relative}
+.img-drop:hover{border-color:var(--accent);color:var(--accent);background:rgba(108,60,224,.02)}
+.img-drop input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.img-thumb{max-width:100%;max-height:80px;border-radius:8px;margin-top:6px;object-fit:cover}
 
-/* === PREVIEW === */
-.pv-area{max-width:640px;margin:0 auto;}
-.empty{text-align:center;color:#bbb;padding:50px 20px;font-size:13px;}
+/* align */
+.align-bar{display:flex;gap:2px;background:#f0f0f0;border-radius:6px;padding:2px;margin-top:4px}
+.align-btn{flex:1;text-align:center;padding:4px;font-size:11px;border:none;background:transparent;border-radius:5px;cursor:pointer;color:#999;font-weight:600;transition:.15s}
+.align-btn.on{background:#fff;color:var(--accent);box-shadow:0 1px 4px rgba(0,0,0,.08)}
 
-/* === MODAL === */
-.mo-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1000;justify-content:center;align-items:center;}
-.mo-bg.show{display:flex;}
-.mo-box{background:#fff;border-radius:14px;padding:24px;width:92%;max-width:600px;max-height:80vh;overflow-y:auto;}
-.mo-box h2{margin-bottom:10px;font-size:17px;}.mo-box textarea{height:250px;font-family:monospace;font-size:11px;}
+button{padding:7px 14px;border:none;border-radius:8px;font-family:inherit;font-size:11px;font-weight:700;cursor:pointer;transition:.2s}
+.bM{background:var(--accent);color:#fff}.bM:hover{opacity:.85}
+.bG{background:#f0f0f0;color:#666}.bG:hover{background:#e5e5e5}
+.bR{background:#fee;color:#ef4444;font-size:10px;padding:4px 10px;border:1px solid #fcc}.bR:hover{background:#ef4444;color:#fff}
+.bE{background:linear-gradient(135deg,#4f46e5,#7c3aed);color:#fff;padding:9px 20px;font-size:12px;box-shadow:0 4px 16px rgba(124,58,237,.2)}
+.bE:hover{box-shadow:0 6px 24px rgba(124,58,237,.35);transform:translateY(-1px)}
+.bSm{padding:3px 9px;font-size:10px;background:#f0f0f0;border-radius:6px;color:#666}
+.bSm:hover{background:#e0e0e0}
+.abar{display:flex;gap:6px;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap}
 
-@media(max-width:900px){.wrap{flex-direction:column;}.pL,.pR{width:100%;max-height:none;}}
+/* Preview */
+.pv-area{max-width:680px;margin:0 auto}
+.empty{text-align:center;color:#bbb;padding:60px 20px;font-size:13px}
+
+/* Pro Card Styles */
+.pro-card{
+  background:#fff;border-radius:20px;
+  box-shadow:0 1px 3px rgba(0,0,0,.04),0 8px 40px rgba(0,0,0,.06);
+  padding:44px 40px;position:relative;overflow:hidden;
+}
+.pro-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;border-radius:20px 20px 0 0}
+.pro-card .p-icon{font-size:32px;margin-bottom:6px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.1))}
+.pro-card .p-label{font-size:13px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;opacity:.7}
+.pro-card .p-heading{font-size:24px;font-weight:900;letter-spacing:-.3px;margin-bottom:20px;line-height:1.4}
+.pro-card .p-body{font-size:16px;line-height:2.1;white-space:pre-wrap;color:#444}
+.pro-card .p-kp{margin-top:24px;border-left:4px solid;padding:20px 24px;border-radius:0 14px 14px 0;backdrop-filter:blur(4px)}
+.pro-card .p-kp-title{font-size:11px;font-weight:700;letter-spacing:2px;margin-bottom:10px}
+.pro-card .p-kp-body{font-size:15px;line-height:2;white-space:pre-wrap;color:#444}
+.pro-card .p-quote{margin-top:24px;padding:24px 28px;border-radius:16px;font-size:17px;line-height:1.9;position:relative;font-weight:500}
+.pro-card .p-quote::before{content:'"';font-size:64px;position:absolute;top:-8px;left:16px;opacity:.12;font-family:Georgia,serif}
+.pro-card .p-number{font-size:56px;font-weight:900;line-height:1.1;margin:16px 0;letter-spacing:-2px;font-family:'Inter',sans-serif}
+.pro-card .p-warning{margin-top:20px;border-left:4px solid #f59e0b;padding:20px 24px;border-radius:0 14px 14px 0;background:linear-gradient(135deg,#fffbeb,#fef3c7)}
+.pro-card .p-warning-body{font-size:15px;line-height:2;white-space:pre-wrap;color:#92400e}
+.pro-card .p-check-item{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid #f5f5f5}
+.pro-card .p-check-item:last-child{border-bottom:none}
+.pro-card .p-check-icon{width:24px;height:24px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;font-weight:700;color:#fff}
+.pro-card .p-check-text{font-size:15px;line-height:1.7;padding-top:1px}
+.pro-card .p-cmp{display:flex;gap:16px;margin-top:20px}
+.pro-card .p-cmp>div{flex:1;border-radius:14px;padding:20px}
+.pro-card .p-cmp-before{background:linear-gradient(135deg,#fef2f2,#fee2e2)}
+.pro-card .p-cmp-after{background:linear-gradient(135deg,#f0fdf4,#dcfce7)}
+.pro-card .p-cmp-label{font-size:11px;font-weight:700;letter-spacing:1.5px;margin-bottom:8px}
+.pro-card .p-cmp-body{font-size:14px;line-height:1.8;white-space:pre-wrap}
+.pro-card .p-bq{border-radius:20px;padding:18px 22px;max-width:82%}
+.pro-card .p-bq-q{margin-left:auto;background:#f1f5f9;border-radius:20px 20px 6px 20px;color:#334155}
+.pro-card .p-bq-a{margin-right:auto;border-radius:20px 20px 20px 6px}
+.pro-card .p-bq-text{font-size:15px;line-height:1.8}
+.pro-card .p-tl-item{display:flex;gap:16px;align-items:flex-start;padding:12px 0;position:relative}
+.pro-card .p-tl-time{min-width:60px;font-weight:900;font-size:15px;font-family:'Inter',sans-serif;padding-top:2px}
+.pro-card .p-tl-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;margin-top:6px;box-shadow:0 0 0 4px #fff,0 0 0 5px #e2e2e2}
+.pro-card .p-tl-text{font-size:15px;line-height:1.7;flex:1}
+.pro-card .p-pts{margin-top:16px}
+.pro-card .p-pt{display:flex;gap:16px;margin-bottom:20px;align-items:flex-start}
+.pro-card .p-pt-num{width:40px;height:40px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px;flex-shrink:0;font-family:'Inter',sans-serif}
+.pro-card .p-pt-title{font-weight:700;font-size:16px;margin-bottom:2px}
+.pro-card .p-pt-desc{font-size:13.5px;color:#666;line-height:1.6}
+.pro-card .p-color-body{border-radius:14px;padding:24px 28px;margin-top:16px;font-size:16px;line-height:2;white-space:pre-wrap;font-weight:600}
+.pro-card .p-trans{text-align:center;padding:24px 0}
+.pro-card .p-trans-text{font-size:15px;color:#888;line-height:1.9;white-space:pre-wrap;margin-bottom:8px}
+.pro-card .p-trans-arrow{font-size:28px;opacity:.3}
+.pro-card .p-pname{font-size:26px;font-weight:900;margin-top:12px}
+.pro-card .p-ptitle{font-size:14px;font-weight:600;margin-bottom:12px}
+.pro-card .p-qa{margin-top:16px}
+.pro-card .p-qa-item{margin-bottom:20px}
+.pro-card .p-qa-q{font-weight:700;font-size:15px;margin-bottom:6px;display:flex;gap:8px;align-items:flex-start}
+.pro-card .p-qa-q-badge{flex-shrink:0;width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff}
+.pro-card .p-qa-a{font-size:14.5px;color:#555;line-height:1.8;padding:12px 16px;border-radius:12px;margin-left:36px}
+.pro-card .p-merit{margin-top:12px}
+.pro-card .p-merit-item{display:flex;gap:16px;padding:16px 0;border-bottom:1px solid #f5f5f5;align-items:flex-start}
+.pro-card .p-merit-item:last-child{border-bottom:none}
+.pro-card .p-merit-icon{font-size:28px;filter:drop-shadow(0 2px 4px rgba(0,0,0,.08))}
+.pro-card .p-merit-title{font-weight:700;font-size:15px}
+.pro-card .p-merit-desc{font-size:13px;color:#888;line-height:1.5;margin-top:1px}
+.pro-card .p-cta{text-align:center;margin-top:28px}
+.pro-card .p-cta-btn{display:inline-block;padding:18px 56px;border-radius:60px;font-weight:900;font-size:18px;color:#fff;position:relative;overflow:hidden;letter-spacing:.5px}
+.pro-card .p-cta-btn::after{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,.15) 50%,transparent 60%);animation:ctaShine 3s infinite}
+@keyframes ctaShine{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.pro-card .p-flow{display:flex;flex-direction:column;align-items:center;margin-top:16px;gap:6px}
+.pro-card .p-flow-step{padding:14px 32px;border-radius:12px;font-weight:700;font-size:15px;min-width:200px;text-align:center}
+.pro-card .p-flow-arrow{font-size:18px;opacity:.3}
+.pro-card .p-sum{border-radius:14px;padding:24px;margin-top:16px}
+.pro-card .p-sum-item{display:flex;gap:10px;align-items:flex-start;margin-bottom:10px}
+.pro-card .p-sum-item:last-child{margin-bottom:0}
+.pro-card .p-sum-icon{font-size:16px;margin-top:1px}
+.pro-card .p-sum-text{font-size:14.5px;line-height:1.7}
+.pro-card .p-img{width:100%;border-radius:14px;margin:12px 0;box-shadow:0 4px 20px rgba(0,0,0,.06)}
+.pro-card .p-img-empty{background:linear-gradient(135deg,#f8f8f8,#f0f0f0);border-radius:14px;padding:40px;text-align:center;color:#ccc;font-size:13px;margin:12px 0}
+
+/* align helpers */
+.al-l{text-align:left}.al-c{text-align:center}.al-r{text-align:right}
+
+/* Modal */
+.mo-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;justify-content:center;align-items:center;backdrop-filter:blur(4px)}
+.mo-bg.show{display:flex}
+.mo-box{background:#fff;border-radius:20px;padding:28px;width:92%;max-width:640px;max-height:80vh;overflow-y:auto;box-shadow:0 24px 80px rgba(0,0,0,.2)}
+.mo-box h2{margin-bottom:12px;font-size:18px}.mo-box textarea{height:260px;font-family:'SF Mono',monospace;font-size:11px;background:#f8f8f8;border-color:#e8e8e8}
+
+@media(max-width:900px){.wrap{flex-direction:column;height:auto}.pL{width:100%;min-width:unset;max-height:50vh}.pR{max-height:none}}
 </style>
 </head>
 <body>
 
-<div class="hd"><h1>📜 スクロール資料ジェネレーター v3</h1><p>20種類のテンプレートから選んで、中身を自由にカスタマイズ</p></div>
+<div class="hd"><h1>✦ スクロール資料ジェネレーター Pro</h1><p>20種類のプロテンプレート × 7カラーテーマ × 自由配置</p></div>
 
 <div class="wrap">
-<div class="pL" id="leftP">
-  <div class="tabs">
-    <div class="tab active" onclick="switchTab(0)">テンプレート</div>
-    <div class="tab" onclick="switchTab(1)">エディタ</div>
+<div class="pL">
+  <div class="pL-head">
+    <div class="tabs"><div class="tab on" onclick="switchTab(0)">テンプレート</div><div class="tab" onclick="switchTab(1)">エディタ</div></div>
   </div>
-  <div id="tabContent"></div>
+  <div class="pL-body" id="tabC"></div>
 </div>
-<div class="pR"><div class="pv-area" id="pvArea"><div class="empty">← テンプレートを選んでください</div></div></div>
+<div class="pR"><div class="pv-area" id="pvArea"><div class="empty">← テンプレートを選んでカードを追加</div></div></div>
 </div>
 
 <div class="mo-bg" id="moBg" onclick="if(event.target===this)this.classList.remove('show')">
   <div class="mo-box">
     <h2>HTMLエクスポート</h2>
+    <p style="font-size:11px;color:#999;margin-bottom:8px">コピーまたはダウンロードして使用してください</p>
     <textarea id="expArea" readonly></textarea>
-    <div style="display:flex;gap:6px;margin-top:10px;">
+    <div style="display:flex;gap:8px;margin-top:12px">
       <button class="bM" onclick="navigator.clipboard.writeText(document.getElementById('expArea').value);alert('コピーしました')">コピー</button>
-      <button class="bM" style="background:#2ed573" onclick="dlFile()">ダウンロード</button>
+      <button class="bM" style="background:#059669" onclick="dlFile()">ダウンロード</button>
       <button class="bG" onclick="document.getElementById('moBg').classList.remove('show')">閉じる</button>
     </div>
   </div>
 </div>
 
 <script>
-/* ========================================
-   THEMES
-======================================== */
-const THEMES=[
-  {name:'ビジネス',main:'#1a3a5c',accent:'#2563eb',acL:'#e8f0fe',kpB:'#2563eb',kpBg:'#f0f5ff',qBg:'#f0f5ff',bg:'#f4f6f9',hl:'#bfdbfe'},
-  {name:'恋愛',main:'#6b2142',accent:'#e84393',acL:'#fde8f0',kpB:'#e84393',kpBg:'#fff0f6',qBg:'#fff0f6',bg:'#fdf5f8',hl:'#fbb6ce'},
-  {name:'占い',main:'#2d1b69',accent:'#6c3ce0',acL:'#ede8ff',kpB:'#6c3ce0',kpBg:'#f5f0ff',qBg:'#f5f0ff',bg:'#f5f3fa',hl:'#d4bfff'},
-  {name:'自己啓発',main:'#5c3d10',accent:'#e67e22',acL:'#fef3e2',kpB:'#e67e22',kpBg:'#fff8ef',qBg:'#fff8ef',bg:'#fdf8f0',hl:'#fcd9a8'},
-  {name:'健康',main:'#1a4a3a',accent:'#00b894',acL:'#e6faf4',kpB:'#00b894',kpBg:'#f0fdf8',qBg:'#f0fdf8',bg:'#f2f9f6',hl:'#a8ecd8'},
-  {name:'教育',main:'#3b3510',accent:'#f39c12',acL:'#fef9e7',kpB:'#f39c12',kpBg:'#fffdf0',qBg:'#fffdf0',bg:'#fdfbf2',hl:'#fce8a0'},
-  {name:'モノトーン',main:'#222',accent:'#555',acL:'#f0f0f0',kpB:'#999',kpBg:'#fafafa',qBg:'#f5f5f5',bg:'#f5f5f5',hl:'#e0e0e0'},
+/* ============ THEMES ============ */
+const TH=[
+  {name:'ビジネス',c:'#2563eb',main:'#0f172a',acL:'#eff6ff',kpB:'#2563eb',kpBg:'#f0f5ff',qBg:'#f0f5ff',bg:'#f1f5f9',hl:'#bfdbfe',grad:'linear-gradient(135deg,#2563eb,#3b82f6)'},
+  {name:'恋愛',c:'#ec4899',main:'#4a0e2b',acL:'#fdf2f8',kpB:'#ec4899',kpBg:'#fdf2f8',qBg:'#fdf2f8',bg:'#fdf5f9',hl:'#fbcfe8',grad:'linear-gradient(135deg,#ec4899,#f472b6)'},
+  {name:'占い',c:'#7c3aed',main:'#1e1049',acL:'#f5f3ff',kpB:'#7c3aed',kpBg:'#f5f3ff',qBg:'#f5f3ff',bg:'#f5f3ff',hl:'#ddd6fe',grad:'linear-gradient(135deg,#7c3aed,#8b5cf6)'},
+  {name:'自己啓発',c:'#ea580c',main:'#431407',acL:'#fff7ed',kpB:'#ea580c',kpBg:'#fff7ed',qBg:'#fff7ed',bg:'#fef6ee',hl:'#fed7aa',grad:'linear-gradient(135deg,#ea580c,#f97316)'},
+  {name:'健康',c:'#059669',main:'#052e16',acL:'#f0fdf4',kpB:'#059669',kpBg:'#f0fdf4',qBg:'#f0fdf4',bg:'#f0fdf4',hl:'#a7f3d0',grad:'linear-gradient(135deg,#059669,#10b981)'},
+  {name:'教育',c:'#d97706',main:'#451a03',acL:'#fffbeb',kpB:'#d97706',kpBg:'#fffbeb',qBg:'#fffbeb',bg:'#fffbeb',hl:'#fde68a',grad:'linear-gradient(135deg,#d97706,#f59e0b)'},
+  {name:'モノトーン',c:'#374151',main:'#111827',acL:'#f9fafb',kpB:'#6b7280',kpBg:'#f9fafb',qBg:'#f9fafb',bg:'#f3f4f6',hl:'#e5e7eb',grad:'linear-gradient(135deg,#374151,#6b7280)'},
 ];
-let cTheme=THEMES[2];
+let cT=TH[2];
 
-/* ========================================
-   20 CARD TEMPLATES
-======================================== */
-const TEMPLATES=[
-  // 1
-  {id:1, name:'ステップ基本', desc:'STEP番号＋見出し＋本文＋KEY POINT',
-   icon:'🎤',label:'STEP 1',heading:'見出しテキスト',
-   elements:[{key:'body',value:'ここに本文が入ります。\n『強調テキスト』は自動でカラーになります。'},{key:'keypoint',value:'ここにキーポイントが入ります。'}]},
-  // 2
-  {id:2, name:'シンプル本文', desc:'見出しと本文だけ。余計な装飾なし',
-   icon:'',label:'',heading:'シンプルな見出し',
-   elements:[{key:'body',value:'装飾を最小限にしたシンプルなカード。\n読みやすさ重視のデザインです。'}]},
-  // 3
-  {id:3, name:'引用カード', desc:'誰かの声や心の声を引用風に',
-   icon:'💬',label:'',heading:'お客様の声',
-   elements:[{key:'quote',value:'この占いを受けて、人生が変わりました。自分のことをこんなに理解してもらえたのは初めてです。'},{key:'body',value:'── 30代女性・会社員'}]},
-  // 4
-  {id:4, name:'数字インパクト', desc:'大きな数字で実績・データを強調',
-   icon:'📊',label:'',heading:'実績',
-   elements:[{key:'number',value:'3,000名+'},{key:'body',value:'これまでにご相談いただいた方の累計人数です。\nおひとりおひとりと丁寧に向き合ってきました。'}]},
-  // 5
-  {id:5, name:'画像ヒーロー', desc:'大きな画像を上部に配置',
-   icon:'',label:'',heading:'',
-   elements:[{key:'image',value:''},{key:'body',value:'画像の下に説明文を入れるレイアウト。\nビジュアルで惹きつけたいときに。'}]},
-  // 6
-  {id:6, name:'警告・注意', desc:'注意喚起や重要な警告',
-   icon:'⚠️',label:'注意',heading:'ここだけは絶対に守ってください',
-   elements:[{key:'warning',value:'これを守らないと、すべてが台無しになります。\n必ず最後まで読んでください。'}]},
-  // 7
-  {id:7, name:'チェックリスト', desc:'確認事項をリスト表示',
-   icon:'✅',label:'',heading:'準備チェックリスト',
-   elements:[{key:'checklist',value:'プロフィールを設定した\nアイコン画像を用意した\n自己紹介文を書いた\n最初の投稿を下書きした'}]},
-  // 8
-  {id:8, name:'ビフォーアフター', desc:'変化・比較を並べて表示',
-   icon:'🔄',label:'',heading:'受講前と受講後',
-   elements:[{key:'compare',valueBefore:'毎日不安で眠れない\n自分に自信がない\n何をしたらいいかわからない',valueAfter:'心が穏やかになった\n自分の強みがわかった\n行動に迷いがなくなった'}]},
-  // 9
-  {id:9, name:'吹き出し会話', desc:'読者の心の声と回答',
-   icon:'',label:'',heading:'',
-   elements:[{key:'bubble_q',value:'でも、私には特別なスキルなんてないし…'},{key:'bubble_a',value:'大丈夫です。スキルがなくても始められる方法があります。\nそれをこれからお伝えしますね。'}]},
-  // 10
-  {id:10, name:'タイムライン', desc:'時系列で流れを説明',
-   icon:'📅',label:'',heading:'1日のスケジュール',
-   elements:[{key:'timeline',value:'7:00|朝の投稿を1つアップ\n12:00|コメント返しとリサーチ\n19:00|夜の投稿を1つアップ\n22:00|DM対応と振り返り'}]},
-  // 11
-  {id:11, name:'ポイント3つ', desc:'3つのポイントをアイコン付きで',
-   icon:'💡',label:'',heading:'成功の3つの鍵',
-   elements:[{key:'points3',value:'継続する|毎日1投稿を3ヶ月続ける\n分析する|反応の良い投稿を研究する\n改善する|データを元に内容を磨く'}]},
-  // 12
-  {id:12, name:'フル装飾', desc:'全要素入り：画像＋本文＋KP＋引用',
-   icon:'🌟',label:'STEP 3',heading:'信頼を勝ち取る',
-   elements:[{key:'image',value:''},{key:'body',value:'ここが最も重要なステップです。\n『信頼』がすべての土台になります。'},{key:'keypoint',value:'信頼なくして、成約なし。\nまずは与えることに集中してください。'},{key:'quote',value:'信頼は一日では築けない。でも一日で壊れる。'}]},
-  // 13
-  {id:13, name:'背景色カード', desc:'アクセントカラー背景で目立たせる',
-   icon:'📢',label:'重要',heading:'ここが一番大事です',
-   elements:[{key:'colored_body',value:'このセクションだけは、何度も読み返してください。\nすべてのステップの中で最も重要な内容です。'}]},
-  // 14
-  {id:14, name:'区切り＋次への導線', desc:'セクション間の繋ぎに',
-   icon:'',label:'',heading:'',
-   elements:[{key:'transition',value:'ここまでの内容はいかがでしたか？\n次のステップでは、いよいよ実践編に入ります。'}]},
-  // 15
-  {id:15, name:'プロフィール', desc:'自己紹介カード',
-   icon:'👤',label:'',heading:'自己紹介',
-   elements:[{key:'image',value:''},{key:'profile_name',value:'山田 花子'},{key:'profile_title',value:'恋愛カウンセラー / 占い師'},{key:'body',value:'はじめまして。\n10年間で3,000人以上の恋愛相談に乗ってきました。\nあなたの悩みに寄り添います。'}]},
-  // 16
-  {id:16, name:'Q&A', desc:'質問と回答のセット',
-   icon:'❓',label:'Q&A',heading:'よくある質問',
-   elements:[{key:'qa',value:'初心者でも大丈夫ですか？|はい、まったくの初心者からスタートした方がほとんどです。ご安心ください。\nどのくらいで結果が出ますか？|個人差はありますが、3ヶ月継続された方の多くが変化を実感されています。'}]},
-  // 17
-  {id:17, name:'メリット一覧', desc:'メリットをアイコン付きで列挙',
-   icon:'🎁',label:'',heading:'参加するメリット',
-   elements:[{key:'merit_list',value:'✨|完全個別サポート|あなた専用のアドバイス\n📱|LINEでいつでも相談|24時間以内に返信\n📚|動画教材見放題|100本以上のコンテンツ\n🤝|仲間とつながれる|専用コミュニティ参加権'}]},
-  // 18
-  {id:18, name:'CTA（行動喚起）', desc:'ボタン付きの行動促進カード',
-   icon:'🚀',label:'',heading:'今すぐ始めましょう',
-   elements:[{key:'body',value:'ここまで読んでくださったあなたは、\nもう一歩を踏み出す準備ができています。'},{key:'cta',value:'LINEで無料相談する'}]},
-  // 19
-  {id:19, name:'ステップ図解', desc:'矢印で流れを図示',
-   icon:'🗺️',label:'',heading:'全体の流れ',
-   elements:[{key:'flow',value:'Threadsで発信\nLINEオプチャに誘導\n信頼関係を構築\n個別相談へ\n成約'}]},
-  // 20
-  {id:20, name:'まとめカード', desc:'セクション末尾のまとめ用',
-   icon:'📝',label:'まとめ',heading:'この章のポイント',
-   elements:[{key:'summary',value:'ポイント1：Threadsは看板。売り込まない\nポイント2：LINEオプチャで信頼を築く\nポイント3：焦らず3ヶ月は継続する'}]},
+/* ============ TEMPLATES ============ */
+const TPL=[
+  {id:1,name:'ステップ基本',desc:'手順解説の定番',icon:'🎯',label:'STEP 1',heading:'見出しテキスト',align:'left',
+   els:[{key:'body',value:'ここに本文が入ります。\n『強調テキスト』は自動でカラーになります。'},{key:'keypoint',value:'ここにキーポイントが入ります。\n最も伝えたいことをここに。'}]},
+  {id:2,name:'シンプル本文',desc:'装飾なしで読ませる',icon:'',label:'',heading:'シンプルな見出し',align:'left',
+   els:[{key:'body',value:'余計な装飾を排除したミニマルなカード。\n文章の力だけで伝えるデザインです。'}]},
+  {id:3,name:'引用・お客様の声',desc:'体験談を印象的に',icon:'💬',label:'',heading:'お客様の声',align:'left',
+   els:[{key:'quote',value:'この占いを受けて、人生が変わりました。自分のことをこんなに理解してもらえたのは初めてです。'},{key:'body',value:'── 30代女性・会社員'}]},
+  {id:4,name:'数字インパクト',desc:'大きな数字で実績を魅せる',icon:'📊',label:'',heading:'実績',align:'center',
+   els:[{key:'number',value:'3,000名+'},{key:'body',value:'これまでにご相談いただいた方の累計人数です。'}]},
+  {id:5,name:'画像ヒーロー',desc:'画像で視覚的に惹きつける',icon:'',label:'',heading:'',align:'center',
+   els:[{key:'image',value:''},{key:'body',value:'画像の下に説明文を配置するレイアウト。\nビジュアルで世界観を伝えたいときに。'}]},
+  {id:6,name:'警告・注意',desc:'重要な注意喚起',icon:'⚠️',label:'',heading:'ここだけは絶対に守ってください',align:'left',
+   els:[{key:'warning',value:'これを守らないと、すべてが台無しになります。\n必ず最後まで読んでください。'}]},
+  {id:7,name:'チェックリスト',desc:'確認事項をわかりやすく',icon:'✅',label:'',heading:'準備チェックリスト',align:'left',
+   els:[{key:'checklist',value:'プロフィールを設定した\nアイコン画像を用意した\n自己紹介文を書いた\n最初の投稿を下書きした'}]},
+  {id:8,name:'ビフォーアフター',desc:'変化を一目で比較',icon:'🔄',label:'',heading:'受講前と受講後',align:'center',
+   els:[{key:'compare',valueBefore:'毎日不安で眠れない\n自分に自信がない\n何をしたらいいかわからない',valueAfter:'心が穏やかになった\n自分の強みがわかった\n行動に迷いがなくなった'}]},
+  {id:9,name:'吹き出し会話',desc:'LINE風の会話形式',icon:'',label:'',heading:'こんな悩みありませんか？',align:'left',
+   els:[{key:'bubble_q',value:'でも、私には特別なスキルなんてないし…'},{key:'bubble_a',value:'大丈夫です。スキルがなくても始められる方法があります。\nこれからお伝えしますね。'}]},
+  {id:10,name:'タイムライン',desc:'時系列で流れを説明',icon:'📅',label:'',heading:'1日のスケジュール',align:'left',
+   els:[{key:'timeline',value:'7:00|朝の投稿を1つアップ\n12:00|コメント返しとリサーチ\n19:00|夜の投稿を1つアップ\n22:00|DM対応と振り返り'}]},
+  {id:11,name:'ポイント3つ',desc:'3つの要点を整理',icon:'💡',label:'',heading:'成功の3つの鍵',align:'left',
+   els:[{key:'points3',value:'継続する|毎日1投稿を3ヶ月続ける\n分析する|反応の良い投稿を研究する\n改善する|データを元に内容を磨く'}]},
+  {id:12,name:'フル装飾',desc:'全部入りの豪華カード',icon:'🌟',label:'STEP 3',heading:'信頼を勝ち取る',align:'left',
+   els:[{key:'image',value:''},{key:'body',value:'ここが最も重要なステップです。\n『信頼』がすべての土台になります。'},{key:'keypoint',value:'信頼なくして、成約なし。\nまずは与えることに集中してください。'},{key:'quote',value:'信頼は一日では築けない。でも一日で壊れる。'}]},
+  {id:13,name:'色付き強調',desc:'背景色で目立たせる',icon:'📢',label:'重要',heading:'ここが一番大事です',align:'center',
+   els:[{key:'colored_body',value:'このセクションだけは、何度も読み返してください。\nすべてのステップの中で最も重要な内容です。'}]},
+  {id:14,name:'次への導線',desc:'セクション間の繋ぎ',icon:'',label:'',heading:'',align:'center',
+   els:[{key:'transition',value:'ここまでの内容はいかがでしたか？\n次のステップでは、いよいよ実践編に入ります。'}]},
+  {id:15,name:'プロフィール',desc:'自己紹介カード',icon:'',label:'',heading:'',align:'center',
+   els:[{key:'image',value:''},{key:'profile_name',value:'山田 花子'},{key:'profile_title',value:'恋愛カウンセラー / 占い師'},{key:'body',value:'はじめまして。\n10年間で3,000人以上の恋愛相談に乗ってきました。'}]},
+  {id:16,name:'Q&A',desc:'質問と回答のセット',icon:'',label:'',heading:'よくある質問',align:'left',
+   els:[{key:'qa',value:[{q:'初心者でも大丈夫ですか？',a:'はい、まったくの初心者からスタートした方がほとんどです。ご安心ください。'},{q:'どのくらいで結果が出ますか？',a:'個人差はありますが、3ヶ月継続された方の多くが変化を実感されています。'}]}]},
+  {id:17,name:'メリット一覧',desc:'メリットをリッチに列挙',icon:'',label:'',heading:'参加するメリット',align:'left',
+   els:[{key:'merit_list',value:'✨|完全個別サポート|あなた専用のアドバイス\n📱|LINEでいつでも相談|24時間以内に返信\n📚|動画教材見放題|100本以上のコンテンツ\n🤝|仲間とつながれる|専用コミュニティ参加権'}]},
+  {id:18,name:'CTA（行動喚起）',desc:'ボタンで行動を促す',icon:'🚀',label:'',heading:'今すぐ始めましょう',align:'center',
+   els:[{key:'body',value:'ここまで読んでくださったあなたは、\nもう一歩を踏み出す準備ができています。'},{key:'cta',value:'LINEで無料相談する'}]},
+  {id:19,name:'フロー図',desc:'矢印で全体の流れを図示',icon:'🗺️',label:'',heading:'全体の流れ',align:'center',
+   els:[{key:'flow',value:'Threadsで発信\nLINEオプチャに誘導\n信頼関係を構築\n個別相談へ\n成約'}]},
+  {id:20,name:'まとめ',desc:'章末のまとめ用',icon:'📝',label:'まとめ',heading:'この章のポイント',align:'left',
+   els:[{key:'summary',value:'ポイント1：Threadsは看板。売り込まない\nポイント2：LINEオプチャで信頼を築く\nポイント3：焦らず3ヶ月は継続する'}]},
 ];
 
-/* ========================================
-   STATE
-======================================== */
-let sections=[];
-let uid=0;
-let activeTab=0;
-let chosenTplId=null;
+/* ============ STATE ============ */
+let secs=[];let uid=0;let aTab=0;
 
-/* ========================================
-   TAB SWITCH
-======================================== */
-function switchTab(n){
-  activeTab=n;
-  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',i===n));
-  renderTabContent();
-}
+function switchTab(n){aTab=n;document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',i===n));renderTab();}
+function renderTab(){const c=document.getElementById('tabC');aTab===0?renderGallery(c):renderEditor(c);}
 
-function renderTabContent(){
-  const c=document.getElementById('tabContent');
-  if(activeTab===0) renderGallery(c);
-  else renderEditor(c);
-}
-
-/* ========================================
-   GALLERY
-======================================== */
+/* ============ GALLERY ============ */
 function renderGallery(c){
-  const themeHtml=THEMES.map((t,i)=>`<div class="tchip ${t===cTheme?'on':''}" style="background:${t.acL};color:${t.accent}" onclick="pickTheme(${i})">${t.name}</div>`).join('');
-  const cards=TEMPLATES.map(t=>`
-    <div class="gal-item ${chosenTplId===t.id?'chosen':''}" onclick="previewTpl(${t.id})">
-      <div class="gal-preview" id="galPv${t.id}"></div>
-      <div class="gal-name">${t.name}</div>
+  const thHtml=TH.map((t,i)=>`<div class="tc ${t===cT?'on':''}" style="background:${t.c}" onclick="pickT(${i})" title="${t.name}"></div>`).join('');
+  const cards=TPL.map(t=>`
+    <div class="gal-card">
+      <div class="gal-top"><h4>${t.name}</h4><span>${t.desc}</span></div>
+      <div class="gal-pv" id="gp${t.id}"></div>
+      <div class="gal-foot"><button class="gal-use" onclick="useTpl(${t.id})">＋ このテンプレを使う</button></div>
     </div>`).join('');
-  c.innerHTML=`
-    <div style="font-size:11px;font-weight:700;color:#888;margin-bottom:6px;">テーマカラー</div>
-    <div class="tbar">${themeHtml}</div>
-    <div style="margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
-      <span style="font-size:11px;font-weight:700;color:#888;">カードテンプレート（クリックでプレビュー）</span>
-      <button class="bM" onclick="useTpl()" ${chosenTplId?'':'disabled'} style="${chosenTplId?'':'opacity:.4;cursor:default'}">このテンプレートを使う →</button>
-    </div>
-    <div class="gal">${cards}</div>`;
-  TEMPLATES.forEach(t=>{const el=document.getElementById('galPv'+t.id);if(el)el.innerHTML=renderBlock(t,cTheme,true);});
+  c.innerHTML=`<div style="margin-bottom:10px;display:flex;align-items:center;gap:10px"><span style="font-size:10px;font-weight:700;color:#999">テーマ</span><div class="tbar" style="margin:0">${thHtml}</div></div>${cards}`;
+  TPL.forEach(t=>{const el=document.getElementById('gp'+t.id);if(el)el.innerHTML=renderCard(t,cT,true);});
 }
 
-function pickTheme(i){cTheme=THEMES[i];renderTabContent();renderPreview();}
+function pickT(i){cT=TH[i];renderTab();renderPv();}
 
-function previewTpl(id){
-  chosenTplId=id;
-  renderTabContent();
-  // show in main preview
-  const t=TEMPLATES.find(x=>x.id===id);
-  document.getElementById('pvArea').innerHTML=renderBlock(t,cTheme,false);
+function useTpl(id){
+  const t=TPL.find(x=>x.id===id);
+  secs.push({id:uid++,icon:t.icon,label:t.label,heading:t.heading,align:t.align||'left',els:JSON.parse(JSON.stringify(t.els))});
+  switchTab(1);renderPv();
 }
 
-function useTpl(){
-  if(!chosenTplId)return;
-  const t=TEMPLATES.find(x=>x.id===chosenTplId);
-  const s={id:uid++,tplId:t.id,icon:t.icon,label:t.label,heading:t.heading,elements:JSON.parse(JSON.stringify(t.elements))};
-  sections.push(s);
-  chosenTplId=null;
-  switchTab(1);
-  renderPreview();
-}
-
-/* ========================================
-   EDITOR
-======================================== */
-function renderEditor(c){
-  const themeHtml=THEMES.map((t,i)=>`<div class="tchip ${t===cTheme?'on':''}" style="background:${t.acL};color:${t.accent}" onclick="pickTheme(${i})">${t.name}</div>`).join('');
-  let html=`
-    <div style="font-size:11px;font-weight:700;color:#888;margin-bottom:6px;">テーマカラー</div>
-    <div class="tbar">${themeHtml}</div>
-    <div class="abar">
-      <button class="bM" onclick="switchTab(0)">← テンプレから追加</button>
-      <button class="bE" onclick="doExport()">HTMLエクスポート</button>
-    </div>`;
-  if(!sections.length){
-    html+=`<div style="text-align:center;color:#bbb;padding:30px;font-size:12px;">テンプレートタブからカードを追加してください</div>`;
-  }else{
-    html+=sections.map((s,si)=>{
-      const title=s.label||s.heading||`セクション ${si+1}`;
-      const elsHtml=s.elements.map((el,ei)=>renderElEditor(s.id,el,ei)).join('');
-      const addBtns=EL_KEYS.map(k=>`<button class="add-btn" onclick="addEl(${s.id},'${k.key}')">+ ${k.label}</button>`).join('');
-      return `
-      <div class="sec-ed" id="sec-${s.id}">
-        <div class="sec-hd" onclick="togSec(${s.id})"><h3>${s.icon||'📄'} ${esc(title)}</h3><span class="arr">▼</span></div>
-        <div class="sec-bd">
-          <div class="rw">
-            <div><label>アイコン</label><input type=text value="${esc(s.icon)}" oninput="uf(${s.id},'icon',this.value)" placeholder="🎤"></div>
-            <div><label>ラベル</label><input type=text value="${esc(s.label)}" oninput="uf(${s.id},'label',this.value)" placeholder="STEP 1"></div>
-          </div>
-          <label>見出し</label><input type=text value="${esc(s.heading)}" oninput="uf(${s.id},'heading',this.value)" placeholder="見出し">
-          <label style="margin-top:12px;">構成要素</label>
-          ${elsHtml}
-          <div class="add-bar">${addBtns}</div>
-          <div style="display:flex;justify-content:space-between;margin-top:12px;">
-            <div><button class="bSm" onclick="mvSec(${s.id},-1)">↑</button> <button class="bSm" onclick="mvSec(${s.id},1)">↓</button></div>
-            <button class="bR" onclick="rmSec(${s.id})">削除</button>
-          </div>
-        </div>
-      </div>`;
-    }).join('');
-  }
-  c.innerHTML=html;
-}
-
-const EL_KEYS=[
+/* ============ EDITOR ============ */
+const ELK=[
   {key:'body',label:'本文'},{key:'keypoint',label:'KEY POINT'},{key:'quote',label:'引用'},
   {key:'number',label:'数字強調'},{key:'image',label:'画像'},{key:'warning',label:'警告'},
   {key:'checklist',label:'チェックリスト'},{key:'compare',label:'ビフォーアフター'},
-  {key:'bubble_q',label:'吹き出し（質問）'},{key:'bubble_a',label:'吹き出し（回答）'},
+  {key:'bubble_q',label:'吹き出し(質問)'},{key:'bubble_a',label:'吹き出し(回答)'},
   {key:'timeline',label:'タイムライン'},{key:'points3',label:'ポイント3つ'},
   {key:'colored_body',label:'色付き本文'},{key:'transition',label:'次への導線'},
   {key:'profile_name',label:'名前'},{key:'profile_title',label:'肩書き'},
@@ -336,179 +303,235 @@ const EL_KEYS=[
   {key:'summary',label:'まとめ'},{key:'divider',label:'区切り線'},
 ];
 
-function renderElEditor(secId,el,ei){
-  const label=EL_KEYS.find(k=>k.key===el.key)?.label||el.key;
-  if(el.key==='divider') return `<div class="eli"><div class="eli-top"><span>── 区切り線 ──</span><button class="eli-x" onclick="rmEl(${secId},${ei})">×</button></div></div>`;
-  if(el.key==='image') return `<div class="eli"><div class="eli-top"><span>${label}</span><button class="eli-x" onclick="rmEl(${secId},${ei})">×</button></div>
-    <div class="img-drop" onclick="this.querySelector('input').click()">📷 クリックまたはドラッグで画像追加<input type="file" accept="image/*" onchange="handleImg(${secId},${ei},this)"></div>
+function renderEditor(c){
+  const thHtml=TH.map((t,i)=>`<div class="tc ${t===cT?'on':''}" style="background:${t.c}" onclick="pickT(${i})" title="${t.name}"></div>`).join('');
+  let h=`<div style="margin-bottom:10px;display:flex;align-items:center;gap:10px"><span style="font-size:10px;font-weight:700;color:#999">テーマ</span><div class="tbar" style="margin:0">${thHtml}</div></div>
+    <div class="abar"><button class="bG" onclick="switchTab(0)">← テンプレから追加</button><button class="bE" onclick="doExport()">エクスポート</button></div>`;
+  if(!secs.length){h+='<div class="empty" style="padding:30px">テンプレートタブからカードを追加してください</div>';}
+  else{
+    h+=secs.map((s,si)=>{
+      const title=s.label||s.heading||`セクション ${si+1}`;
+      const elsH=s.els.map((el,ei)=>renderElEd(s.id,el,ei)).join('');
+      const addBtns=ELK.map(k=>`<button class="add-btn" onclick="addEl(${s.id},'${k.key}')">+ ${k.label}</button>`).join('');
+      return `
+      <div class="sec-ed" id="sec-${s.id}">
+        <div class="sec-hd" onclick="togS(${s.id})"><h3>${s.icon||'📄'} ${esc(title)}</h3><span class="arr">▶</span></div>
+        <div class="sec-bd">
+          <div class="rw">
+            <div><label>アイコン</label><input type=text value="${esc(s.icon)}" oninput="uf(${s.id},'icon',this.value)" placeholder="🎯"></div>
+            <div><label>ラベル</label><input type=text value="${esc(s.label)}" oninput="uf(${s.id},'label',this.value)" placeholder="STEP 1"></div>
+          </div>
+          <label>見出し</label><input type=text value="${esc(s.heading)}" oninput="uf(${s.id},'heading',this.value)">
+          <label>配置</label>
+          <div class="align-bar">
+            <div class="align-btn ${s.align==='left'?'on':''}" onclick="uf(${s.id},'align','left');renderTab()">← 左</div>
+            <div class="align-btn ${s.align==='center'?'on':''}" onclick="uf(${s.id},'align','center');renderTab()">中央</div>
+            <div class="align-btn ${s.align==='right'?'on':''}" onclick="uf(${s.id},'align','right');renderTab()">右 →</div>
+          </div>
+          <label style="margin-top:12px">構成要素</label>
+          ${elsH}
+          <div class="add-bar">${addBtns}</div>
+          <div style="display:flex;justify-content:space-between;margin-top:12px">
+            <div><button class="bSm" onclick="mvS(${s.id},-1)">↑</button> <button class="bSm" onclick="mvS(${s.id},1)">↓</button></div>
+            <button class="bR" onclick="rmS(${s.id})">削除</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  c.innerHTML=h;
+}
+
+function renderElEd(sid,el,ei){
+  const lb=ELK.find(k=>k.key===el.key)?.label||el.key;
+  if(el.key==='divider') return `<div class="eli"><div class="eli-top"><span>── 区切り線 ──</span><button class="eli-x" onclick="rmEl(${sid},${ei})">×</button></div></div>`;
+  if(el.key==='image') return `<div class="eli"><div class="eli-top"><span>${lb}</span><button class="eli-x" onclick="rmEl(${sid},${ei})">×</button></div>
+    <div class="img-drop">📷 クリックで画像を追加<input type="file" accept="image/*" onchange="hImg(${sid},${ei},this)"></div>
     ${el.value?`<img class="img-thumb" src="${el.value}">`:''}</div>`;
-  if(el.key==='compare') return `<div class="eli"><div class="eli-top"><span>${label}</span><button class="eli-x" onclick="rmEl(${secId},${ei})">×</button></div>
-    <label>Before</label><textarea rows=3 oninput="uel(${secId},${ei},'valueBefore',this.value)">${esc(el.valueBefore||'')}</textarea>
-    <label>After</label><textarea rows=3 oninput="uel(${secId},${ei},'valueAfter',this.value)">${esc(el.valueAfter||'')}</textarea></div>`;
-  return `<div class="eli"><div class="eli-top"><span>${label}</span><button class="eli-x" onclick="rmEl(${secId},${ei})">×</button></div>
-    <textarea rows="${['number','profile_name','profile_title','cta'].includes(el.key)?1:3}" oninput="uel(${secId},${ei},'value',this.value)">${esc(el.value||'')}</textarea></div>`;
+  if(el.key==='compare') return `<div class="eli"><div class="eli-top"><span>${lb}</span><button class="eli-x" onclick="rmEl(${sid},${ei})">×</button></div>
+    <label>Before</label><textarea rows=2 oninput="uel(${sid},${ei},'valueBefore',this.value)">${esc(el.valueBefore||'')}</textarea>
+    <label>After</label><textarea rows=2 oninput="uel(${sid},${ei},'valueAfter',this.value)">${esc(el.valueAfter||'')}</textarea></div>`;
+  if(el.key==='qa'){
+    const items=Array.isArray(el.value)?el.value:[{q:'',a:''}];
+    let qaH=items.map((item,qi)=>`
+      <div style="background:#f9f9f9;border-radius:8px;padding:8px;margin-bottom:6px">
+        <label>質問 ${qi+1}</label><input type=text value="${esc(item.q)}" oninput="uqa(${sid},${ei},${qi},'q',this.value)">
+        <label>回答 ${qi+1}</label><textarea rows=2 oninput="uqa(${sid},${ei},${qi},'a',this.value)">${esc(item.a)}</textarea>
+        <button class="bR" style="margin-top:4px" onclick="rmQa(${sid},${ei},${qi})">この質問を削除</button>
+      </div>`).join('');
+    qaH+=`<button class="add-btn" style="margin-top:4px" onclick="addQa(${sid},${ei})">+ 質問を追加</button>`;
+    return `<div class="eli"><div class="eli-top"><span>${lb}</span><button class="eli-x" onclick="rmEl(${sid},${ei})">×</button></div>${qaH}</div>`;
+  }
+  return `<div class="eli"><div class="eli-top"><span>${lb}</span><button class="eli-x" onclick="rmEl(${sid},${ei})">×</button></div>
+    <textarea rows="${['number','profile_name','profile_title','cta'].includes(el.key)?1:3}" oninput="uel(${sid},${ei},'value',this.value)">${esc(typeof el.value==='string'?el.value:'')}</textarea></div>`;
 }
 
-function handleImg(secId,ei,input){
-  const file=input.files[0]; if(!file)return;
-  const reader=new FileReader();
-  reader.onload=function(e){
-    sections.find(s=>s.id===secId).elements[ei].value=e.target.result;
-    renderTabContent(); renderPreview();
-  };
-  reader.readAsDataURL(file);
+/* QA helpers */
+function uqa(sid,ei,qi,field,val){
+  const el=secs.find(s=>s.id===sid).els[ei];
+  if(!Array.isArray(el.value))el.value=[{q:'',a:''}];
+  el.value[qi][field]=val;renderPv();
+}
+function addQa(sid,ei){
+  const el=secs.find(s=>s.id===sid).els[ei];
+  if(!Array.isArray(el.value))el.value=[];
+  el.value.push({q:'',a:''});renderTab();renderPv();
+}
+function rmQa(sid,ei,qi){
+  secs.find(s=>s.id===sid).els[ei].value.splice(qi,1);renderTab();renderPv();
 }
 
-/* ========================================
-   EDITOR ACTIONS
-======================================== */
-function uf(id,f,v){sections.find(s=>s.id===id)[f]=v;renderPreview();}
-function uel(id,ei,f,v){sections.find(s=>s.id===id).elements[ei][f]=v;renderPreview();}
+function hImg(sid,ei,inp){
+  const f=inp.files[0];if(!f)return;
+  const r=new FileReader();r.onload=e=>{secs.find(s=>s.id===sid).els[ei].value=e.target.result;renderTab();renderPv();};r.readAsDataURL(f);
+}
+
+function uf(id,f,v){secs.find(s=>s.id===id)[f]=v;renderPv();}
+function uel(id,ei,f,v){secs.find(s=>s.id===id).els[ei][f]=v;renderPv();}
 function addEl(id,key){
-  const el=key==='compare'?{key,valueBefore:'',valueAfter:''}:{key,value:''};
-  sections.find(s=>s.id===id).elements.push(el);
-  renderTabContent();renderPreview();
+  const el=key==='compare'?{key,valueBefore:'',valueAfter:''}:key==='qa'?{key,value:[{q:'',a:''}]}:{key,value:''};
+  secs.find(s=>s.id===id).els.push(el);renderTab();renderPv();
 }
-function rmEl(id,ei){sections.find(s=>s.id===id).elements.splice(ei,1);renderTabContent();renderPreview();}
-function togSec(id){document.getElementById('sec-'+id).classList.toggle('shut');}
-function rmSec(id){if(!confirm('削除しますか？'))return;sections=sections.filter(s=>s.id!==id);renderTabContent();renderPreview();}
-function mvSec(id,d){const i=sections.findIndex(s=>s.id===id);const j=i+d;if(j<0||j>=sections.length)return;[sections[i],sections[j]]=[sections[j],sections[i]];renderTabContent();renderPreview();}
+function rmEl(id,ei){secs.find(s=>s.id===id).els.splice(ei,1);renderTab();renderPv();}
+function togS(id){document.getElementById('sec-'+id).classList.toggle('shut');}
+function rmS(id){if(!confirm('削除しますか？'))return;secs=secs.filter(s=>s.id!==id);renderTab();renderPv();}
+function mvS(id,d){const i=secs.findIndex(s=>s.id===id);const j=i+d;if(j<0||j>=secs.length)return;[secs[i],secs[j]]=[secs[j],secs[i]];renderTab();renderPv();}
 
-/* ========================================
-   RENDER BLOCK (preview & gallery)
-======================================== */
+/* ============ RENDER CARD ============ */
 function esc(s){return(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
-function clr(text,t){return esc(text).replace(/『([^』]*)』/g,`<span style="color:${t.accent};font-weight:700">『$1』</span>`);}
+function clr(t,th){return esc(t).replace(/『([^』]*)』/g,`<span style="color:${th.c};font-weight:700">『$1』</span>`);}
 
-function renderBlock(s,t,mini){
-  const sc=mini?'transform:scale(0.65);transform-origin:top left;':'';
+function renderCard(s,t,mini){
+  const m=mini;
+  const pad=m?'14px 16px':'44px 40px';
+  const al=s.align||'left';
+  const alSt=al==='center'?'text-align:center':al==='right'?'text-align:right':'text-align:left';
   let h='';
-  if(s.icon)h+=`<div style="font-size:${mini?'18px':'26px'};margin-bottom:2px">${s.icon}</div>`;
-  if(s.label)h+=`<div style="font-size:${mini?'16px':'26px'};font-weight:900;color:${t.main};margin-bottom:4px">${esc(s.label)}</div>`;
-  if(s.heading)h+=`<div style="font-size:${mini?'13px':'20px'};font-weight:900;color:${t.main};margin-bottom:12px">${esc(s.heading)}</div>`;
 
-  (s.elements||[]).forEach(el=>{
-    const fs=mini?'11px':'15.5px';
-    const lh=mini?'1.6':'2';
+  if(s.icon)h+=`<div style="font-size:${m?'20px':'32px'};margin-bottom:4px;${alSt};filter:drop-shadow(0 2px 4px rgba(0,0,0,.1))">${s.icon}</div>`;
+  if(s.label)h+=`<div style="font-size:${m?'10px':'13px'};font-weight:700;letter-spacing:2px;color:${t.c};margin-bottom:4px;${alSt}">${esc(s.label)}</div>`;
+  if(s.heading)h+=`<div style="font-size:${m?'14px':'24px'};font-weight:900;color:${t.main};margin-bottom:${m?'8px':'20px'};line-height:1.4;letter-spacing:-.3px;${alSt}">${esc(s.heading)}</div>`;
+
+  (s.els||[]).forEach(el=>{
+    const fs=m?'10px':'16px';const fss=m?'9px':'15px';const lh=m?'1.6':'2.1';
     switch(el.key){
       case 'body':
-        h+=`<div style="font-size:${fs};line-height:${lh};white-space:pre-wrap">${clr(el.value||'',t)}</div>`;break;
+        h+=`<div style="font-size:${fs};line-height:${lh};white-space:pre-wrap;color:#444;${alSt}">${clr(el.value||'',t)}</div>`;break;
       case 'keypoint':
-        h+=`<div style="margin-top:${mini?'8px':'20px'};border-left:4px solid ${t.kpB};padding:${mini?'8px 10px':'16px 18px 16px 22px'};background:${t.kpBg};border-radius:0 10px 10px 0">
-          <div style="font-size:${mini?'9px':'12px'};font-weight:700;color:${t.kpB};letter-spacing:1px;margin-bottom:${mini?'4px':'8px'}">KEY POINT</div>
-          <div style="font-size:${mini?'10px':'14.5px'};line-height:${lh};white-space:pre-wrap">${clr(el.value||'',t)}</div></div>`;break;
+        h+=`<div style="margin-top:${m?'8px':'24px'};border-left:4px solid ${t.kpB};padding:${m?'8px 10px':'20px 24px'};background:${t.kpBg};border-radius:0 14px 14px 0">
+          <div style="font-size:${m?'8px':'11px'};font-weight:700;color:${t.kpB};letter-spacing:2px;margin-bottom:${m?'4px':'10px'}">KEY POINT</div>
+          <div style="font-size:${fss};line-height:${lh};white-space:pre-wrap;color:#444">${clr(el.value||'',t)}</div></div>`;break;
       case 'quote':
-        h+=`<div style="margin-top:${mini?'8px':'18px'};padding:${mini?'10px':'16px 20px'};border-radius:10px;background:${t.qBg};font-style:italic;font-size:${fs};line-height:1.8;color:${t.main};position:relative">
-          <span style="font-size:${mini?'24px':'40px'};position:absolute;top:${mini?'-2px':'-6px'};left:${mini?'6px':'10px'};opacity:.15">"</span>${clr(el.value||'',t)}</div>`;break;
+        h+=`<div style="margin-top:${m?'8px':'24px'};padding:${m?'10px 14px':'24px 28px'};border-radius:${m?'10px':'16px'};background:${t.qBg};font-size:${m?'10px':'17px'};line-height:1.9;color:${t.main};font-weight:500;position:relative">
+          <span style="font-size:${m?'28px':'64px'};position:absolute;top:${m?'-4px':'-8px'};left:${m?'8px':'16px'};opacity:.12;font-family:Georgia,serif">"</span>${clr(el.value||'',t)}</div>`;break;
       case 'number':
-        h+=`<div style="font-size:${mini?'28px':'48px'};font-weight:900;color:${t.accent};line-height:1.2;margin:${mini?'6px 0':'12px 0'}">${esc(el.value||'')}</div>`;break;
+        h+=`<div style="font-size:${m?'28px':'56px'};font-weight:900;color:${t.c};line-height:1.1;margin:${m?'6px 0':'16px 0'};letter-spacing:-2px;font-family:'Inter',sans-serif;${alSt}">${esc(el.value||'')}</div>`;break;
       case 'image':
-        if(el.value)h+=`<img src="${el.value}" style="width:100%;border-radius:10px;margin:${mini?'6px 0':'12px 0'}">`;
-        else h+=`<div style="background:#f0f0f0;border-radius:10px;padding:${mini?'16px':'32px'};text-align:center;color:#bbb;font-size:${mini?'10px':'13px'};margin:${mini?'6px 0':'12px 0'}">📷 画像</div>`;break;
+        if(el.value)h+=`<img src="${el.value}" style="width:100%;border-radius:${m?'8px':'14px'};margin:${m?'6px 0':'12px 0'};box-shadow:0 4px 20px rgba(0,0,0,.06)">`;
+        else h+=`<div style="background:linear-gradient(135deg,#f8f8f8,#f0f0f0);border-radius:${m?'8px':'14px'};padding:${m?'16px':'40px'};text-align:center;color:#ccc;font-size:${m?'10px':'13px'};margin:${m?'6px 0':'12px 0'}">📷 画像</div>`;break;
       case 'warning':
-        h+=`<div style="background:#fff3cd;border-left:4px solid #ffc107;padding:${mini?'8px 10px':'16px 20px'};border-radius:0 10px 10px 0;margin-top:${mini?'6px':'12px'}">
-          <div style="font-size:${fs};line-height:${lh};white-space:pre-wrap;color:#856404">${clr(el.value||'',t)}</div></div>`;break;
+        h+=`<div style="margin-top:${m?'6px':'20px'};border-left:4px solid #f59e0b;padding:${m?'8px 10px':'20px 24px'};border-radius:0 14px 14px 0;background:linear-gradient(135deg,#fffbeb,#fef3c7)">
+          <div style="font-size:${fss};line-height:${lh};white-space:pre-wrap;color:#92400e">${clr(el.value||'',t)}</div></div>`;break;
       case 'checklist':
-        h+=(el.value||'').split('\n').filter(Boolean).map(line=>
-          `<div style="display:flex;gap:8px;align-items:flex-start;margin-top:${mini?'3px':'8px'}">
-            <span style="color:${t.accent};font-size:${mini?'12px':'18px'}">☑</span>
-            <span style="font-size:${fs};line-height:${lh}">${esc(line)}</span></div>`).join('');break;
+        (el.value||'').split('\n').filter(Boolean).forEach(line=>{
+          h+=`<div style="display:flex;gap:${m?'6px':'12px'};align-items:flex-start;padding:${m?'4px 0':'10px 0'};border-bottom:1px solid #f5f5f5">
+            <div style="width:${m?'16px':'24px'};height:${m?'16px':'24px'};border-radius:${m?'4px':'7px'};background:${t.c};display:flex;align-items:center;justify-content:center;font-size:${m?'8px':'13px'};flex-shrink:0;color:#fff;font-weight:700">✓</div>
+            <span style="font-size:${fss};line-height:1.7;padding-top:${m?'0':'2px'}">${esc(line)}</span></div>`;
+        });break;
       case 'compare':
-        h+=`<div style="display:flex;gap:${mini?'6px':'12px'};margin-top:${mini?'6px':'12px'}">
-          <div style="flex:1;background:#fee;border-radius:10px;padding:${mini?'8px':'16px'}"><div style="font-size:${mini?'9px':'12px'};font-weight:700;color:#e74c3c;margin-bottom:4px">BEFORE</div><div style="font-size:${mini?'10px':'14px'};line-height:1.7;white-space:pre-wrap">${esc(el.valueBefore||'')}</div></div>
-          <div style="flex:1;background:#efe;border-radius:10px;padding:${mini?'8px':'16px'}"><div style="font-size:${mini?'9px':'12px'};font-weight:700;color:#27ae60;margin-bottom:4px">AFTER</div><div style="font-size:${mini?'10px':'14px'};line-height:1.7;white-space:pre-wrap">${esc(el.valueAfter||'')}</div></div></div>`;break;
+        h+=`<div style="display:flex;gap:${m?'6px':'16px'};margin-top:${m?'6px':'20px'}">
+          <div style="flex:1;border-radius:${m?'8px':'14px'};padding:${m?'8px':'20px'};background:linear-gradient(135deg,#fef2f2,#fee2e2)"><div style="font-size:${m?'8px':'11px'};font-weight:700;letter-spacing:1.5px;color:#dc2626;margin-bottom:${m?'3px':'8px'}">BEFORE</div><div style="font-size:${m?'9px':'14px'};line-height:1.8;white-space:pre-wrap;color:#7f1d1d">${esc(el.valueBefore||'')}</div></div>
+          <div style="flex:1;border-radius:${m?'8px':'14px'};padding:${m?'8px':'20px'};background:linear-gradient(135deg,#f0fdf4,#dcfce7)"><div style="font-size:${m?'8px':'11px'};font-weight:700;letter-spacing:1.5px;color:#16a34a;margin-bottom:${m?'3px':'8px'}">AFTER</div><div style="font-size:${m?'9px':'14px'};line-height:1.8;white-space:pre-wrap;color:#14532d">${esc(el.valueAfter||'')}</div></div></div>`;break;
       case 'bubble_q':
-        h+=`<div style="margin-top:${mini?'6px':'12px'};display:flex;justify-content:flex-end"><div style="background:#f0f0f0;border-radius:16px 16px 4px 16px;padding:${mini?'8px 12px':'14px 18px'};max-width:85%;font-size:${fs};line-height:1.7">${clr(el.value||'',t)}</div></div>`;break;
+        h+=`<div style="display:flex;justify-content:flex-end;margin-top:${m?'6px':'14px'}"><div style="background:#f1f5f9;border-radius:20px 20px 6px 20px;padding:${m?'8px 12px':'18px 22px'};max-width:82%;font-size:${fss};line-height:1.8;color:#334155">${clr(el.value||'',t)}</div></div>`;break;
       case 'bubble_a':
-        h+=`<div style="margin-top:${mini?'4px':'8px'};display:flex;justify-content:flex-start"><div style="background:${t.acL};border-radius:16px 16px 16px 4px;padding:${mini?'8px 12px':'14px 18px'};max-width:85%;font-size:${fs};line-height:1.7">${clr(el.value||'',t)}</div></div>`;break;
+        h+=`<div style="display:flex;justify-content:flex-start;margin-top:${m?'4px':'8px'}"><div style="background:${t.acL};border-radius:20px 20px 20px 6px;padding:${m?'8px 12px':'18px 22px'};max-width:82%;font-size:${fss};line-height:1.8;color:${t.main}">${clr(el.value||'',t)}</div></div>`;break;
       case 'timeline':
-        h+=(el.value||'').split('\n').filter(Boolean).map(line=>{
+        (el.value||'').split('\n').filter(Boolean).forEach(line=>{
           const[time,...rest]=line.split('|');
-          return `<div style="display:flex;gap:${mini?'6px':'14px'};margin-top:${mini?'4px':'10px'};align-items:flex-start">
-            <div style="min-width:${mini?'36px':'56px'};font-weight:900;color:${t.accent};font-size:${mini?'10px':'14px'}">${esc(time)}</div>
-            <div style="width:3px;min-height:${mini?'16px':'24px'};background:${t.acL};border-radius:2px;margin-top:4px"></div>
-            <div style="font-size:${fs};line-height:1.7">${esc(rest.join('|'))}</div></div>`;
-        }).join('');break;
+          h+=`<div style="display:flex;gap:${m?'6px':'16px'};align-items:flex-start;padding:${m?'4px 0':'12px 0'}">
+            <div style="min-width:${m?'32px':'60px'};font-weight:900;color:${t.c};font-size:${m?'9px':'15px'};font-family:'Inter',sans-serif">${esc(time)}</div>
+            <div style="width:${m?'8px':'12px'};height:${m?'8px':'12px'};border-radius:50%;background:${t.c};flex-shrink:0;margin-top:${m?'3px':'6px'};box-shadow:0 0 0 ${m?'2px':'4px'} #fff,0 0 0 ${m?'3px':'5px'} #e2e2e2"></div>
+            <div style="font-size:${fss};line-height:1.7;flex:1">${esc(rest.join('|'))}</div></div>`;
+        });break;
       case 'points3':
-        h+=`<div style="margin-top:${mini?'6px':'12px'}">`;
-        h+=(el.value||'').split('\n').filter(Boolean).map((line,i)=>{
+        h+=`<div style="margin-top:${m?'6px':'16px'}">`;
+        (el.value||'').split('\n').filter(Boolean).forEach((line,i)=>{
           const[title,...desc]=line.split('|');
-          return `<div style="display:flex;gap:${mini?'8px':'14px'};margin-bottom:${mini?'6px':'14px'};align-items:flex-start">
-            <div style="width:${mini?'24px':'36px'};height:${mini?'24px':'36px'};border-radius:50%;background:${t.acL};color:${t.accent};display:flex;align-items:center;justify-content:center;font-weight:900;font-size:${mini?'11px':'16px'};flex-shrink:0">${i+1}</div>
-            <div><div style="font-weight:700;font-size:${mini?'11px':'15px'};color:${t.main}">${esc(title)}</div><div style="font-size:${mini?'10px':'13.5px'};color:#666;line-height:1.6">${esc(desc.join('|'))}</div></div></div>`;
-        }).join('');
+          h+=`<div style="display:flex;gap:${m?'8px':'16px'};margin-bottom:${m?'8px':'20px'};align-items:flex-start">
+            <div style="width:${m?'24px':'40px'};height:${m?'24px':'40px'};border-radius:${m?'6px':'12px'};background:${t.acL};color:${t.c};display:flex;align-items:center;justify-content:center;font-weight:900;font-size:${m?'11px':'18px'};flex-shrink:0;font-family:'Inter',sans-serif">${i+1}</div>
+            <div><div style="font-weight:700;font-size:${m?'10px':'16px'};color:${t.main}">${esc(title)}</div><div style="font-size:${m?'9px':'13.5px'};color:#666;line-height:1.6">${esc(desc.join('|'))}</div></div></div>`;
+        });
         h+=`</div>`;break;
       case 'colored_body':
-        h+=`<div style="background:${t.acL};border-radius:12px;padding:${mini?'10px':'20px 24px'};margin-top:${mini?'6px':'12px'}">
-          <div style="font-size:${fs};line-height:${lh};white-space:pre-wrap;color:${t.main};font-weight:700">${clr(el.value||'',t)}</div></div>`;break;
+        h+=`<div style="background:${t.acL};border-radius:${m?'8px':'14px'};padding:${m?'10px':'24px 28px'};margin-top:${m?'6px':'16px'};font-size:${fs};line-height:${lh};white-space:pre-wrap;color:${t.main};font-weight:600;${alSt}">${clr(el.value||'',t)}</div>`;break;
       case 'transition':
-        h+=`<div style="text-align:center;padding:${mini?'10px 0':'24px 0'};color:${t.accent}">
-          <div style="font-size:${mini?'10px':'14px'};line-height:1.8;white-space:pre-wrap;color:#666">${clr(el.value||'',t)}</div>
-          <div style="font-size:${mini?'20px':'32px'};margin-top:${mini?'4px':'8px'}">↓</div></div>`;break;
+        h+=`<div style="text-align:center;padding:${m?'8px 0':'24px 0'}">
+          <div style="font-size:${fss};color:#888;line-height:1.9;white-space:pre-wrap;margin-bottom:${m?'4px':'8px'}">${clr(el.value||'',t)}</div>
+          <div style="font-size:${m?'16px':'28px'};opacity:.3">↓</div></div>`;break;
       case 'profile_name':
-        h+=`<div style="font-size:${mini?'14px':'24px'};font-weight:900;color:${t.main};margin-top:${mini?'4px':'8px'}">${esc(el.value||'')}</div>`;break;
+        h+=`<div style="font-size:${m?'14px':'26px'};font-weight:900;color:${t.main};margin-top:${m?'4px':'12px'};${alSt}">${esc(el.value||'')}</div>`;break;
       case 'profile_title':
-        h+=`<div style="font-size:${mini?'10px':'13px'};color:${t.accent};font-weight:700;margin-bottom:${mini?'4px':'8px'}">${esc(el.value||'')}</div>`;break;
+        h+=`<div style="font-size:${m?'9px':'14px'};color:${t.c};font-weight:600;margin-bottom:${m?'4px':'12px'};${alSt}">${esc(el.value||'')}</div>`;break;
       case 'qa':
-        h+=(el.value||'').split('\n').filter(Boolean).map(line=>{
-          const[q,a]=line.split('|');
-          return `<div style="margin-top:${mini?'6px':'14px'}">
-            <div style="font-weight:700;color:${t.accent};font-size:${mini?'11px':'15px'};margin-bottom:4px">Q. ${esc(q)}</div>
-            <div style="font-size:${mini?'10px':'14px'};color:#555;line-height:1.7;padding-left:${mini?'8px':'12px'};border-left:3px solid ${t.acL}">A. ${esc(a||'')}</div></div>`;
-        }).join('');break;
+        const qaItems=Array.isArray(el.value)?el.value:[];
+        qaItems.forEach(item=>{
+          h+=`<div style="margin-bottom:${m?'8px':'20px'}">
+            <div style="display:flex;gap:${m?'4px':'8px'};align-items:flex-start;font-weight:700;font-size:${m?'10px':'15px'};color:${t.main};margin-bottom:${m?'3px':'6px'}">
+              <span style="flex-shrink:0;width:${m?'18px':'28px'};height:${m?'18px':'28px'};border-radius:${m?'4px':'8px'};background:${t.c};color:#fff;display:flex;align-items:center;justify-content:center;font-size:${m?'9px':'14px'};font-weight:900">Q</span>
+              <span style="padding-top:${m?'1px':'3px'}">${esc(item.q)}</span></div>
+            <div style="font-size:${m?'9px':'14.5px'};color:#555;line-height:1.8;padding:${m?'6px 8px':'12px 16px'};background:${t.acL};border-radius:${m?'6px':'12px'};margin-left:${m?'22px':'36px'}">${esc(item.a)}</div></div>`;
+        });break;
       case 'merit_list':
-        h+=(el.value||'').split('\n').filter(Boolean).map(line=>{
-          const parts=line.split('|');
-          const icon=parts[0]||'✨',title=parts[1]||'',desc=parts[2]||'';
-          return `<div style="display:flex;gap:${mini?'8px':'14px'};margin-top:${mini?'6px':'12px'};align-items:flex-start">
-            <span style="font-size:${mini?'16px':'24px'}">${icon}</span>
-            <div><div style="font-weight:700;font-size:${mini?'11px':'15px'};color:${t.main}">${esc(title)}</div><div style="font-size:${mini?'10px':'13px'};color:#777">${esc(desc)}</div></div></div>`;
-        }).join('');break;
+        (el.value||'').split('\n').filter(Boolean).forEach(line=>{
+          const pts=line.split('|');const icon=pts[0]||'✨',title=pts[1]||'',desc=pts[2]||'';
+          h+=`<div style="display:flex;gap:${m?'8px':'16px'};padding:${m?'6px 0':'16px 0'};border-bottom:1px solid #f5f5f5;align-items:flex-start">
+            <span style="font-size:${m?'16px':'28px'};filter:drop-shadow(0 2px 4px rgba(0,0,0,.08))">${icon}</span>
+            <div><div style="font-weight:700;font-size:${m?'10px':'15px'};color:${t.main}">${esc(title)}</div><div style="font-size:${m?'9px':'13px'};color:#888;line-height:1.5;margin-top:1px">${esc(desc)}</div></div></div>`;
+        });break;
       case 'cta':
-        h+=`<div style="text-align:center;margin-top:${mini?'10px':'24px'}"><div style="display:inline-block;background:${t.accent};color:#fff;padding:${mini?'8px 20px':'16px 48px'};border-radius:60px;font-weight:900;font-size:${mini?'12px':'18px'};box-shadow:0 4px 16px ${t.accent}40">${esc(el.value||'')}</div></div>`;break;
+        h+=`<div style="text-align:center;margin-top:${m?'10px':'28px'}"><div style="display:inline-block;background:${t.grad};color:#fff;padding:${m?'8px 20px':'18px 56px'};border-radius:60px;font-weight:900;font-size:${m?'11px':'18px'};box-shadow:0 8px 30px ${t.c}35;letter-spacing:.5px">${esc(el.value||'')}</div></div>`;break;
       case 'flow':
-        h+=`<div style="display:flex;flex-direction:column;align-items:center;margin-top:${mini?'6px':'12px'}">`;
-        h+=(el.value||'').split('\n').filter(Boolean).map((step,i,arr)=>{
-          let out=`<div style="background:${t.acL};color:${t.main};padding:${mini?'6px 14px':'12px 28px'};border-radius:8px;font-weight:700;font-size:${mini?'10px':'15px'};text-align:center">${esc(step)}</div>`;
-          if(i<arr.length-1)out+=`<div style="color:${t.accent};font-size:${mini?'14px':'22px'};margin:${mini?'2px 0':'6px 0'}">▼</div>`;
-          return out;
-        }).join('');
+        h+=`<div style="display:flex;flex-direction:column;align-items:center;margin-top:${m?'6px':'16px'};gap:${m?'3px':'6px'}">`;
+        (el.value||'').split('\n').filter(Boolean).forEach((step,i,arr)=>{
+          h+=`<div style="background:${t.acL};color:${t.main};padding:${m?'6px 14px':'14px 32px'};border-radius:${m?'6px':'12px'};font-weight:700;font-size:${m?'9px':'15px'};min-width:${m?'80px':'200px'};text-align:center">${esc(step)}</div>`;
+          if(i<arr.length-1)h+=`<div style="color:${t.c};font-size:${m?'10px':'18px'};opacity:.4">▼</div>`;
+        });
         h+=`</div>`;break;
       case 'summary':
-        h+=`<div style="background:${t.kpBg};border-radius:12px;padding:${mini?'10px':'20px 24px'};margin-top:${mini?'6px':'12px'}">`;
-        h+=(el.value||'').split('\n').filter(Boolean).map(line=>
-          `<div style="display:flex;gap:8px;align-items:flex-start;margin-bottom:${mini?'3px':'8px'}">
-            <span style="color:${t.accent}">✔</span><span style="font-size:${mini?'10px':'14px'};line-height:1.7">${esc(line)}</span></div>`).join('');
+        h+=`<div style="background:${t.kpBg};border-radius:${m?'8px':'14px'};padding:${m?'10px':'24px'};margin-top:${m?'6px':'16px'}">`;
+        (el.value||'').split('\n').filter(Boolean).forEach(line=>{
+          h+=`<div style="display:flex;gap:${m?'6px':'10px'};align-items:flex-start;margin-bottom:${m?'4px':'10px'}">
+            <span style="color:${t.c};font-size:${m?'10px':'16px'};margin-top:1px">✦</span><span style="font-size:${m?'9px':'14.5px'};line-height:1.7">${esc(line)}</span></div>`;
+        });
         h+=`</div>`;break;
       case 'divider':
-        h+=`<hr style="border:none;border-top:1px solid #eee;margin:${mini?'8px 0':'16px 0'}">`;break;
+        h+=`<hr style="border:none;border-top:1px solid #eee;margin:${m?'8px 0':'20px 0'}">`;break;
     }
   });
-  return `<div style="background:#fff;border-radius:14px;box-shadow:0 4px 20px rgba(0,0,0,.06);padding:${mini?'12px':'36px 32px'};${sc}">${h}</div>`;
+
+  return `<div style="background:#fff;border-radius:${m?'12px':'20px'};box-shadow:0 1px 3px rgba(0,0,0,.04),0 8px 40px rgba(0,0,0,.06);padding:${pad};position:relative;overflow:hidden">
+    <div style="position:absolute;top:0;left:0;right:0;height:4px;background:${t.grad};border-radius:20px 20px 0 0"></div>
+    ${h}</div>`;
 }
 
-/* ========================================
-   PREVIEW
-======================================== */
-function renderPreview(){
+/* ============ PREVIEW ============ */
+function renderPv(){
   const c=document.getElementById('pvArea');
-  if(!sections.length){c.innerHTML='<div class="empty">← テンプレートからカードを追加してください</div>';return;}
-  c.innerHTML=sections.map(s=>renderBlock(s,cTheme,false)).join('<div style="height:36px"></div>');
+  if(!secs.length){c.innerHTML='<div class="empty">← テンプレートからカードを追加してください</div>';return;}
+  c.innerHTML=secs.map(s=>`<div style="margin-bottom:40px">${renderCard(s,cT,false)}</div>`).join('');
 }
 
-/* ========================================
-   EXPORT
-======================================== */
+/* ============ EXPORT ============ */
 function doExport(){
-  const t=cTheme;
-  const blocks=sections.map(s=>renderBlock(s,t,false)).join('\n');
+  const blocks=secs.map(s=>renderCard(s,cT,false)).join('\n<div style="height:40px"></div>\n');
   const html=`<!DOCTYPE html>
 <html lang="ja"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>スクロール資料</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700;900&display=swap" rel="stylesheet">
-<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Noto Sans JP',sans-serif;background:${t.bg};padding:40px 20px}</style>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Noto Sans JP','Inter',sans-serif;background:${cT.bg};padding:40px 20px}</style>
 </head><body>
-<div style="max-width:640px;margin:0 auto;display:flex;flex-direction:column;gap:36px;">
+<div style="max-width:680px;margin:0 auto">
 ${blocks}
 </div>
 </body></html>`;
@@ -520,10 +543,8 @@ function dlFile(){
   const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='scroll-doc.html';a.click();
 }
 
-/* ========================================
-   INIT
-======================================== */
-renderTabContent();
+/* INIT */
+renderTab();
 </script>
 </body>
 </html>
